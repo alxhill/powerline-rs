@@ -1,7 +1,5 @@
-use powerline;
-use powerline::{Color, colors};
 use powerline::modules::*;
-use powerline::theme::SimpleTheme;
+use powerline::{colors, Color};
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
@@ -9,7 +7,7 @@ pub struct RainbowTheme;
 impl CmdScheme for RainbowTheme {
     const CMD_PASSED_FG: Color = colors::light_grey();
     const CMD_PASSED_BG: Color = colors::green();
-    const CMD_FAILED_BG: Color = colors::red();
+    const CMD_FAILED_BG: Color = colors::warning_red();
     const CMD_FAILED_FG: Color = colors::light_grey();
     const CMD_USER_SYMBOL: &'static str = "$";
 }
@@ -20,11 +18,6 @@ impl CwdScheme for RainbowTheme {
     const HOME_FG: Color = colors::light_grey();
     const HOME_BG: Color = colors::turquoise_blue();
     const SEPARATOR_FG: Color = Color(40);
-}
-
-impl ExitCodeScheme for RainbowTheme {
-    const EXIT_CODE_BG: Color = colors::mid_red();
-    const EXIT_CODE_FG: Color = Color(0);
 }
 
 impl GitScheme for RainbowTheme {
@@ -65,9 +58,8 @@ fn main() {
     top_prompt.add_module(VirtualEnv::<RainbowTheme>::new());
 
     let mut mini_prompt = powerline::Powerline::new();
-    mini_prompt.add_module(ExitCode::<RainbowTheme>::new());
     mini_prompt.add_module(Cmd::<RainbowTheme>::new());
 
     println!("{}", top_prompt);
-    print!("{}", mini_prompt);
+    print!("{} ", mini_prompt);
 }

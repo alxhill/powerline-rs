@@ -26,6 +26,12 @@ pub struct Powerline {
     last_style: Option<Style>,
 }
 
+impl Default for Powerline {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Powerline {
     pub fn new() -> Powerline {
         Powerline { buffer: String::with_capacity(512), last_style: None }

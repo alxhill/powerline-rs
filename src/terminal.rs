@@ -9,7 +9,6 @@ pub struct FgColor(u8);
 
 pub struct Reset;
 
-
 impl Color {
     pub fn to_u8(self) -> u8 {
         self.0

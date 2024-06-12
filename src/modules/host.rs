@@ -13,6 +13,12 @@ pub trait HostScheme {
     const HOSTNAME_BG: Color;
 }
 
+impl<S: HostScheme> Default for Host<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: HostScheme> Host<S> {
     pub fn new() -> Host<S> {
         Host { show_on_local: true, scheme: PhantomData }

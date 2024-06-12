@@ -12,6 +12,12 @@ pub trait ReadOnlyScheme {
     const READONLY_SYMBOL: &'static str = "";
 }
 
+impl<S: ReadOnlyScheme> Default for ReadOnly<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: ReadOnlyScheme> ReadOnly<S> {
     pub fn new() -> ReadOnly<S> {
         ReadOnly(PhantomData)

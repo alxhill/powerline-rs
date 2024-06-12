@@ -14,6 +14,12 @@ pub trait UserScheme {
     const USERNAME_FG: Color;
 }
 
+impl<S: UserScheme> Default for User<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: UserScheme> User<S> {
     pub fn new() -> User<S> {
         User { show_on_local: true, scheme: PhantomData }

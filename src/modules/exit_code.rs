@@ -13,6 +13,12 @@ pub trait ExitCodeScheme {
     const EXIT_CODE_FG: Color;
 }
 
+impl<S: ExitCodeScheme> Default for ExitCode<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: ExitCodeScheme> ExitCode<S> {
     pub fn new() -> ExitCode<S> {
         ExitCode { scheme: PhantomData }

@@ -57,7 +57,7 @@ impl<S: CwdScheme> Module for Cwd<S> {
 
         let depth = cwd.matches('/').count();
 
-        if (cwd.len() > self.max_length as usize) && (depth > self.wanted_seg_num) {
+        if (cwd.len() > self.max_length) && (depth > self.wanted_seg_num) {
             let left = self.wanted_seg_num / 2;
             let right = self.wanted_seg_num - left;
 

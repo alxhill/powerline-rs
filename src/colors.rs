@@ -28,3 +28,4 @@ term_color!(turquoise_blue, 31);
 term_color!(dark_green, 22);
 term_color!(mid_green, 28);
 term_color!(mid_red, 124);
+term_color!(warning_red, 160);

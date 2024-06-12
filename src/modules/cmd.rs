@@ -18,6 +18,12 @@ pub trait CmdScheme {
     const CMD_USER_SYMBOL: &'static str = "$";
 }
 
+impl<S: CmdScheme> Default for Cmd<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: CmdScheme> Cmd<S> {
     pub fn new() -> Cmd<S> {
         Cmd { status: None, scheme: PhantomData }
@@ -30,13 +36,13 @@ impl<S: CmdScheme> Cmd<S> {
 
 impl<S: CmdScheme> Module for Cmd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        let (fg, bg) = if self.status.or_else(|| env::args().nth(1).map(|x| x == "0")).unwrap_or(false) {
-            (S::CMD_PASSED_FG, S::CMD_PASSED_BG)
-        } else {
-            (S::CMD_FAILED_FG, S::CMD_FAILED_BG)
+        let user_symbol = if users::get_current_uid() == 0 { S::CMD_ROOT_SYMBOL } else { S::CMD_USER_SYMBOL };
+        let status_arg = env::args().nth(1);
+        let (symbol, fg, bg) = match status_arg.as_deref() {
+            None | Some("0") => (user_symbol, S::CMD_PASSED_FG, S::CMD_PASSED_BG),
+            Some(non_zero_code) => (non_zero_code, S::CMD_FAILED_FG, S::CMD_FAILED_BG),
         };
 
-        let special = if users::get_current_uid() == 0 { S::CMD_ROOT_SYMBOL } else { S::CMD_USER_SYMBOL };
-        powerline.add_segment(special, Style::simple(fg, bg));
+        powerline.add_segment(symbol, Style::simple(fg, bg));
     }
 }

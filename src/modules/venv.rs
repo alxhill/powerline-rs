@@ -14,6 +14,12 @@ pub trait VirtualEnvScheme {
     const PYVENV_BG: Color;
 }
 
+impl<S: VirtualEnvScheme> Default for VirtualEnv<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: VirtualEnvScheme> VirtualEnv<S> {
     pub fn new() -> VirtualEnv<S> {
         VirtualEnv { scheme: PhantomData }

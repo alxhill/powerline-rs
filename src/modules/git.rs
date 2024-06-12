@@ -41,6 +41,12 @@ pub trait GitScheme {
     const GIT_REPO_DIRTY_FG: Color;
 }
 
+impl<S: GitScheme> Default for Git<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: GitScheme> Git<S> {
     pub fn new() -> Git<S> {
         Git { scheme: PhantomData }
