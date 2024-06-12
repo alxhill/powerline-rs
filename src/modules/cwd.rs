@@ -12,7 +12,6 @@ pub struct Cwd<S: CwdScheme> {
 }
 
 pub trait CwdScheme {
-    const CWD_FG: Color;
     const PATH_FG: Color;
     const PATH_BG: Color;
     const HOME_FG: Color;
