@@ -2,6 +2,7 @@ use powerline::modules::*;
 use powerline::powerline::Separator;
 use powerline::{colors, Color};
 use std::env;
+use chrono::Duration;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
@@ -65,6 +66,11 @@ impl PythonEnvScheme for RainbowTheme {
 
 impl SpacerScheme for RainbowTheme {}
 
+impl LastCmdDurationScheme for RainbowTheme {
+    const TIME_BG: Color = Color(202);
+    const TIME_FG: Color = colors::light_grey();
+}
+
 fn main() {
     match env::args().nth(1) {
         Some(arg) if arg == "--right" => right_prompt(),
@@ -75,7 +81,6 @@ fn main() {
 fn right_prompt() {
     let mut right_prompt = powerline::Powerline::new();
 
-    // right_prompt.add_module(Spacer::<RainbowTheme>::small());
     right_prompt.add_module(PythonEnv::<RainbowTheme>::new());
 
     println!("{}", right_prompt);
@@ -91,6 +96,7 @@ fn left_prompt() {
     top_prompt.add_module(Git::<RainbowTheme>::new());
 
     let mut mini_prompt = powerline::Powerline::new();
+    mini_prompt.add_module(LastCmdDuration::<RainbowTheme>::new(Duration::seconds(1)));
     mini_prompt.add_module(Cmd::<RainbowTheme>::new());
 
     println!("{}", top_prompt);

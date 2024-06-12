@@ -14,9 +14,11 @@ mod short_cwd;
 mod spacer;
 #[cfg(feature = "time")]
 mod time;
+mod duration;
 
 pub use cmd::{Cmd, CmdScheme};
 pub use cwd::{Cwd, CwdScheme};
+pub use duration::{LastCmdDuration, LastCmdDurationScheme};
 pub use exit_code::{ExitCode, ExitCodeScheme};
 pub use git::{Git, GitScheme};
 pub use host::{Host, HostScheme};
