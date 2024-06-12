@@ -42,7 +42,7 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
 
             powerline.add_segment(
                 format!("🐍 {}", venv_name),
-                Style::simple(S::PYVENV_FG, S::PYVENV_BG),
+                Style::custom(S::PYVENV_FG, S::PYVENV_BG, Separator::Custom('\u{200b}')),
             )
         }
     }

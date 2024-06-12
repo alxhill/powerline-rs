@@ -75,7 +75,7 @@ fn main() {
 fn right_prompt() {
     let mut right_prompt = powerline::Powerline::new();
 
-    right_prompt.add_module(Spacer::<RainbowTheme>::small());
+    // right_prompt.add_module(Spacer::<RainbowTheme>::small());
     right_prompt.add_module(PythonEnv::<RainbowTheme>::new());
 
     println!("{}", right_prompt);
