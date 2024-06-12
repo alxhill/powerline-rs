@@ -14,6 +14,7 @@ pub fn run_git(path: &Path) -> GitStats {
         .renames_from_rewrites(true)
         .renames_head_to_index(true);
 
+    let mut remote = false;
     let (mut untracked, mut non_staged, mut conflicted, mut staged, mut ahead, mut behind) = (0, 0, 0, 0, 0, 0);
 
     for status in repository.statuses(Some(&mut status_options)).unwrap().iter().map(|ref x| x.status()) {
@@ -46,6 +47,7 @@ pub fn run_git(path: &Path) -> GitStats {
 
         if let (Some(local), Some(upstream)) = (local, upstream) {
             let (a, b) = repository.graph_ahead_behind(local, upstream).unwrap();
+            remote = true;
             ahead = a as u32;
             behind = b as u32;
         };
@@ -69,5 +71,5 @@ pub fn run_git(path: &Path) -> GitStats {
             }
         });
 
-    GitStats { untracked, staged, non_staged, ahead, behind, conflicted, branch_name }
+    GitStats { untracked, staged, non_staged, ahead, behind, conflicted, remote, branch_name }
 }

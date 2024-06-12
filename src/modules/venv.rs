@@ -35,7 +35,7 @@ impl<S: VirtualEnvScheme> Module for VirtualEnv<S> {
             // file_name is always some, because env variable is a valid directory path.
             let venv_name = Path::new(&venv_path).file_name().unwrap().to_string_lossy();
 
-            powerline.add_segment(venv_name, Style::simple(S::PYVENV_FG, S::PYVENV_BG))
+            powerline.add_segment(format!("🐍 {}", venv_name), Style::simple(S::PYVENV_FG, S::PYVENV_BG))
         }
     }
 }

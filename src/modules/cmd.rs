@@ -5,7 +5,6 @@ use super::Module;
 use crate::{Color, Powerline, Style};
 
 pub struct Cmd<S: CmdScheme> {
-    status: Option<bool>,
     scheme: PhantomData<S>,
 }
 
@@ -26,12 +25,9 @@ impl<S: CmdScheme> Default for Cmd<S> {
 
 impl<S: CmdScheme> Cmd<S> {
     pub fn new() -> Cmd<S> {
-        Cmd { status: None, scheme: PhantomData }
+        Cmd { scheme: PhantomData }
     }
 
-    pub fn with_status(status: bool) -> Cmd<S> {
-        Cmd { status: Some(status), scheme: PhantomData }
-    }
 }
 
 impl<S: CmdScheme> Module for Cmd<S> {
@@ -43,6 +39,6 @@ impl<S: CmdScheme> Module for Cmd<S> {
             Some(non_zero_code) => (non_zero_code, S::CMD_FAILED_FG, S::CMD_FAILED_BG),
         };
 
-        powerline.add_segment(symbol, Style::simple(fg, bg));
+        powerline.add_short_segment(symbol, Style::simple(fg, bg));
     }
 }

@@ -19,6 +19,34 @@ impl Style {
     pub fn special(fg: Color, bg: Color, sep: char, sep_fg: Color) -> Style {
         Style { fg: fg.into(), bg: bg.into(), sep, sep_fg: sep_fg.into() }
     }
+
+    pub fn custom(fg: Color, bg: Color, separator: Separator) -> Style {
+        Style { fg: fg.into(), bg: bg.into(), sep: separator.into(), sep_fg: bg.into() }
+    }
+}
+
+pub enum Separator {
+    ChevronRight,
+    ChevronLeft,
+    RoundRight,
+    RoundLeft,
+    AngleLineRight,
+    AngleLineLeft,
+    Custom(char)
+}
+
+impl From<Separator> for char {
+    fn from(value: Separator) -> Self {
+        match value {
+            Separator::ChevronRight => '\u{e0b0}',
+            Separator::ChevronLeft => '\u{e0b2}',
+            Separator::RoundRight => '\u{e0b4}',
+            Separator::RoundLeft => '\u{e0b6}',
+            Separator::AngleLineRight => '\u{e0b1}',
+            Separator::AngleLineLeft => '\u{e0b3}',
+            Separator::Custom(c) => c
+        }
+    }
 }
 
 pub struct Powerline {

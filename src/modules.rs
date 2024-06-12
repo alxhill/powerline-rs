@@ -11,9 +11,13 @@ mod venv;
 
 #[cfg(feature = "time")]
 mod time;
+mod short_cwd;
+mod spacer;
 
 pub use cmd::{Cmd, CmdScheme};
 pub use cwd::{Cwd, CwdScheme};
+pub use spacer::{Spacer, SpacerScheme};
+pub use short_cwd::{ShortCwd, ShortCwdScheme};
 pub use exit_code::{ExitCode, ExitCodeScheme};
 pub use git::{Git, GitScheme};
 pub use host::{Host, HostScheme};

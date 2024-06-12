@@ -1,24 +1,34 @@
 use powerline::modules::*;
 use powerline::{colors, Color};
+use powerline::powerline::Separator;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
 
 impl CmdScheme for RainbowTheme {
-    const CMD_PASSED_FG: Color = colors::light_grey();
-    const CMD_PASSED_BG: Color = colors::green();
+    const CMD_PASSED_FG: Color = colors::green();
+    const CMD_PASSED_BG: Color = colors::black();
     const CMD_FAILED_BG: Color = colors::warning_red();
     const CMD_FAILED_FG: Color = colors::light_grey();
-    const CMD_USER_SYMBOL: &'static str = "$";
+    const CMD_USER_SYMBOL: &'static str = "\u{f105}";
 }
 
 impl CwdScheme for RainbowTheme {
     const PATH_FG: Color = Color(254);
     const PATH_BG: Color = Color(53);
     const HOME_FG: Color = colors::light_grey();
-    const HOME_BG: Color = colors::turquoise_blue();
+    const HOME_BG: Color = colors::red();
     const SEPARATOR_FG: Color = Color(40);
 }
+
+impl ShortCwdScheme for RainbowTheme {
+    const PATH_FG: Color = colors::light_grey();
+    const PATH_BG: Color = Color(236);
+    const HOME_FG: Color = colors::light_grey();
+    const HOME_BG: Color = colors::red();
+    const SEPARATOR_FG: Color = colors::light_grey();
+}
+
 
 impl GitScheme for RainbowTheme {
     const GIT_AHEAD_BG: Color = Color(240);
@@ -33,8 +43,8 @@ impl GitScheme for RainbowTheme {
     const GIT_UNTRACKED_FG: Color = Color(15);
     const GIT_CONFLICTED_BG: Color = Color(9);
     const GIT_CONFLICTED_FG: Color = Color(15);
-    const GIT_REPO_CLEAN_BG: Color = Color(148);
-    const GIT_REPO_CLEAN_FG: Color = Color(0);
+    const GIT_REPO_CLEAN_BG: Color = colors::blue();
+    const GIT_REPO_CLEAN_FG: Color = colors::turquoise();
     const GIT_REPO_DIRTY_BG: Color = Color(161);
     const GIT_REPO_DIRTY_FG: Color = Color(15);
 }
@@ -49,10 +59,14 @@ impl VirtualEnvScheme for RainbowTheme {
     const PYVENV_BG: Color = Color(42);
 }
 
+impl SpacerScheme for RainbowTheme {}
+
 fn main() {
     let mut top_prompt = powerline::Powerline::new();
 
-    top_prompt.add_module(Cwd::<RainbowTheme>::new(45, 4, false));
+    top_prompt.add_module(Spacer::<RainbowTheme>::small());
+    top_prompt.add_module(ShortCwd::<RainbowTheme>::new(45, 4, false));
+    top_prompt.add_module(Spacer::<RainbowTheme>::large());
     top_prompt.add_module(Git::<RainbowTheme>::new());
     top_prompt.add_module(ReadOnly::<RainbowTheme>::new());
     top_prompt.add_module(VirtualEnv::<RainbowTheme>::new());
