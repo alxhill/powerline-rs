@@ -9,6 +9,7 @@ pub struct FgColor(u8);
 
 pub struct Reset;
 
+
 impl Color {
     pub fn to_u8(self) -> u8 {
         self.0
@@ -16,6 +17,14 @@ impl Color {
 
     pub fn from_u8(val: u8) -> Color {
         Color(val)
+    }
+
+    pub fn black_fg() -> Color {
+        Color(30)
+    }
+
+    pub fn black_bg() -> Color {
+        Color(40)
     }
 }
 
