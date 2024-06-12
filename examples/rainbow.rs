@@ -1,6 +1,7 @@
 use powerline::modules::*;
-use powerline::{colors, Color};
 use powerline::powerline::Separator;
+use powerline::{colors, Color};
+use std::env;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
@@ -29,7 +30,6 @@ impl ShortCwdScheme for RainbowTheme {
     const SEPARATOR_FG: Color = colors::light_grey();
 }
 
-
 impl GitScheme for RainbowTheme {
     const GIT_AHEAD_BG: Color = Color(240);
     const GIT_AHEAD_FG: Color = Color(250);
@@ -44,9 +44,9 @@ impl GitScheme for RainbowTheme {
     const GIT_CONFLICTED_BG: Color = Color(9);
     const GIT_CONFLICTED_FG: Color = Color(15);
     const GIT_REPO_CLEAN_BG: Color = colors::blue();
-    const GIT_REPO_CLEAN_FG: Color = colors::turquoise();
-    const GIT_REPO_DIRTY_BG: Color = Color(161);
-    const GIT_REPO_DIRTY_FG: Color = Color(15);
+    const GIT_REPO_CLEAN_FG: Color = colors::light_grey();
+    const GIT_REPO_DIRTY_BG: Color = colors::turquoise();
+    const GIT_REPO_DIRTY_FG: Color = colors::light_grey();
 }
 
 impl ReadOnlyScheme for RainbowTheme {
@@ -54,7 +54,8 @@ impl ReadOnlyScheme for RainbowTheme {
     const READONLY_BG: Color = Color(124);
 }
 
-impl VirtualEnvScheme for RainbowTheme {
+impl PythonEnvScheme for RainbowTheme {
+    const SEPARATOR: Separator = Separator::ChevronLeft;
     const PYVENV_FG: Color = Color(0);
     const PYVENV_BG: Color = Color(42);
 }
@@ -62,14 +63,29 @@ impl VirtualEnvScheme for RainbowTheme {
 impl SpacerScheme for RainbowTheme {}
 
 fn main() {
+    match env::args().nth(1) {
+        Some(arg) if arg == "--right" => right_prompt(),
+        _ => left_prompt(),
+    }
+}
+
+fn right_prompt() {
+    let mut right_prompt = powerline::Powerline::new();
+
+    right_prompt.add_module(Spacer::<RainbowTheme>::small());
+    right_prompt.add_module(PythonEnv::<RainbowTheme>::new());
+
+    print!("{}", right_prompt);
+}
+
+fn left_prompt() {
     let mut top_prompt = powerline::Powerline::new();
 
     top_prompt.add_module(Spacer::<RainbowTheme>::small());
     top_prompt.add_module(ShortCwd::<RainbowTheme>::new(45, 4, false));
+    top_prompt.add_module(ReadOnly::<RainbowTheme>::new());
     top_prompt.add_module(Spacer::<RainbowTheme>::large());
     top_prompt.add_module(Git::<RainbowTheme>::new());
-    top_prompt.add_module(ReadOnly::<RainbowTheme>::new());
-    top_prompt.add_module(VirtualEnv::<RainbowTheme>::new());
 
     let mut mini_prompt = powerline::Powerline::new();
     mini_prompt.add_module(Cmd::<RainbowTheme>::new());

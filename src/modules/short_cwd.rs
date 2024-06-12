@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 use std::{env, path};
 
 use super::Module;
-use crate::{Color, colors, Powerline, Style};
+use crate::{colors, Color, Powerline, Style};
 
 pub struct ShortCwd<S: ShortCwdScheme> {
     max_length: usize,
@@ -19,30 +19,36 @@ pub trait ShortCwdScheme {
     const SEPARATOR_FG: Color;
 }
 
-const RAINBOW_CYCLE: [Color; 7] = [
+const RAINBOW_CYCLE: [Color; 6] = [
     colors::red(),
     colors::orange(),
     colors::yellow(),
     colors::green(),
     colors::blue(),
-    colors::dark_blue(),
     colors::nice_puple(),
 ];
 
 impl<S: ShortCwdScheme> ShortCwd<S> {
     pub fn new(max_length: usize, wanted_seg_num: usize, resolve_symlinks: bool) -> ShortCwd<S> {
-        ShortCwd { max_length, wanted_seg_num, resolve_symlinks, scheme: PhantomData }
+        ShortCwd {
+            max_length,
+            wanted_seg_num,
+            resolve_symlinks,
+            scheme: PhantomData,
+        }
     }
 }
 
 macro_rules! rainbow_segment {
     ($powerline:ident, $iter_var:ident, $value:expr) => {
         let r_col = RAINBOW_CYCLE[$iter_var % RAINBOW_CYCLE.len()];
-        $powerline.add_short_segment($value, Style::special(S::PATH_FG, r_col, DEFAULT_SEPARATOR, r_col));
+        $powerline.add_short_segment(
+            format!(" {}", $value),
+            Style::special(S::PATH_FG, r_col, DEFAULT_SEPARATOR, r_col),
+        );
         $iter_var = $iter_var.wrapping_add(1);
     };
 }
-
 
 const DEFAULT_SEPARATOR: char = '\u{e0b0}';
 const ROUND_SEPARATOR: char = '\u{e0b4}';
@@ -75,7 +81,6 @@ impl<S: ShortCwdScheme> Module for ShortCwd<S> {
         }
 
         let depth = cwd.matches('/').count();
-
 
         if (cwd.len() > self.max_length) && (depth > self.wanted_seg_num) {
             let left = self.wanted_seg_num / 2;

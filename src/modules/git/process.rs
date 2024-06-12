@@ -4,7 +4,10 @@ use std::process::Command;
 use super::GitStats;
 
 pub fn get_first_number(s: &str) -> u32 {
-    s.chars().take_while(|x| x.is_digit(10)).flat_map(|x| x.to_digit(10)).fold(0, |acc, x| 10 * acc + x)
+    s.chars()
+        .take_while(|x| x.is_digit(10))
+        .flat_map(|x| x.to_digit(10))
+        .fold(0, |acc, x| 10 * acc + x)
 }
 
 pub fn extract_ahead_behind(s: &str) -> (u32, u32) {
@@ -12,8 +15,14 @@ pub fn extract_ahead_behind(s: &str) -> (u32, u32) {
         let s = s.get((pos + offset)..).unwrap();
         get_first_number(s)
     };
-    let ahead = s.find("ahead").map(|pos| extract_number(pos, 6)).unwrap_or(0);
-    let behind = s.find("behind").map(|pos| extract_number(pos, 7)).unwrap_or(0);
+    let ahead = s
+        .find("ahead")
+        .map(|pos| extract_number(pos, 6))
+        .unwrap_or(0);
+    let behind = s
+        .find("behind")
+        .map(|pos| extract_number(pos, 7))
+        .unwrap_or(0);
     (ahead, behind)
 }
 
@@ -41,10 +50,17 @@ pub fn get_branch_name(s: &str) -> Option<&str> {
 }
 
 pub fn get_detached_branch_name() -> String {
-    let child = Command::new("git").args(&["describe", "--tags", "--always"]).output().unwrap();
+    let child = Command::new("git")
+        .args(&["describe", "--tags", "--always"])
+        .output()
+        .unwrap();
 
     if child.status.success() {
-        let branch = std::str::from_utf8(&child.stdout).unwrap().split('\n').next().unwrap();
+        let branch = std::str::from_utf8(&child.stdout)
+            .unwrap()
+            .split('\n')
+            .next()
+            .unwrap();
         format!("\u{2693}{}", branch)
     } else {
         String::from("Big Bang")
@@ -52,7 +68,11 @@ pub fn get_detached_branch_name() -> String {
 }
 
 pub fn run_git(_: &Path) -> GitStats {
-    let output = Command::new("git").args(&["status", "--porcelain", "-b"]).output().unwrap().stdout;
+    let output = Command::new("git")
+        .args(&["status", "--porcelain", "-b"])
+        .output()
+        .unwrap()
+        .stdout;
 
     let mut lines = output.split(|x| *x == (b'\n'));
     let branch_line = std::str::from_utf8(lines.next().unwrap()).unwrap();
@@ -66,7 +86,10 @@ pub fn run_git(_: &Path) -> GitStats {
 
     let branch_name = {
         if let Some(branch_name) = get_branch_name(&branch_line) {
-            if let Some(info) = branch_line.find('[').map(|pos| branch_line.get(pos..).unwrap()) {
+            if let Some(info) = branch_line
+                .find('[')
+                .map(|pos| branch_line.get(pos..).unwrap())
+            {
                 let (a, b) = extract_ahead_behind(info);
                 ahead = a;
                 behind = b;
@@ -90,12 +113,20 @@ pub fn run_git(_: &Path) -> GitStats {
                 if a != ' ' {
                     staged += 1;
                 }
-            },
+            }
         };
     };
     for op in lines.flat_map(|line| line.get(..2)) {
         add_file(std::str::from_utf8(op).unwrap());
     }
 
-    super::GitStats { untracked, ahead, behind, non_staged, staged, conflicted, branch_name }
+    super::GitStats {
+        untracked,
+        ahead,
+        behind,
+        non_staged,
+        staged,
+        conflicted,
+        branch_name,
+    }
 }

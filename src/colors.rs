@@ -31,7 +31,6 @@ term_color!(mid_green, 28);
 term_color!(mid_red, 124);
 term_color!(warning_red, 160);
 
-
 term_color!(dark_red, 52);
 term_color!(orange, 130);
 term_color!(dark_yellow, 136);

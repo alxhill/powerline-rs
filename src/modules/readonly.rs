@@ -32,7 +32,10 @@ impl<S: ReadOnlyScheme> Module for ReadOnly<S> {
         };
 
         if readonly {
-            powerline.add_segment(S::READONLY_SYMBOL, Style::simple(S::READONLY_FG, S::READONLY_BG));
+            powerline.add_segment(
+                S::READONLY_SYMBOL,
+                Style::simple(S::READONLY_FG, S::READONLY_BG),
+            );
         }
     }
 }

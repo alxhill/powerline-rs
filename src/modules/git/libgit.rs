@@ -15,9 +15,15 @@ pub fn run_git(path: &Path) -> GitStats {
         .renames_head_to_index(true);
 
     let mut remote = false;
-    let (mut untracked, mut non_staged, mut conflicted, mut staged, mut ahead, mut behind) = (0, 0, 0, 0, 0, 0);
+    let (mut untracked, mut non_staged, mut conflicted, mut staged, mut ahead, mut behind) =
+        (0, 0, 0, 0, 0, 0);
 
-    for status in repository.statuses(Some(&mut status_options)).unwrap().iter().map(|ref x| x.status()) {
+    for status in repository
+        .statuses(Some(&mut status_options))
+        .unwrap()
+        .iter()
+        .map(|ref x| x.status())
+    {
         if status.intersects(
             Status::INDEX_NEW
                 | Status::INDEX_MODIFIED
@@ -38,12 +44,19 @@ pub fn run_git(path: &Path) -> GitStats {
         }
     }
 
-    let active_branch: Option<Branch> =
-        repository.branches(Some(BranchType::Local)).unwrap().filter_map(Result::ok).map(|x| x.0).find(|b| b.is_head());
+    let active_branch: Option<Branch> = repository
+        .branches(Some(BranchType::Local))
+        .unwrap()
+        .filter_map(Result::ok)
+        .map(|x| x.0)
+        .find(|b| b.is_head());
 
     if let Some(ref active_branch) = active_branch {
         let local = active_branch.get().target();
-        let upstream = active_branch.upstream().ok().and_then(|obj| obj.get().target());
+        let upstream = active_branch
+            .upstream()
+            .ok()
+            .and_then(|obj| obj.get().target());
 
         if let (Some(local), Some(upstream)) = (local, upstream) {
             let (a, b) = repository.graph_ahead_behind(local, upstream).unwrap();
@@ -53,8 +66,11 @@ pub fn run_git(path: &Path) -> GitStats {
         };
     }
 
-    let branch_name =
-        active_branch.as_ref().and_then(|x| x.name().unwrap()).map(ToOwned::to_owned).unwrap_or_else(|| {
+    let branch_name = active_branch
+        .as_ref()
+        .and_then(|x| x.name().unwrap())
+        .map(ToOwned::to_owned)
+        .unwrap_or_else(|| {
             if let Ok(head) = repository.head() {
                 let target = head.target().unwrap();
 
@@ -71,5 +87,14 @@ pub fn run_git(path: &Path) -> GitStats {
             }
         });
 
-    GitStats { untracked, staged, non_staged, ahead, behind, conflicted, remote, branch_name }
+    GitStats {
+        untracked,
+        staged,
+        non_staged,
+        ahead,
+        behind,
+        conflicted,
+        remote,
+        branch_name,
+    }
 }

@@ -25,14 +25,19 @@ impl<S: CmdScheme> Default for Cmd<S> {
 
 impl<S: CmdScheme> Cmd<S> {
     pub fn new() -> Cmd<S> {
-        Cmd { scheme: PhantomData }
+        Cmd {
+            scheme: PhantomData,
+        }
     }
-
 }
 
 impl<S: CmdScheme> Module for Cmd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        let user_symbol = if users::get_current_uid() == 0 { S::CMD_ROOT_SYMBOL } else { S::CMD_USER_SYMBOL };
+        let user_symbol = if users::get_current_uid() == 0 {
+            S::CMD_ROOT_SYMBOL
+        } else {
+            S::CMD_USER_SYMBOL
+        };
         let status_arg = env::args().nth(1);
         let (symbol, fg, bg) = match status_arg.as_deref() {
             None | Some("0") => (user_symbol, S::CMD_PASSED_FG, S::CMD_PASSED_BG),

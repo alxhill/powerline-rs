@@ -22,14 +22,22 @@ pub trait CwdScheme {
 
 impl<S: CwdScheme> Cwd<S> {
     pub fn new(max_length: usize, wanted_seg_num: usize, resolve_symlinks: bool) -> Cwd<S> {
-        Cwd { max_length, wanted_seg_num, resolve_symlinks, scheme: PhantomData }
+        Cwd {
+            max_length,
+            wanted_seg_num,
+            resolve_symlinks,
+            scheme: PhantomData,
+        }
     }
 }
 
 macro_rules! append_cwd_segments {
     ($powerline:ident, $iter:expr) => {
         for val in $iter {
-            $powerline.add_segment(val, Style::special(S::PATH_FG, S::PATH_BG, '\u{E0B1}', S::SEPARATOR_FG));
+            $powerline.add_segment(
+                val,
+                Style::special(S::PATH_FG, S::PATH_BG, '\u{E0B1}', S::SEPARATOR_FG),
+            );
         }
     };
 }
@@ -65,7 +73,10 @@ impl<S: CwdScheme> Module for Cwd<S> {
             let end = cwd.split('/').skip(depth - right + 1);
 
             append_cwd_segments!(powerline, start);
-            powerline.add_segment('\u{2026}', Style::special(S::PATH_FG, S::PATH_BG, '\u{E0B1}', S::SEPARATOR_FG));
+            powerline.add_segment(
+                '\u{2026}',
+                Style::special(S::PATH_FG, S::PATH_BG, '\u{E0B1}', S::SEPARATOR_FG),
+            );
             append_cwd_segments!(powerline, end);
         } else {
             append_cwd_segments!(powerline, cwd.split('/').skip(1));

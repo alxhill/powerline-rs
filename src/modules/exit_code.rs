@@ -21,7 +21,9 @@ impl<S: ExitCodeScheme> Default for ExitCode<S> {
 
 impl<S: ExitCodeScheme> ExitCode<S> {
     pub fn new() -> ExitCode<S> {
-        ExitCode { scheme: PhantomData }
+        ExitCode {
+            scheme: PhantomData,
+        }
     }
 }
 

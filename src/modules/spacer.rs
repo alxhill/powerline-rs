@@ -1,9 +1,11 @@
-use std::marker::PhantomData;
-use crate::{Color, colors, Powerline, Style};
 use crate::modules::Module;
+use crate::powerline::Separator;
+use crate::{colors, Color, Powerline, Style};
+use std::marker::PhantomData;
 
 pub struct Spacer<S: SpacerScheme> {
     scheme: PhantomData<S>,
+    separator: Separator,
     large: bool,
 }
 
@@ -11,14 +13,29 @@ pub trait SpacerScheme {
     const BG_COLOR: Color = colors::black();
 }
 
-
 impl<S: SpacerScheme> Spacer<S> {
     pub fn large() -> Spacer<S> {
-        Spacer { scheme: PhantomData, large: true }
+        Spacer {
+            scheme: PhantomData,
+            separator: Separator::ChevronRight,
+            large: true,
+        }
     }
 
     pub fn small() -> Spacer<S> {
-        Spacer { scheme: PhantomData, large: false }
+        Spacer {
+            scheme: PhantomData,
+            separator: Separator::ChevronRight,
+            large: false,
+        }
+    }
+
+    pub fn custom(separator: Separator, large: bool) -> Spacer<S> {
+        Spacer {
+            scheme: PhantomData,
+            separator,
+            large,
+        }
     }
 }
 

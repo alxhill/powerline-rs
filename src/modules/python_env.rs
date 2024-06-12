@@ -3,32 +3,34 @@ use std::marker::PhantomData;
 use std::path::Path;
 
 use super::Module;
+use crate::powerline::Separator;
 use crate::{Color, Powerline, Style};
 
-pub struct VirtualEnv<S: VirtualEnvScheme> {
+pub struct PythonEnv<S: PythonEnvScheme> {
     scheme: PhantomData<S>,
 }
 
-pub trait VirtualEnvScheme {
+pub trait PythonEnvScheme {
+    const SEPARATOR: Separator;
     const PYVENV_FG: Color;
     const PYVENV_BG: Color;
 }
 
-impl<S: VirtualEnvScheme> Default for VirtualEnv<S> {
+impl<S: PythonEnvScheme> Default for PythonEnv<S> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<S: VirtualEnvScheme> VirtualEnv<S> {
-    pub fn new() -> VirtualEnv<S> {
-        VirtualEnv {
+impl<S: PythonEnvScheme> PythonEnv<S> {
+    pub fn new() -> PythonEnv<S> {
+        PythonEnv {
             scheme: PhantomData,
         }
     }
 }
 
-impl<S: VirtualEnvScheme> Module for VirtualEnv<S> {
+impl<S: PythonEnvScheme> Module for PythonEnv<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         let venv = env::var("VIRTUAL_ENV")
             .or_else(|_| env::var("CONDA_ENV_PATH"))

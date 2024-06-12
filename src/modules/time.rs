@@ -17,11 +17,17 @@ pub trait TimeScheme {
 
 impl<S: TimeScheme> Time<S> {
     pub fn new() -> Time<S> {
-        Time { time_format: "%H:%M:%S", scheme: PhantomData }
+        Time {
+            time_format: "%H:%M:%S",
+            scheme: PhantomData,
+        }
     }
 
     pub fn with_time_format(time_format: &'static str) -> Time<S> {
-        Time { time_format, scheme: PhantomData }
+        Time {
+            time_format,
+            scheme: PhantomData,
+        }
     }
 }
 

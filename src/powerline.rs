@@ -13,15 +13,30 @@ pub struct Style {
 
 impl Style {
     pub fn simple(fg: Color, bg: Color) -> Style {
-        Style { fg: fg.into(), bg: bg.into(), sep: '\u{E0B0}', sep_fg: bg.into() }
+        Style {
+            fg: fg.into(),
+            bg: bg.into(),
+            sep: '\u{E0B0}',
+            sep_fg: bg.into(),
+        }
     }
 
     pub fn special(fg: Color, bg: Color, sep: char, sep_fg: Color) -> Style {
-        Style { fg: fg.into(), bg: bg.into(), sep, sep_fg: sep_fg.into() }
+        Style {
+            fg: fg.into(),
+            bg: bg.into(),
+            sep,
+            sep_fg: sep_fg.into(),
+        }
     }
 
     pub fn custom(fg: Color, bg: Color, separator: Separator) -> Style {
-        Style { fg: fg.into(), bg: bg.into(), sep: separator.into(), sep_fg: bg.into() }
+        Style {
+            fg: fg.into(),
+            bg: bg.into(),
+            sep: separator.into(),
+            sep_fg: bg.into(),
+        }
     }
 }
 
@@ -32,7 +47,7 @@ pub enum Separator {
     RoundLeft,
     AngleLineRight,
     AngleLineLeft,
-    Custom(char)
+    Custom(char),
 }
 
 impl From<Separator> for char {
@@ -44,7 +59,7 @@ impl From<Separator> for char {
             Separator::RoundLeft => '\u{e0b6}',
             Separator::AngleLineRight => '\u{e0b1}',
             Separator::AngleLineLeft => '\u{e0b3}',
-            Separator::Custom(c) => c
+            Separator::Custom(c) => c,
         }
     }
 }
@@ -62,7 +77,10 @@ impl Default for Powerline {
 
 impl Powerline {
     pub fn new() -> Powerline {
-        Powerline { buffer: String::with_capacity(512), last_style: None }
+        Powerline {
+            buffer: String::with_capacity(512),
+            last_style: None,
+        }
     }
 
     #[inline(always)]
@@ -79,7 +97,11 @@ impl Powerline {
             let _ = write!(self.buffer, "{}", style.fg);
         }
 
-        let _ = if spaces { write!(self.buffer, " {} ", seg) } else { write!(self.buffer, "{}", seg) };
+        let _ = if spaces {
+            write!(self.buffer, " {} ", seg)
+        } else {
+            write!(self.buffer, "{}", seg)
+        };
 
         self.last_style = Some(style)
     }
@@ -104,7 +126,9 @@ impl Powerline {
 impl fmt::Display for Powerline {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.last_style {
-            Some(Style { sep_fg, sep, .. }) => write!(f, "{}{}{}{}{}", self.buffer, Reset, sep_fg, sep, Reset),
+            Some(Style { sep_fg, sep, .. }) => {
+                write!(f, "{}{}{}{}{}", self.buffer, Reset, sep_fg, sep, Reset)
+            }
             None => Ok(()),
         }
     }
