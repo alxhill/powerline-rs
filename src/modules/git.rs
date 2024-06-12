@@ -40,6 +40,10 @@ pub trait GitScheme {
     const GIT_REPO_CLEAN_FG: Color;
     const GIT_REPO_DIRTY_BG: Color;
     const GIT_REPO_DIRTY_FG: Color;
+
+    const NOT_STAGED_SYMBOL: &'static str = PENCIL;
+    const STAGED_SYMBOL: &'static str = TICK;// plus
+    const UNTRACKED_SYMBOL: &'static str = QUESTION_MARK;
 }
 
 impl<S: GitScheme> Default for Git<S> {
@@ -90,15 +94,15 @@ fn find_git_dir() -> Option<PathBuf> {
     }
 }
 
-const UP_ARROW: char = '\u{2B06}';
-const DOWN_ARROW: char = '\u{2B07}';
-const TICK: char = '\u{2714}';
-const PENCIL: char = '\u{270E}';
-const QUESTION_MARK: char = '\u{2753}';
-const FANCY_STAR: char = '\u{273C}';
+const UP_ARROW: &'static str = "\u{2B06}";
+const DOWN_ARROW: &'static str = "\u{2B07}";
+const TICK: &'static str = "\u{2714}";
+const PENCIL: &'static str = "\u{270E}";
+const QUESTION_MARK: &'static str = "\u{2753}";
+const FANCY_STAR: &'static str = "\u{273C}";
 
-const GITHUB_LOGO: char = '\u{e65b}';
-const GIT_ICON: char = '\u{e0a0}';
+const GITHUB_LOGO: &'static str = "\u{e65b}";
+const GIT_ICON: &'static str = "\u{e0a0}";
 
 impl<S: GitScheme> Module for Git<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
@@ -127,11 +131,7 @@ impl<S: GitScheme> Module for Git<S> {
         );
 
         let mut add_elem = |count: u32, symbol, fg, bg| match count.cmp(&1) {
-            Ordering::Equal => powerline.add_short_segment(
-                format!(" {}", symbol),
-                Style::custom(fg, bg, Separator::RoundRight),
-            ),
-            Ordering::Greater => powerline.add_short_segment(
+            Ordering::Equal | Ordering::Greater => powerline.add_short_segment(
                 format!(" {} {}", count, symbol),
                 Style::custom(fg, bg, Separator::RoundRight),
             ),
@@ -140,10 +140,9 @@ impl<S: GitScheme> Module for Git<S> {
 
         add_elem(stats.ahead, UP_ARROW, S::GIT_AHEAD_FG, S::GIT_AHEAD_BG);
         add_elem(stats.behind, DOWN_ARROW, S::GIT_BEHIND_FG, S::GIT_BEHIND_BG);
-        add_elem(stats.staged, TICK, S::GIT_STAGED_FG, S::GIT_STAGED_BG);
         add_elem(
             stats.non_staged,
-            PENCIL,
+            S::NOT_STAGED_SYMBOL,
             S::GIT_NOTSTAGED_FG,
             S::GIT_NOTSTAGED_BG,
         );
@@ -153,6 +152,7 @@ impl<S: GitScheme> Module for Git<S> {
             S::GIT_UNTRACKED_FG,
             S::GIT_UNTRACKED_BG,
         );
+        add_elem(stats.staged, S::STAGED_SYMBOL, S::GIT_STAGED_FG, S::GIT_STAGED_BG);
         add_elem(
             stats.conflicted,
             FANCY_STAR,

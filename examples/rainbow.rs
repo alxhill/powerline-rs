@@ -36,17 +36,20 @@ impl GitScheme for RainbowTheme {
     const GIT_BEHIND_BG: Color = Color(240);
     const GIT_BEHIND_FG: Color = Color(250);
     const GIT_STAGED_BG: Color = Color(22);
-    const GIT_STAGED_FG: Color = Color(15);
-    const GIT_NOTSTAGED_BG: Color = Color(130);
-    const GIT_NOTSTAGED_FG: Color = Color(15);
+    const GIT_STAGED_FG: Color = colors::light_grey();
+    const GIT_NOTSTAGED_BG: Color = colors::warning_red();
+    const GIT_NOTSTAGED_FG: Color = colors::light_grey();
     const GIT_UNTRACKED_BG: Color = Color(52);
-    const GIT_UNTRACKED_FG: Color = Color(15);
+    const GIT_UNTRACKED_FG: Color = colors::light_grey();
     const GIT_CONFLICTED_BG: Color = Color(9);
-    const GIT_CONFLICTED_FG: Color = Color(15);
+    const GIT_CONFLICTED_FG: Color = colors::light_grey();
     const GIT_REPO_CLEAN_BG: Color = colors::blue();
     const GIT_REPO_CLEAN_FG: Color = colors::light_grey();
-    const GIT_REPO_DIRTY_BG: Color = colors::turquoise();
+    const GIT_REPO_DIRTY_BG: Color = Color(202);
     const GIT_REPO_DIRTY_FG: Color = colors::light_grey();
+    const NOT_STAGED_SYMBOL: &'static str = "\u{f0deb}"; // pencil with +
+    const STAGED_SYMBOL: &'static str = "\u{f067}"; // plus
+    const UNTRACKED_SYMBOL: &'static str = "\u{f086f}"; // file with ?
 }
 
 impl ReadOnlyScheme for RainbowTheme {
@@ -75,7 +78,7 @@ fn right_prompt() {
     right_prompt.add_module(Spacer::<RainbowTheme>::small());
     right_prompt.add_module(PythonEnv::<RainbowTheme>::new());
 
-    print!("{}", right_prompt);
+    println!("{}", right_prompt);
 }
 
 fn left_prompt() {
