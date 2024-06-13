@@ -2,7 +2,6 @@ use crate::config;
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use std::fmt;
 use std::fmt::{Display, Write};
-use std::time::Duration;
 
 use crate::modules::{
     Cmd, Cwd, Git, Host, LastCmdDuration, Module, PythonEnv, ReadOnly, Spacer, User,
@@ -156,7 +155,10 @@ impl Powerline {
         }
     }
 
-    pub fn from_conf<T: CompleteTheme>(conf: &config::CommandLine, runtime_data: impl TerminalRuntimeMetadata) -> Self {
+    pub fn from_conf<T: CompleteTheme>(
+        conf: &config::CommandLine,
+        runtime_data: impl TerminalRuntimeMetadata,
+    ) -> Self {
         let mut powerline = Powerline::new();
         powerline.add_conf_modules::<T>(&conf.left, &runtime_data);
 
@@ -272,13 +274,19 @@ impl Powerline {
         module.append_segments(self);
     }
 
-    fn add_conf_modules<T: CompleteTheme>(&mut self, modules: &Vec<LineSegment>, runtime_data: &impl TerminalRuntimeMetadata) {
+    fn add_conf_modules<T: CompleteTheme>(
+        &mut self,
+        modules: &Vec<LineSegment>,
+        runtime_data: &impl TerminalRuntimeMetadata,
+    ) {
         for module in modules {
             match module {
                 LineSegment::SmallSpacer => self.add_module(Spacer::<T>::small()),
                 LineSegment::LargeSpacer => self.add_module(Spacer::<T>::large()),
                 LineSegment::PythonEnv => self.add_module(PythonEnv::<T>::new()),
-                LineSegment::Cmd => self.add_module(Cmd::<T>::new(runtime_data.last_command_status())),
+                LineSegment::Cmd => {
+                    self.add_module(Cmd::<T>::new(runtime_data.last_command_status()))
+                }
                 LineSegment::Git => self.add_module(Git::<T>::new()),
                 LineSegment::Separator(style) => self.set_separator(style.into()),
                 LineSegment::ReadOnly => self.add_module(ReadOnly::<T>::new()),
@@ -322,7 +330,7 @@ impl Powerline {
                         "{}{}{}{}{}",
                         Reset, sep_fg, sep, Reset, padding
                     )
-                        .unwrap();
+                    .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();

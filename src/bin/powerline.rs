@@ -1,28 +1,24 @@
 extern crate powerline;
 
-use std::env::args;
+use clap::Parser;
 use std::error::Error;
 use std::fs::File;
-use std::{env, io};
-use std::path::PathBuf;
+use std::io;
 use std::time::Duration;
-use clap::Parser;
 
 use thiserror::Error;
 
 use powerline::config::{Config, TerminalRuntimeMetadata};
-use powerline::Powerline;
 use powerline::themes::{RainbowTheme, SimpleTheme};
-
+use powerline::Powerline;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 struct PowerlineArgs {
     conf_file: String,
+    last_cmd_duration: Option<u64>,
     #[arg(short, long)]
     columns: usize,
-    #[arg(short = 'd', long = "duration")]
-    last_cmd_duration: Option<u64>,
     #[arg(short, long)]
     status: String,
 }
@@ -50,10 +46,10 @@ fn main() {
                 let powerline = match conf.theme.as_str() {
                     "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt, &args),
                     "simple" => Powerline::from_conf::<SimpleTheme>(&prompt, &args),
-                    _ => panic!("unknown theme, supported themes are simple and rainbow")
+                    _ => panic!("unknown theme, supported themes are simple and rainbow"),
                 };
 
-                println!("{}", powerline.render(100));
+                println!("{}", powerline.render(args.columns));
             }
         }
         Err(e) => {

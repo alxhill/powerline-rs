@@ -15,9 +15,7 @@ fn main() {
     };
 
     let columns = str::parse::<usize>(columns).unwrap_or(0);
-    let duration = str::parse::<u64>(duration)
-        .map(Duration::from_millis)
-        .unwrap_or(Duration::from_secs(0));
+    let duration = str::parse::<u64>(duration).map(Duration::from_millis).ok();
 
     let top_prompt = powerline::Powerline::builder()
         .change_separator(Separator::Chevron)
@@ -37,7 +35,7 @@ fn main() {
             duration,
             Duration::from_millis(0),
         ))
-        .add_module(Cmd::<RainbowTheme>::new(status.to_owned()))
+        .add_module(Cmd::<RainbowTheme>::new(status))
         .render(columns);
 
     println!("{}", top_prompt);
