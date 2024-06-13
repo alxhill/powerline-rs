@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::{read, File};
+use std::fs::{File};
 use std::io::read_to_string;
 use std::marker::PhantomData;
 use std::path::Path;
@@ -43,6 +43,16 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
             .or_else(|_| env::var("CONDA_ENV_PATH"))
             .or_else(|_| env::var("CONDA_DEFAULT_ENV"));
 
+        let pylogo = if let Ok(cwd) = env::current_dir() {
+            if cwd.join("pyproject.toml").exists() {
+                format!("{} {}", PYTHON_LOGO, '\u{f150e}') // snake
+            } else {
+                PYTHON_LOGO.to_string()
+            }
+        } else {
+            "".into()
+        };
+
         if let Ok(venv_path) = venv {
             // file_name is always some, because env variable is a valid directory path.
             let venv_name = Path::new(&venv_path).file_name().unwrap().to_string_lossy();
@@ -59,22 +69,30 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
                 .unwrap_or("".into());
 
             powerline.add_short_segment(
-                format!("{} {} ", PYTHON_LOGO, venv_name),
+                format!("{} {} ", pylogo, venv_name),
                 Style::simple(S::PYVENV_FG, S::PYVENV_BG),
             );
             powerline.add_segment(
                 py_ver_str.trim().to_string(),
                 Style::simple(S::PYVER_FG, S::PYVER_BG),
             );
-        } else if let Some(cwd) = env::current_dir().ok() {
-            if cwd.join(".python-version").exists() {
-                let py_ver = File::open(cwd.join(".python-version"))
-                    .and_then(|f| read_to_string(f))
-                    .unwrap_or("UNKNOWN".to_string());
-                powerline.add_segment(
-                    format!("{} {}", PYTHON_LOGO, py_ver.trim().to_string()),
-                    Style::simple(S::PYVER_FG, S::PYVER_BG),
+        } else if let Ok(cwd) = env::current_dir() {
+            let py_ver = File::open(cwd.join(".python-version"))
+                .and_then(read_to_string)
+                .ok();
+
+            if cwd.join(".python-version").exists() || cwd.join("pyproject.toml").exists() {
+                powerline.add_short_segment(
+                    format!("{} ", pylogo),
+                    Style::simple(S::PYVENV_FG, S::PYVENV_BG),
                 );
+
+                if let Some(py_ver) = py_ver {
+                    powerline.add_segment(
+                        py_ver.trim().to_string(),
+                        Style::simple(S::PYVER_FG, S::PYVER_BG),
+                    );
+                }
             }
         }
     }
