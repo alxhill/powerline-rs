@@ -12,18 +12,16 @@ pub struct Cwd<S: CwdScheme> {
 }
 
 pub trait CwdScheme {
-    const PATH_FG: Color;
-    const PATH_BG: Color;
+    const RAINBOW_CYCLE: [Color; 6] = [
+        colors::red(),
+        colors::orange(),
+        colors::yellow(),
+        colors::green(),
+        colors::blue(),
+        colors::nice_puple(),
+    ];
 }
 
-const RAINBOW_CYCLE: [Color; 6] = [
-    colors::red(),
-    colors::orange(),
-    colors::yellow(),
-    colors::green(),
-    colors::blue(),
-    colors::nice_puple(),
-];
 
 impl<S: CwdScheme> Cwd<S> {
     pub fn new(max_length: usize, wanted_seg_num: usize, resolve_symlinks: bool) -> Cwd<S> {
@@ -38,7 +36,7 @@ impl<S: CwdScheme> Cwd<S> {
 
 macro_rules! rainbow_segment {
     ($powerline:ident, $iter_var:ident, $value:expr) => {
-        let r_col = RAINBOW_CYCLE[$iter_var % RAINBOW_CYCLE.len()];
+        let r_col = S::RAINBOW_CYCLE[$iter_var % S::RAINBOW_CYCLE.len()];
         $powerline.add_short_segment(format!(" {}", $value), Style::simple(S::PATH_FG, r_col));
         $iter_var = $iter_var.wrapping_add(1);
     };
@@ -54,11 +52,12 @@ impl<S: CwdScheme> Module for Cwd<S> {
 
         let mut cwd = current_dir.to_str().unwrap();
 
-        if cwd == "/" {
-            return powerline.add_segment('/', Style::simple(S::PATH_FG, S::PATH_BG));
-        }
-
         let mut current_bg = 0usize;
+
+        if cwd == "/" {
+            rainbow_segment!(powerline, current_bg, "~");
+            return;
+        }
 
         if let Ok(home_str) = env::var("HOME") {
             if cwd.starts_with(&home_str) {

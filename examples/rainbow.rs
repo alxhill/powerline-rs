@@ -11,30 +11,27 @@ impl CmdScheme for RainbowTheme {
     const CMD_PASSED_FG: Color = green();
     const CMD_PASSED_BG: Color = black();
     const CMD_FAILED_BG: Color = warning_red();
-    const CMD_FAILED_FG: Color = light_grey();
+    const CMD_FAILED_FG: Color = white();
     const CMD_USER_SYMBOL: &'static str = "\u{f105}";
 }
 
-impl CwdScheme for RainbowTheme {
-    const PATH_FG: Color = light_grey();
-    const PATH_BG: Color = Color(236);
-}
+impl CwdScheme for RainbowTheme {}
 
 impl GitScheme for RainbowTheme {
-    const GIT_REMOTE_BG: Color = Color(240);
-    const GIT_REMOTE_FG: Color = Color(250);
-    const GIT_STAGED_BG: Color = Color(22);
-    const GIT_STAGED_FG: Color = light_grey();
+    const GIT_REMOTE_BG: Color = mid_grey();
+    const GIT_REMOTE_FG: Color = light_grey();
+    const GIT_STAGED_BG: Color = forest_green();
+    const GIT_STAGED_FG: Color = white();
     const GIT_NOTSTAGED_BG: Color = warning_red();
-    const GIT_NOTSTAGED_FG: Color = light_grey();
-    const GIT_UNTRACKED_BG: Color = Color(52);
-    const GIT_UNTRACKED_FG: Color = light_grey();
-    const GIT_CONFLICTED_BG: Color = Color(9);
-    const GIT_CONFLICTED_FG: Color = light_grey();
+    const GIT_NOTSTAGED_FG: Color = white();
+    const GIT_UNTRACKED_BG: Color = burgundy();
+    const GIT_UNTRACKED_FG: Color = white();
+    const GIT_CONFLICTED_BG: Color = light_red();
+    const GIT_CONFLICTED_FG: Color = white();
     const GIT_REPO_CLEAN_BG: Color = blue();
-    const GIT_REPO_CLEAN_FG: Color = light_grey();
-    const GIT_REPO_DIRTY_BG: Color = Color(202);
-    const GIT_REPO_DIRTY_FG: Color = light_grey();
+    const GIT_REPO_CLEAN_FG: Color = white();
+    const GIT_REPO_DIRTY_BG: Color = bright_orange();
+    const GIT_REPO_DIRTY_FG: Color = white();
     const NOT_STAGED_SYMBOL: &'static str = "\u{f0deb}"; // pencil with +
     const STAGED_SYMBOL: &'static str = "+"; // plus
     const UNTRACKED_SYMBOL: &'static str = "?"; // file with ?
