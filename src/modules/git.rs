@@ -15,6 +15,7 @@ use process as internal;
 #[cfg(feature = "libgit")]
 mod libgit;
 
+use crate::colors::black;
 use crate::powerline::Separator;
 #[cfg(feature = "libgit")]
 use libgit as internal;
@@ -42,7 +43,7 @@ pub trait GitScheme {
     const GIT_REPO_DIRTY_FG: Color;
 
     const NOT_STAGED_SYMBOL: &'static str = PENCIL;
-    const STAGED_SYMBOL: &'static str = TICK;// plus
+    const STAGED_SYMBOL: &'static str = TICK; // plus
     const UNTRACKED_SYMBOL: &'static str = QUESTION_MARK;
 }
 
@@ -106,10 +107,6 @@ const GIT_ICON: &'static str = "\u{e0a0}";
 
 impl<S: GitScheme> Module for Git<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        if let Some(style) = powerline.last_style_mut() {
-            style.sep = None
-        }
-
         let git_dir = match find_git_dir() {
             Some(dir) => dir,
             _ => return,
@@ -131,14 +128,13 @@ impl<S: GitScheme> Module for Git<S> {
 
         powerline.add_segment(
             format!("{} {}", icons, stats.branch_name),
-            Style::custom(branch_fg, branch_bg, Separator::RoundRight),
+            Style::simple(branch_fg, branch_bg),
         );
 
         let mut add_elem = |count: u32, symbol, fg, bg| match count.cmp(&1) {
-            Ordering::Equal | Ordering::Greater => powerline.add_short_segment(
-                format!(" {} {}", count, symbol),
-                Style::custom(fg, bg, Separator::RoundRight),
-            ),
+            Ordering::Equal | Ordering::Greater => {
+                powerline.add_short_segment(format!(" {} {}", count, symbol), Style::simple(fg, bg))
+            }
             Ordering::Less => (),
         };
 
@@ -156,7 +152,12 @@ impl<S: GitScheme> Module for Git<S> {
             S::GIT_UNTRACKED_FG,
             S::GIT_UNTRACKED_BG,
         );
-        add_elem(stats.staged, S::STAGED_SYMBOL, S::GIT_STAGED_FG, S::GIT_STAGED_BG);
+        add_elem(
+            stats.staged,
+            S::STAGED_SYMBOL,
+            S::GIT_STAGED_FG,
+            S::GIT_STAGED_BG,
+        );
         add_elem(
             stats.conflicted,
             FANCY_STAR,

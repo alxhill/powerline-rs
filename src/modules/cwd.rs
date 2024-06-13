@@ -2,8 +2,8 @@ use std::marker::PhantomData;
 use std::{env, path};
 
 use super::Module;
-use crate::{colors, Color, Powerline, Style};
 use crate::powerline::Separator;
+use crate::{colors, Color, Powerline, Style};
 
 pub struct Cwd<S: CwdScheme> {
     max_length: usize,
@@ -48,8 +48,6 @@ macro_rules! rainbow_segment {
         $iter_var = $iter_var.wrapping_add(1);
     };
 }
-
-const FULL_SLASH_SEPARATOR: char = '\u{E0bc}';
 
 impl<S: CwdScheme> Module for Cwd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {

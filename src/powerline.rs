@@ -48,8 +48,31 @@ pub enum Separator {
     RoundLeft,
     AngleLineRight,
     AngleLineLeft,
-    ShortAngleBracket,
+    ShortAngleBracketRight,
+    ZeroWidthSpace,
     Custom(char),
+}
+
+enum Direction {
+    Left,
+    Right,
+    None,
+}
+
+impl Separator {
+    fn direction(&self) -> Direction {
+        match self {
+            Separator::ChevronRight
+            | Separator::RoundRight
+            | Separator::AngleLineRight
+            | Separator::ShortAngleBracketRight => Direction::Right,
+            Separator::ChevronLeft | Separator::RoundLeft | Separator::AngleLineLeft => {
+                Direction::Left
+            }
+            Separator::ZeroWidthSpace => Direction::None,
+            Separator::Custom(_) => Direction::Right,
+        }
+    }
 }
 
 impl From<Separator> for char {
@@ -61,7 +84,8 @@ impl From<Separator> for char {
             Separator::RoundLeft => '\u{e0b6}',
             Separator::AngleLineRight => '\u{e0b1}',
             Separator::AngleLineLeft => '\u{e0b3}',
-            Separator::ShortAngleBracket =>  '\u{276D}',
+            Separator::ShortAngleBracketRight => '\u{276D}',
+            Separator::ZeroWidthSpace => '\u{200B}',
             Separator::Custom(c) => c,
         }
     }
@@ -69,8 +93,10 @@ impl From<Separator> for char {
 
 pub struct Powerline {
     buffer: String,
+    right_buffer: String,
     last_style: Option<Style>,
-    separator: Separator
+    last_style_right: Option<Style>,
+    separator: Separator,
 }
 
 impl Default for Powerline {
@@ -83,8 +109,10 @@ impl Powerline {
     pub fn new() -> Powerline {
         Powerline {
             buffer: String::with_capacity(512),
+            right_buffer: String::with_capacity(512),
             last_style: None,
-            separator: Separator::ChevronRight
+            last_style_right: None,
+            separator: Separator::ChevronRight,
         }
     }
 
@@ -115,6 +143,14 @@ impl Powerline {
         self.last_style = Some(style)
     }
 
+    fn write_right_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) {
+        let _ = if spaces {
+            write!(self.buffer, " {} ", seg)
+        } else {
+            write!(self.buffer, "{}", seg)
+        };
+    }
+
     pub fn add_segment<D: Display>(&mut self, seg: D, style: Style) {
         self.write_segment(seg, style, true)
     }
@@ -122,6 +158,8 @@ impl Powerline {
     pub fn add_short_segment<D: Display>(&mut self, seg: D, style: Style) {
         self.write_segment(seg, style, false)
     }
+
+    pub fn add_right_segment<D: Display>(&mut self, seg: D, style: Style) {}
 
     pub fn add_module<M: Module>(mut self, mut module: M) -> Self {
         module.append_segments(&mut self);

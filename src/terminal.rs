@@ -17,14 +17,6 @@ impl Color {
     pub fn from_u8(val: u8) -> Color {
         Color(val)
     }
-
-    pub fn black_fg() -> Color {
-        Color(30)
-    }
-
-    pub fn black_bg() -> Color {
-        Color(40)
-    }
 }
 
 impl FgColor {

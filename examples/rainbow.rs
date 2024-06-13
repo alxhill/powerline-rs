@@ -1,8 +1,8 @@
+use chrono::Duration;
 use powerline::modules::*;
 use powerline::powerline::Separator;
 use powerline::{colors, Color};
 use std::env;
-use chrono::Duration;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
@@ -62,29 +62,19 @@ impl LastCmdDurationScheme for RainbowTheme {
 }
 
 fn main() {
-    match env::args().nth(1) {
-        Some(arg) if arg == "--right" => right_prompt(),
-        _ => left_prompt(),
-    }
-}
-
-fn right_prompt() {
-    let right_prompt = powerline::Powerline::new()
-        .add_module(PythonEnv::<RainbowTheme>::new());
-
-    println!("{}", right_prompt);
-}
-
-fn left_prompt() {
     let top_prompt = powerline::Powerline::new()
+        .set_separator(Separator::ChevronRight)
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
         .add_module(Spacer::<RainbowTheme>::large())
+        .set_separator(Separator::RoundRight)
         .add_module(Git::<RainbowTheme>::new());
 
     let mini_prompt = powerline::Powerline::new()
-        .add_module(LastCmdDuration::<RainbowTheme>::new(Duration::milliseconds(50)))
+        .add_module(LastCmdDuration::<RainbowTheme>::new(
+            Duration::milliseconds(50),
+        ))
         .add_module(Cmd::<RainbowTheme>::new());
 
     println!("{}", top_prompt);
