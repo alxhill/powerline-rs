@@ -33,7 +33,7 @@ impl<S: LastCmdDurationScheme> Module for LastCmdDuration<S> {
                 if cmd_duration > self.min_display_time {
                     powerline.add_short_segment(
                         format!(" {}{}", nice_duration(cmd_duration), S::TIME_ICON),
-                        Style::custom(S::TIME_FG, S::TIME_BG, Separator::ChevronRight),
+                        Style::simple(S::TIME_FG, S::TIME_BG),
                     );
                 }
             }

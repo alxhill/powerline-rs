@@ -1,21 +1,21 @@
 use chrono::Duration;
 use powerline::modules::*;
 use powerline::powerline::Separator;
-use powerline::{colors, Color};
+use powerline::{colors::*, Color};
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
 
 impl CmdScheme for RainbowTheme {
-    const CMD_PASSED_FG: Color = colors::green();
-    const CMD_PASSED_BG: Color = colors::black();
-    const CMD_FAILED_BG: Color = colors::warning_red();
-    const CMD_FAILED_FG: Color = colors::light_grey();
+    const CMD_PASSED_FG: Color = green();
+    const CMD_PASSED_BG: Color = black();
+    const CMD_FAILED_BG: Color = warning_red();
+    const CMD_FAILED_FG: Color = light_grey();
     const CMD_USER_SYMBOL: &'static str = "\u{f105}";
 }
 
 impl CwdScheme for RainbowTheme {
-    const PATH_FG: Color = colors::light_grey();
+    const PATH_FG: Color = light_grey();
     const PATH_BG: Color = Color(236);
 }
 
@@ -25,17 +25,17 @@ impl GitScheme for RainbowTheme {
     const GIT_BEHIND_BG: Color = Color(240);
     const GIT_BEHIND_FG: Color = Color(250);
     const GIT_STAGED_BG: Color = Color(22);
-    const GIT_STAGED_FG: Color = colors::light_grey();
-    const GIT_NOTSTAGED_BG: Color = colors::warning_red();
-    const GIT_NOTSTAGED_FG: Color = colors::light_grey();
+    const GIT_STAGED_FG: Color = light_grey();
+    const GIT_NOTSTAGED_BG: Color = warning_red();
+    const GIT_NOTSTAGED_FG: Color = light_grey();
     const GIT_UNTRACKED_BG: Color = Color(52);
-    const GIT_UNTRACKED_FG: Color = colors::light_grey();
+    const GIT_UNTRACKED_FG: Color = light_grey();
     const GIT_CONFLICTED_BG: Color = Color(9);
-    const GIT_CONFLICTED_FG: Color = colors::light_grey();
-    const GIT_REPO_CLEAN_BG: Color = colors::blue();
-    const GIT_REPO_CLEAN_FG: Color = colors::light_grey();
+    const GIT_CONFLICTED_FG: Color = light_grey();
+    const GIT_REPO_CLEAN_BG: Color = blue();
+    const GIT_REPO_CLEAN_FG: Color = light_grey();
     const GIT_REPO_DIRTY_BG: Color = Color(202);
-    const GIT_REPO_DIRTY_FG: Color = colors::light_grey();
+    const GIT_REPO_DIRTY_FG: Color = light_grey();
     const NOT_STAGED_SYMBOL: &'static str = "\u{f0deb}"; // pencil with +
     const STAGED_SYMBOL: &'static str = "\u{f067}"; // plus
     const UNTRACKED_SYMBOL: &'static str = "\u{f086f}"; // file with ?
@@ -50,13 +50,15 @@ impl PythonEnvScheme for RainbowTheme {
     const SEPARATOR: Separator = Separator::ChevronLeft;
     const PYVENV_FG: Color = Color(0);
     const PYVENV_BG: Color = Color(42);
+    const PYVER_FG: Color = light_grey();
+    const PYVER_BG: Color = light_green();
 }
 
 impl SpacerScheme for RainbowTheme {}
 
 impl LastCmdDurationScheme for RainbowTheme {
-    const TIME_BG: Color = colors::black();
-    const TIME_FG: Color = colors::green();
+    const TIME_BG: Color = black();
+    const TIME_FG: Color = green();
     const TIME_ICON: &'static str = "";
 }
 

@@ -15,7 +15,6 @@ pub struct Cwd<S: CwdScheme> {
 pub trait CwdScheme {
     const PATH_FG: Color;
     const PATH_BG: Color;
-    const SEPARATOR: Separator = Separator::ChevronRight;
 }
 
 const RAINBOW_CYCLE: [Color; 6] = [
@@ -43,7 +42,7 @@ macro_rules! rainbow_segment {
         let r_col = RAINBOW_CYCLE[$iter_var % RAINBOW_CYCLE.len()];
         $powerline.add_short_segment(
             format!(" {}", $value),
-            Style::custom(S::PATH_FG, r_col, S::SEPARATOR),
+            Style::simple(S::PATH_FG, r_col),
         );
         $iter_var = $iter_var.wrapping_add(1);
     };

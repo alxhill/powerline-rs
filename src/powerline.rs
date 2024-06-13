@@ -21,15 +21,6 @@ impl Style {
         }
     }
 
-    pub fn special(fg: Color, bg: Color, sep: char, sep_fg: Color) -> Style {
-        Style {
-            fg: fg.into(),
-            bg: bg.into(),
-            sep: Some(Separator::Custom(sep)),
-            sep_fg: sep_fg.into(),
-        }
-    }
-
     pub fn custom(fg: Color, bg: Color, separator: Separator) -> Style {
         Style {
             fg: fg.into(),
@@ -50,7 +41,6 @@ pub enum Separator {
     AngleLineLeft,
     ShortAngleBracketRight,
     ZeroWidthSpace,
-    Custom(char),
 }
 
 enum Direction {
@@ -70,7 +60,6 @@ impl Separator {
                 Direction::Left
             }
             Separator::ZeroWidthSpace => Direction::None,
-            Separator::Custom(_) => Direction::Right,
         }
     }
 }
@@ -86,7 +75,6 @@ impl From<Separator> for char {
             Separator::AngleLineLeft => '\u{e0b3}',
             Separator::ShortAngleBracketRight => '\u{276D}',
             Separator::ZeroWidthSpace => '\u{200B}',
-            Separator::Custom(c) => c,
         }
     }
 }
@@ -145,10 +133,12 @@ impl Powerline {
 
     fn write_right_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) {
         let _ = if spaces {
-            write!(self.buffer, " {} ", seg)
+            write!(self.right_buffer, " {} ", seg)
         } else {
-            write!(self.buffer, "{}", seg)
+            write!(self.right_buffer, "{}", seg)
         };
+
+        todo!()
     }
 
     pub fn add_segment<D: Display>(&mut self, seg: D, style: Style) {
@@ -159,7 +149,9 @@ impl Powerline {
         self.write_segment(seg, style, false)
     }
 
-    pub fn add_right_segment<D: Display>(&mut self, seg: D, style: Style) {}
+    pub fn add_right_segment<D: Display>(&mut self, seg: D, style: Style) {
+        todo!()
+    }
 
     pub fn add_module<M: Module>(mut self, mut module: M) -> Self {
         module.append_segments(&mut self);
