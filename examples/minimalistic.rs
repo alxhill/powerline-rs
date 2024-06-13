@@ -6,7 +6,8 @@ fn main() {
         .add_module(Cwd::<SimpleTheme>::new(45, 4, false))
         .add_module(Git::<SimpleTheme>::new())
         .add_module(ReadOnly::<SimpleTheme>::new())
-        .add_module(Cmd::<SimpleTheme>::new("0".into()));
+        .add_module(Cmd::<SimpleTheme>::new("0".into()))
+        .render(0);
 
     println!("{} ", prompt);
 }
