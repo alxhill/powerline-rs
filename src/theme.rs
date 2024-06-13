@@ -43,10 +43,8 @@ impl TimeScheme for SimpleTheme {
 }
 
 impl GitScheme for SimpleTheme {
-    const GIT_AHEAD_BG: Color = Color(240);
-    const GIT_AHEAD_FG: Color = Color(250);
-    const GIT_BEHIND_BG: Color = Color(240);
-    const GIT_BEHIND_FG: Color = Color(250);
+    const GIT_REMOTE_BG: Color = Color(240);
+    const GIT_REMOTE_FG: Color = Color(250);
     const GIT_STAGED_BG: Color = Color(22);
     const GIT_STAGED_FG: Color = Color(15);
     const GIT_NOTSTAGED_BG: Color = Color(130);

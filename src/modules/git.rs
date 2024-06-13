@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::env;
+use std::fmt::Write;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
@@ -23,10 +24,8 @@ pub struct Git<S> {
 }
 
 pub trait GitScheme {
-    const GIT_AHEAD_BG: Color;
-    const GIT_AHEAD_FG: Color;
-    const GIT_BEHIND_BG: Color;
-    const GIT_BEHIND_FG: Color;
+    const GIT_REMOTE_BG: Color;
+    const GIT_REMOTE_FG: Color;
     const GIT_STAGED_BG: Color;
     const GIT_STAGED_FG: Color;
     const GIT_NOTSTAGED_BG: Color;
@@ -94,14 +93,14 @@ fn find_git_dir() -> Option<PathBuf> {
     }
 }
 
-const UP_ARROW: &str = "\u{2B06}";
-const DOWN_ARROW: &str = "\u{2B07}";
+const UP_ARROW: &str = "\u{f062}";
+const DOWN_ARROW: &str = "\u{f063}";
 const TICK: &str = "\u{2714}";
 const PENCIL: &str = "\u{270E}";
 const QUESTION_MARK: &str = "\u{2753}";
 const FANCY_STAR: &str = "\u{273C}";
 
-const GITHUB_LOGO: &str = "\u{e65b}";
+const GITHUB_LOGO: &str = "\u{e709}";
 const GIT_ICON: &str = "\u{e0a0}";
 
 impl<S: GitScheme> Module for Git<S> {
@@ -119,49 +118,58 @@ impl<S: GitScheme> Module for Git<S> {
             (S::GIT_REPO_CLEAN_FG, S::GIT_REPO_CLEAN_BG)
         };
 
-        let icons = if stats.remote {
-            format!("{} {}", GIT_ICON, GITHUB_LOGO)
-        } else {
-            GIT_ICON.to_string()
-        };
-
         powerline.add_segment(
-            format!("{} {}", icons, stats.branch_name),
+            format!("{} {}", GIT_ICON, stats.branch_name),
             Style::simple(branch_fg, branch_bg),
         );
 
-        let mut add_elem = |count: u32, symbol, fg, bg| match count.cmp(&1) {
+        let add_elem = |powerline: &mut Powerline, count: u32, symbol, fg, bg| match count.cmp(&1) {
             Ordering::Equal | Ordering::Greater => {
                 powerline.add_short_segment(format!(" {} {}", count, symbol), Style::simple(fg, bg))
             }
             Ordering::Less => (),
         };
 
-        add_elem(stats.ahead, UP_ARROW, S::GIT_AHEAD_FG, S::GIT_AHEAD_BG);
-        add_elem(stats.behind, DOWN_ARROW, S::GIT_BEHIND_FG, S::GIT_BEHIND_BG);
         add_elem(
+            powerline,
             stats.non_staged,
             S::NOT_STAGED_SYMBOL,
             S::GIT_NOTSTAGED_FG,
             S::GIT_NOTSTAGED_BG,
         );
         add_elem(
+            powerline,
             stats.untracked,
             S::UNTRACKED_SYMBOL,
             S::GIT_UNTRACKED_FG,
             S::GIT_UNTRACKED_BG,
         );
         add_elem(
+            powerline,
             stats.staged,
             S::STAGED_SYMBOL,
             S::GIT_STAGED_FG,
             S::GIT_STAGED_BG,
         );
         add_elem(
+            powerline,
             stats.conflicted,
             S::CONFLICTED_SYMBOL,
             S::GIT_CONFLICTED_FG,
             S::GIT_CONFLICTED_BG,
         );
+
+        if stats.remote {
+            let mut remote: String = format!("{} ", GITHUB_LOGO);
+
+            if stats.ahead > 0 {
+                let _ = write!(remote, "{}{} ", stats.ahead, UP_ARROW);
+            }
+            if stats.behind > 0 {
+                let _ = write!(remote, "{}{}", stats.behind, DOWN_ARROW);
+            }
+
+            powerline.add_segment(remote, Style::simple(S::GIT_REMOTE_FG, S::GIT_REMOTE_BG));
+        }
     }
 }
