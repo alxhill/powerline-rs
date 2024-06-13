@@ -153,7 +153,8 @@ Custom programs allow creating new themes and modules, but require recompilation
 
 ### Config file
 
-`config.rs` has the full definition of all valid types in the config directory.
+`config.rs` has the full definition of all valid types in the config directory, `example_config.json` shows a complete
+configuration setup.
 
 ### Custom program
 
