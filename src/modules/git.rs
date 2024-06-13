@@ -125,7 +125,7 @@ impl<S: GitScheme> Module for Git<S> {
 
         let add_elem = |powerline: &mut Powerline, count: u32, symbol, fg, bg| match count.cmp(&1) {
             Ordering::Equal | Ordering::Greater => {
-                powerline.add_short_segment(format!(" {} {}", count, symbol), Style::simple(fg, bg))
+                powerline.add_segment(format!("{} {}", count, symbol), Style::simple(fg, bg))
             }
             Ordering::Less => (),
         };

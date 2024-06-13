@@ -22,9 +22,9 @@ impl GitScheme for RainbowTheme {
     const GIT_REMOTE_FG: Color = light_grey();
     const GIT_STAGED_BG: Color = forest_green();
     const GIT_STAGED_FG: Color = white();
-    const GIT_NOTSTAGED_BG: Color = warning_red();
+    const GIT_NOTSTAGED_BG: Color = mid_red();
     const GIT_NOTSTAGED_FG: Color = white();
-    const GIT_UNTRACKED_BG: Color = burgundy();
+    const GIT_UNTRACKED_BG: Color = warning_red();
     const GIT_UNTRACKED_FG: Color = white();
     const GIT_CONFLICTED_BG: Color = light_red();
     const GIT_CONFLICTED_FG: Color = white();
@@ -32,9 +32,9 @@ impl GitScheme for RainbowTheme {
     const GIT_REPO_CLEAN_FG: Color = white();
     const GIT_REPO_DIRTY_BG: Color = bright_orange();
     const GIT_REPO_DIRTY_FG: Color = white();
-    const NOT_STAGED_SYMBOL: &'static str = "\u{f0deb}"; // pencil with +
-    const STAGED_SYMBOL: &'static str = "+"; // plus
-    const UNTRACKED_SYMBOL: &'static str = "?"; // file with ?
+    const NOT_STAGED_SYMBOL: &'static str = "\u{eae9}"; // pencil
+    const STAGED_SYMBOL: &'static str = "+";
+    const UNTRACKED_SYMBOL: &'static str = "?";
 }
 
 impl ReadOnlyScheme for RainbowTheme {
@@ -76,9 +76,7 @@ fn main() {
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
-        // .add_padding(2, None)
         .add_module(Spacer::<RainbowTheme>::small())
-        .set_separator(Separator::Chevron)
         .add_module(Git::<RainbowTheme>::new())
         .to_right()
         .set_separator(Separator::Round)
