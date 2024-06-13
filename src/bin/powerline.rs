@@ -1,22 +1,46 @@
 extern crate powerline;
 
-use powerline::powerline::PowerlineRightBuilder;
-
-use powerline::modules::Time;
-use powerline::modules::*;
-use powerline::themes::SimpleTheme;
 use std::env::args;
+use std::fs::File;
+use std::io;
+
+use thiserror::Error;
+
+use powerline::config::Config;
+use powerline::Powerline;
+use powerline::powerline::PowerlineRightBuilder;
+use powerline::themes::{RainbowTheme, SimpleTheme};
 
 fn main() {
-    let prompt = powerline::Powerline::builder()
-        .add_module(Time::<SimpleTheme>::with_time_format("%H:%M:%S"))
-        .add_module(User::<SimpleTheme>::new())
-        .add_module(Host::<SimpleTheme>::new())
-        .add_module(Cwd::<SimpleTheme>::new(45, 4, false))
-        .add_module(Git::<SimpleTheme>::new())
-        .add_module(ReadOnly::<SimpleTheme>::new())
-        .add_module(Cmd::<SimpleTheme>::new(args().nth(1).unwrap_or("0".into())))
-        .render(0);
+    let conf = load_config().expect("Failed to read config from file");
 
-    println!("{} ", prompt);
+    for prompt in conf.rows {
+        let powerline = match conf.theme.as_str() {
+            "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt),
+            "simple" => Powerline::from_conf::<SimpleTheme>(&prompt),
+            _ => panic!("unknown theme, supported themes are simple and rainbow")
+        };
+
+        println!("{}", powerline.render(100));
+    }
+}
+
+#[derive(Error, Debug)]
+enum PowerlineError {
+    #[error("config argument not found")]
+    InvalidArgument,
+    #[error("could not read config file")]
+    IoError(#[from] io::Error),
+    #[error("config file could not be parsed")]
+    InvalidConfig(#[from] serde_json::Error),
+}
+
+fn load_config() -> Result<Config, PowerlineError> {
+    let conf_file = args().nth(1)
+        .ok_or(PowerlineError::InvalidArgument)?;
+
+    let conf_file = File::open(conf_file)?;
+    let conf: Config = serde_json::from_reader(conf_file)?;
+
+    Ok(conf)
 }

@@ -3,30 +3,33 @@
   "rows": [
     {
       "left": [
+        "small_spacer",
         {
           "cwd": {
-            "max_length": 50,
+            "max_length": 60,
             "wanted_seg_num": 4,
             "resolve_symlinks": false
           }
         },
-        {
-          "padding": 2
-        },
-        {
-          "separator": "round"
-        },
+        "read_only",
+        "small_spacer",
         "git"
       ],
       "right": [
-        "python_env"
+        {
+          "separator": "round"
+        },
+        "python_env",
+        {
+          "padding": 0
+        }
       ]
     },
     {
       "left": [
         {
           "last_cmd_duration": {
-            "min_run_time": "10ms"
+            "min_run_time": "0ms"
           }
         },
         "cmd"

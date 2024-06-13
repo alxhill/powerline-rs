@@ -41,5 +41,5 @@ fn main() {
         .render(columns);
 
     println!("{}", top_prompt);
-    print!("{} ", mini_prompt);
+    println!("{} ", mini_prompt);
 }
