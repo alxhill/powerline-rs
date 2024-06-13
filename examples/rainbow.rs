@@ -2,7 +2,6 @@ use chrono::Duration;
 use powerline::modules::*;
 use powerline::powerline::Separator;
 use powerline::{colors, Color};
-use std::env;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;

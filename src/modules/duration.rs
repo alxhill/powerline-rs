@@ -54,5 +54,5 @@ fn nice_duration(dur: Duration) -> String {
         return format!("{}ms", dur.num_milliseconds());
     }
 
-    return format!("{}µs", dur.num_microseconds().unwrap_or(0));
+    format!("{}µs", dur.num_microseconds().unwrap_or(0))
 }

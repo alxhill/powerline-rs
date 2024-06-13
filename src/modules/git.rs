@@ -15,8 +15,6 @@ use process as internal;
 #[cfg(feature = "libgit")]
 mod libgit;
 
-use crate::colors::black;
-use crate::powerline::Separator;
 #[cfg(feature = "libgit")]
 use libgit as internal;
 
@@ -95,15 +93,15 @@ fn find_git_dir() -> Option<PathBuf> {
     }
 }
 
-const UP_ARROW: &'static str = "\u{2B06}";
-const DOWN_ARROW: &'static str = "\u{2B07}";
-const TICK: &'static str = "\u{2714}";
-const PENCIL: &'static str = "\u{270E}";
-const QUESTION_MARK: &'static str = "\u{2753}";
-const FANCY_STAR: &'static str = "\u{273C}";
+const UP_ARROW: &str = "\u{2B06}";
+const DOWN_ARROW: &str = "\u{2B07}";
+const TICK: &str = "\u{2714}";
+const PENCIL: &str = "\u{270E}";
+const QUESTION_MARK: &str = "\u{2753}";
+const FANCY_STAR: &str = "\u{273C}";
 
-const GITHUB_LOGO: &'static str = "\u{e65b}";
-const GIT_ICON: &'static str = "\u{e0a0}";
+const GITHUB_LOGO: &str = "\u{e65b}";
+const GIT_ICON: &str = "\u{e0a0}";
 
 impl<S: GitScheme> Module for Git<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
@@ -123,7 +121,7 @@ impl<S: GitScheme> Module for Git<S> {
         let icons = if stats.remote {
             format!("{} {}", GIT_ICON, GITHUB_LOGO)
         } else {
-            format!("{GIT_ICON}")
+            GIT_ICON.to_string()
         };
 
         powerline.add_segment(

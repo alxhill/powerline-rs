@@ -15,6 +15,12 @@ pub trait TimeScheme {
     const TIME_FG: Color;
 }
 
+impl<S: TimeScheme> Default for Time<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<S: TimeScheme> Time<S> {
     pub fn new() -> Time<S> {
         Time {
