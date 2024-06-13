@@ -1,0 +1,36 @@
+{
+  "theme": "rainbow",
+  "rows": [
+    {
+      "left": [
+        {
+          "cwd": {
+            "max_length": 50,
+            "wanted_seg_num": 4,
+            "resolve_symlinks": false
+          }
+        },
+        {
+          "padding": 2
+        },
+        {
+          "separator": "round"
+        },
+        "git"
+      ],
+      "right": [
+        "python_env"
+      ]
+    },
+    {
+      "left": [
+        {
+          "last_cmd_duration": {
+            "min_run_time": "10ms"
+          }
+        },
+        "cmd"
+      ]
+    }
+  ]
+}
