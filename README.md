@@ -140,6 +140,7 @@ function fish_prompt
   set -gx duration 0
 end
 
+# disable any default right prompt (e.g python env)
 function fish_right_prompt
 end
 ```
