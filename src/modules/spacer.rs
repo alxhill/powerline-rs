@@ -7,7 +7,6 @@ use std::marker::PhantomData;
 pub struct Spacer<S: SpacerScheme> {
     scheme: PhantomData<S>,
     separator: Separator,
-    bg_color: Option<Color>,
     large: bool,
 }
 
@@ -20,7 +19,6 @@ impl<S: SpacerScheme> Spacer<S> {
         Spacer {
             scheme: PhantomData,
             separator: Separator::ChevronRight,
-            bg_color: None,
             large: true,
         }
     }
@@ -29,17 +27,7 @@ impl<S: SpacerScheme> Spacer<S> {
         Spacer {
             scheme: PhantomData,
             separator: Separator::ChevronRight,
-            bg_color: None,
             large: false,
-        }
-    }
-
-    pub fn custom(separator: Separator, large: bool) -> Spacer<S> {
-        Spacer {
-            scheme: PhantomData,
-            bg_color: None,
-            separator,
-            large,
         }
     }
 }

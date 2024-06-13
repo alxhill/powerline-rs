@@ -7,7 +7,7 @@ use crate::terminal::*;
 pub struct Style {
     pub fg: FgColor,
     pub bg: BgColor,
-    pub sep: char,
+    pub sep: Option<Separator>,
     pub sep_fg: FgColor,
 }
 
@@ -16,7 +16,7 @@ impl Style {
         Style {
             fg: fg.into(),
             bg: bg.into(),
-            sep: '\u{E0B0}',
+            sep: None, // use the "default" separator
             sep_fg: bg.into(),
         }
     }
@@ -25,7 +25,7 @@ impl Style {
         Style {
             fg: fg.into(),
             bg: bg.into(),
-            sep,
+            sep: Some(Separator::Custom(sep)),
             sep_fg: sep_fg.into(),
         }
     }
@@ -48,6 +48,7 @@ pub enum Separator {
     RoundLeft,
     AngleLineRight,
     AngleLineLeft,
+    ShortAngleBracket,
     Custom(char),
 }
 
@@ -60,6 +61,7 @@ impl From<Separator> for char {
             Separator::RoundLeft => '\u{e0b6}',
             Separator::AngleLineRight => '\u{e0b1}',
             Separator::AngleLineLeft => '\u{e0b3}',
+            Separator::ShortAngleBracket =>  '\u{276D}',
             Separator::Custom(c) => c,
         }
     }
@@ -68,6 +70,7 @@ impl From<Separator> for char {
 pub struct Powerline {
     buffer: String,
     last_style: Option<Style>,
+    separator: Separator
 }
 
 impl Default for Powerline {
@@ -81,14 +84,19 @@ impl Powerline {
         Powerline {
             buffer: String::with_capacity(512),
             last_style: None,
+            separator: Separator::ChevronRight
         }
+    }
+
+    pub fn set_separator(mut self, separator: Separator) -> Self {
+        self.separator = separator;
+        self
     }
 
     #[inline(always)]
     fn write_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) {
-        // write!(f, "{}{}{}{}{}{}", seg.fg, seg.bg, seg.val, next.bg, seg.sep_col, seg.sep)?;
-
         let _ = if let Some(Style { sep_fg, sep, .. }) = self.last_style {
+            let sep: char = sep.unwrap_or(self.separator).into();
             write!(self.buffer, "{}{}{}", style.bg, sep_fg, sep)
         } else {
             write!(self.buffer, "{}", style.bg)
@@ -115,8 +123,9 @@ impl Powerline {
         self.write_segment(seg, style, false)
     }
 
-    pub fn add_module<M: Module>(&mut self, mut module: M) {
-        module.append_segments(self)
+    pub fn add_module<M: Module>(mut self, mut module: M) -> Self {
+        module.append_segments(&mut self);
+        self
     }
 
     pub fn last_style_mut(&mut self) -> Option<&mut Style> {
@@ -128,6 +137,7 @@ impl fmt::Display for Powerline {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.last_style {
             Some(Style { sep_fg, sep, .. }) => {
+                let sep: char = sep.unwrap_or(self.separator).into();
                 write!(f, "{}{}{}{}{}", self.buffer, Reset, sep_fg, sep, Reset)
             }
             None => Ok(()),

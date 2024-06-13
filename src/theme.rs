@@ -14,9 +14,6 @@ impl CmdScheme for SimpleTheme {
 impl CwdScheme for SimpleTheme {
     const PATH_FG: Color = Color(250);
     const PATH_BG: Color = Color(237);
-    const HOME_FG: Color = Color(15);
-    const HOME_BG: Color = Color(31);
-    const SEPARATOR_FG: Color = Color(244);
 }
 
 impl ExitCodeScheme for SimpleTheme {
@@ -40,7 +37,6 @@ impl ReadOnlyScheme for SimpleTheme {
     const READONLY_BG: Color = Color(124);
 }
 
-#[cfg(feature = "time")]
 impl TimeScheme for SimpleTheme {
     const TIME_BG: Color = Color(238);
     const TIME_FG: Color = Color(250);

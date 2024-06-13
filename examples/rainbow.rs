@@ -16,19 +16,8 @@ impl CmdScheme for RainbowTheme {
 }
 
 impl CwdScheme for RainbowTheme {
-    const PATH_FG: Color = Color(254);
-    const PATH_BG: Color = Color(53);
-    const HOME_FG: Color = colors::light_grey();
-    const HOME_BG: Color = colors::red();
-    const SEPARATOR_FG: Color = Color(40);
-}
-
-impl ShortCwdScheme for RainbowTheme {
     const PATH_FG: Color = colors::light_grey();
     const PATH_BG: Color = Color(236);
-    const HOME_FG: Color = colors::light_grey();
-    const HOME_BG: Color = colors::red();
-    const SEPARATOR_FG: Color = colors::light_grey();
 }
 
 impl GitScheme for RainbowTheme {
@@ -80,25 +69,23 @@ fn main() {
 }
 
 fn right_prompt() {
-    let mut right_prompt = powerline::Powerline::new();
-
-    right_prompt.add_module(PythonEnv::<RainbowTheme>::new());
+    let right_prompt = powerline::Powerline::new()
+        .add_module(PythonEnv::<RainbowTheme>::new());
 
     println!("{}", right_prompt);
 }
 
 fn left_prompt() {
-    let mut top_prompt = powerline::Powerline::new();
+    let top_prompt = powerline::Powerline::new()
+        .add_module(Spacer::<RainbowTheme>::small())
+        .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
+        .add_module(ReadOnly::<RainbowTheme>::new())
+        .add_module(Spacer::<RainbowTheme>::large())
+        .add_module(Git::<RainbowTheme>::new());
 
-    top_prompt.add_module(Spacer::<RainbowTheme>::small());
-    top_prompt.add_module(ShortCwd::<RainbowTheme>::new(45, 4, false));
-    top_prompt.add_module(ReadOnly::<RainbowTheme>::new());
-    top_prompt.add_module(Spacer::<RainbowTheme>::large());
-    top_prompt.add_module(Git::<RainbowTheme>::new());
-
-    let mut mini_prompt = powerline::Powerline::new();
-    mini_prompt.add_module(LastCmdDuration::<RainbowTheme>::new(Duration::milliseconds(50)));
-    mini_prompt.add_module(Cmd::<RainbowTheme>::new());
+    let mini_prompt = powerline::Powerline::new()
+        .add_module(LastCmdDuration::<RainbowTheme>::new(Duration::milliseconds(50)))
+        .add_module(Cmd::<RainbowTheme>::new());
 
     println!("{}", top_prompt);
     print!("{} ", mini_prompt);

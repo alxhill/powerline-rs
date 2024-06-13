@@ -106,6 +106,10 @@ const GIT_ICON: &'static str = "\u{e0a0}";
 
 impl<S: GitScheme> Module for Git<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
+        if let Some(style) = powerline.last_style_mut() {
+            style.sep = None
+        }
+
         let git_dir = match find_git_dir() {
             Some(dir) => dir,
             _ => return,

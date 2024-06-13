@@ -2,7 +2,8 @@ use std::marker::PhantomData;
 use std::{env, path};
 
 use super::Module;
-use crate::{Color, Powerline, Style};
+use crate::{colors, Color, Powerline, Style};
+use crate::powerline::Separator;
 
 pub struct Cwd<S: CwdScheme> {
     max_length: usize,
@@ -14,11 +15,17 @@ pub struct Cwd<S: CwdScheme> {
 pub trait CwdScheme {
     const PATH_FG: Color;
     const PATH_BG: Color;
-    const HOME_FG: Color;
-    const HOME_BG: Color;
-    const SEPARATOR_FG: Color;
-    const CWD_HOME_SYMBOL: &'static str = "~";
+    const SEPARATOR: Separator = Separator::ChevronRight;
 }
+
+const RAINBOW_CYCLE: [Color; 6] = [
+    colors::red(),
+    colors::orange(),
+    colors::yellow(),
+    colors::green(),
+    colors::blue(),
+    colors::nice_puple(),
+];
 
 impl<S: CwdScheme> Cwd<S> {
     pub fn new(max_length: usize, wanted_seg_num: usize, resolve_symlinks: bool) -> Cwd<S> {
@@ -31,16 +38,18 @@ impl<S: CwdScheme> Cwd<S> {
     }
 }
 
-macro_rules! append_cwd_segments {
-    ($powerline:ident, $iter:expr) => {
-        for val in $iter {
-            $powerline.add_segment(
-                val,
-                Style::special(S::PATH_FG, S::PATH_BG, '\u{E0B1}', S::SEPARATOR_FG),
-            );
-        }
+macro_rules! rainbow_segment {
+    ($powerline:ident, $iter_var:ident, $value:expr) => {
+        let r_col = RAINBOW_CYCLE[$iter_var % RAINBOW_CYCLE.len()];
+        $powerline.add_short_segment(
+            format!(" {}", $value),
+            Style::custom(S::PATH_FG, r_col, S::SEPARATOR),
+        );
+        $iter_var = $iter_var.wrapping_add(1);
     };
 }
+
+const FULL_SLASH_SEPARATOR: char = '\u{E0bc}';
 
 impl<S: CwdScheme> Module for Cwd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
@@ -56,9 +65,11 @@ impl<S: CwdScheme> Module for Cwd<S> {
             return powerline.add_segment('/', Style::simple(S::PATH_FG, S::PATH_BG));
         }
 
+        let mut current_bg = 0usize;
+
         if let Ok(home_str) = env::var("HOME") {
             if cwd.starts_with(&home_str) {
-                powerline.add_segment(S::CWD_HOME_SYMBOL, Style::simple(S::HOME_FG, S::HOME_BG));
+                rainbow_segment!(powerline, current_bg, "~");
                 cwd = &cwd[home_str.len()..]
             }
         }
@@ -72,18 +83,23 @@ impl<S: CwdScheme> Module for Cwd<S> {
             let start = cwd.split('/').skip(1).take(left);
             let end = cwd.split('/').skip(depth - right + 1);
 
-            append_cwd_segments!(powerline, start);
-            powerline.add_segment(
-                '\u{2026}',
-                Style::special(S::PATH_FG, S::PATH_BG, '\u{E0B1}', S::SEPARATOR_FG),
-            );
-            append_cwd_segments!(powerline, end);
+            for val in start {
+                rainbow_segment!(powerline, current_bg, val);
+            }
+
+            rainbow_segment!(powerline, current_bg, "...");
+
+            for val in end {
+                rainbow_segment!(powerline, current_bg, val);
+            }
         } else {
-            append_cwd_segments!(powerline, cwd.split('/').skip(1));
+            for val in cwd.split('/').skip(1) {
+                rainbow_segment!(powerline, current_bg, val);
+            }
         };
 
         if let Some(style) = powerline.last_style_mut() {
-            style.sep = '\u{E0B0}';
+            style.sep = Some(Separator::ChevronRight);
             style.sep_fg = style.bg.transpose();
         }
     }

@@ -12,12 +12,11 @@ git2 = { version = "0.18", optional = true, default-features = false }
 chrono = { version = "0.4.29"}
 
 [features]
-default = ["bash-shell", "libgit"]
+default = ["bare-shell", "libgit"]
 bash-shell = []
 bare-shell = []
 zsh-shell = []
 libgit = ["git2"]
-time = []
 
 [profile.release]
 opt-level = 3

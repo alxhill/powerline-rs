@@ -1,5 +1,4 @@
 use std::env;
-use std::fmt::format;
 use std::marker::PhantomData;
 use chrono::Duration;
 use crate::{Color, Powerline, Style};
