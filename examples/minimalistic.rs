@@ -1,5 +1,5 @@
 use powerline::modules::*;
-use powerline::theme::SimpleTheme;
+use powerline::themes::SimpleTheme;
 
 fn main() {
     let prompt = powerline::Powerline::new()

@@ -1,5 +1,5 @@
-use crate::modules::*;
-use crate::Color;
+use crate::{Color, colors};
+use crate::modules::{CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme, ReadOnlyScheme, TimeScheme, UserScheme};
 
 #[derive(Copy, Clone)]
 pub struct SimpleTheme;
@@ -11,7 +11,11 @@ impl CmdScheme for SimpleTheme {
     const CMD_FAILED_FG: Color = Color(15);
 }
 
-impl CwdScheme for SimpleTheme {}
+impl CwdScheme<1> for SimpleTheme {
+    const PATH_BG_COLORS: [Color; 1] = [
+        colors::grey()
+    ];
+}
 
 impl ExitCodeScheme for SimpleTheme {
     const EXIT_CODE_BG: Color = Color(161);
