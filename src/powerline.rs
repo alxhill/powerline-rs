@@ -1,4 +1,5 @@
 use std::fmt::{Display, Write};
+use std::{fmt};
 
 use crate::modules::Module;
 use crate::terminal::*;
@@ -66,6 +67,7 @@ pub struct Powerline {
     last_style_right: Option<Style>,
     separator: Separator,
     direction: Direction,
+    last_padding: bool,
 }
 
 impl Default for Powerline {
@@ -85,6 +87,7 @@ impl Powerline {
             last_style_right: None,
             separator: Separator::Chevron,
             direction: Direction::Left,
+            last_padding: false,
         }
     }
 
@@ -94,75 +97,93 @@ impl Powerline {
     }
 
     #[inline(always)]
-    fn write_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) {
+    fn write_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) -> fmt::Result {
         // write the last style's separator on the new style's background
-        let _ = if let Some(Style { sep_fg, sep, .. }) = self.last_style {
+        if self.last_padding {
+            let new_sep = style.sep.unwrap_or(self.separator);
+            write!(
+                self.left_buffer,
+                "{}{}",
+                style.sep_fg,
+                new_sep.for_direction(Direction::Left)
+            )?;
+            self.last_padding = false;
+        }
+
+        if let Some(Style { sep_fg, sep, .. }) = self.last_style {
             let sep: char = sep
                 .unwrap_or(self.separator)
                 .for_direction(Direction::Right);
             self.left_columns += 1;
-            write!(self.left_buffer, "{}{}{}", style.bg, sep_fg, sep)
+            write!(self.left_buffer, "{}{}{}", style.bg, sep_fg, sep)?;
         } else {
-            write!(self.left_buffer, "{}", style.bg)
+            write!(self.left_buffer, "{}", style.bg)?;
         };
 
         if self.last_style.as_ref().map(|s| s.sep_fg) != Some(style.fg) {
-            let _ = write!(self.left_buffer, "{}", style.fg);
+            write!(self.left_buffer, "{}", style.fg)?;
         }
 
         let orig_len = self.left_buffer.len();
-        let _ = if spaces {
-            write!(self.left_buffer, " {} ", seg)
+        if spaces {
+            write!(self.left_buffer, " {} ", seg)?;
         } else {
-            write!(self.left_buffer, "{}", seg)
+            write!(self.left_buffer, "{}", seg)?;
         };
 
         // attempt to account for symbols in the segment by assuming all chars
         // printed are of length 1
         self.left_columns += self.left_buffer[orig_len..].chars().count();
 
-        self.last_style = Some(style)
+        self.last_style = Some(style);
+        Ok(())
     }
 
-    fn write_segment_right<D: Display>(&mut self, seg: D, style: Style, spaces: bool) {
+    fn write_segment_right<D: Display>(
+        &mut self,
+        seg: D,
+        style: Style,
+        spaces: bool,
+    ) -> fmt::Result {
         let sep: char = style
             .sep
             .unwrap_or(self.separator)
             .for_direction(Direction::Left);
         // write the separator directly onto the current background
-        let _ = write!(self.right_buffer, "{}{}{}", style.sep_fg, sep, style.bg);
+        write!(self.right_buffer, "{}{}{}", style.sep_fg, sep, style.bg)?;
         self.right_columns += 1;
 
         if self.last_style_right.as_ref().map(|s| s.sep_fg) != Some(style.fg) {
-            let _ = write!(self.right_buffer, "{}", style.fg);
+            write!(self.right_buffer, "{}", style.fg)?;
         }
 
         let orig_len = self.right_buffer.len();
-        let _ = if spaces {
-            write!(self.right_buffer, " {} ", seg)
+        if spaces {
+            write!(self.right_buffer, " {} ", seg)?;
         } else {
-            write!(self.right_buffer, "{}", seg)
+            write!(self.right_buffer, "{}", seg)?;
         };
 
         // attempt to account for symbols in the segment by assuming all chars
         // printed are of length 1 (so multi-byte chars don't over-inflate the size)
         self.right_columns += self.right_buffer[orig_len..].chars().count();
 
-        self.last_style_right = Some(style)
+        self.last_style_right = Some(style);
+        Ok(())
     }
 
     pub fn add_segment<D: Display>(&mut self, seg: D, style: Style) {
-        match self.direction {
+        let _ = match self.direction {
             Direction::Left => self.write_segment(seg, style, true),
             Direction::Right => self.write_segment_right(seg, style, true),
-        }
+        };
     }
 
     pub fn add_short_segment<D: Display>(&mut self, seg: D, style: Style) {
-        match self.direction {
+        let _ = match self.direction {
             Direction::Left => self.write_segment(seg, style, false),
             Direction::Right => self.write_segment_right(seg, style, false),
-        }
+        };
     }
 
     pub fn to_right(mut self) -> Self {
@@ -177,11 +198,14 @@ impl Powerline {
         self
     }
 
+    // todo: write opposite-side separators after padding for a cleaner look
     pub fn add_padding(mut self, len: usize, bg: Option<Color>) -> Self {
         let padding = vec![" "; len].join("");
         self.left_columns += len;
         match self.direction {
             Direction::Left => {
+                // close out the buffer, write the padding, and leave the next write_segment
+                // to handle adding the alternate separator
                 self.close_left_buffer();
                 match bg {
                     Some(color) => {
@@ -190,8 +214,20 @@ impl Powerline {
                     None => write!(self.left_buffer, "{}{}", Reset, padding).unwrap(),
                 }
             }
-            Direction::Right => todo!(),
+            Direction::Right => {
+                // close out the current blob and write the padding
+                if let Some(Style { sep_fg, sep, .. }) = self.last_style_right {
+                    let sep: char = sep
+                        .unwrap_or(self.separator)
+                        .for_direction(Direction::Right);
+                    write!(self.left_buffer, "{}{}{}", sep_fg, sep, padding).unwrap();
+                    self.left_columns += 1;
+                }
+                self.last_style = None;
+            },
         }
+
+        self.last_padding = true;
 
         self
     }
