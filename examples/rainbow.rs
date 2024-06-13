@@ -93,7 +93,7 @@ fn main() {
     let mini_prompt = powerline::Powerline::new()
         .add_module(LastCmdDuration::<RainbowTheme>::new(
             duration,
-            Duration::milliseconds(50),
+            Duration::milliseconds(0),
         ))
         .add_module(Cmd::<RainbowTheme>::new(status.to_owned()))
         .render(columns);
