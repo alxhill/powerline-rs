@@ -1,10 +1,9 @@
-use powerline::{config, Powerline};
 use powerline::config::LineSegment::{Cmd, Cwd, Git, LastCmdDuration, PythonEnv};
 use powerline::config::{CommandLine, LineSegment, SeparatorStyle};
-use std::fs::File;
+use powerline::themes::{RainbowTheme, SimpleTheme};
+use powerline::{config, Powerline};
 use std::time::Duration;
 use LineSegment::{Padding, Separator};
-use powerline::themes::{RainbowTheme, SimpleTheme};
 
 fn main() {
     let conf = config::Config {
@@ -17,8 +16,8 @@ fn main() {
                         wanted_seg_num: 4,
                         resolve_symlinks: false,
                     },
-                    // Padding(2),
-                    // Separator(SeparatorStyle::Round),
+                    Padding(2),
+                    Separator(SeparatorStyle::Round),
                     Git,
                 ],
                 right: Some(vec![PythonEnv]),
@@ -44,12 +43,8 @@ fn main() {
     let cmd_line = &conf.rows[0];
 
     let powerline = match conf.theme.to_lowercase().as_str() {
-        "rainbow" => {
-            Powerline::from_conf::<RainbowTheme>(cmd_line)
-        }
-        "simple" => {
-            Powerline::from_conf::<SimpleTheme>(cmd_line)
-        }
+        "rainbow" => Powerline::from_conf::<RainbowTheme>(cmd_line),
+        "simple" => Powerline::from_conf::<SimpleTheme>(cmd_line),
         _ => panic!("Unknown theme"),
     };
 

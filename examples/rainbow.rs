@@ -1,6 +1,6 @@
 use powerline::modules::*;
 use powerline::powerline::Separator;
-use powerline::powerline::{PowerlineRightBuilder, PowerlineLeftBuilder};
+use powerline::powerline::{PowerlineLeftBuilder, PowerlineRightBuilder};
 use powerline::themes::RainbowTheme;
 use std::env;
 use std::time::Duration;
@@ -34,7 +34,8 @@ fn main() {
 
     let mini_prompt = powerline::Powerline::builder()
         .add_module(LastCmdDuration::<RainbowTheme>::new(
-            duration, Duration::from_millis(0),
+            duration,
+            Duration::from_millis(0),
         ))
         .add_module(Cmd::<RainbowTheme>::new(status.to_owned()))
         .render(columns);

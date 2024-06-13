@@ -1,6 +1,9 @@
-use crate::modules::{CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme, LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme};
-use crate::{colors, Color};
+use crate::modules::{
+    CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme, LastCmdDurationScheme,
+    PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
+};
 use crate::themes::CompleteTheme;
+use crate::{colors, Color};
 
 #[derive(Copy, Clone)]
 pub struct SimpleTheme;

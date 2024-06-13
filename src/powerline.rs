@@ -1,10 +1,12 @@
 use crate::config;
-use crate::config::{Config, LineSegment, SeparatorStyle};
+use crate::config::{LineSegment, SeparatorStyle};
 use std::fmt;
 use std::fmt::{Display, Write};
 use std::time::Duration;
 
-use crate::modules::{Cwd, Module, Spacer, LastCmdDuration, PythonEnv, Cmd, Git};
+use crate::modules::{
+    Cmd, Cwd, Git, Host, LastCmdDuration, Module, PythonEnv, ReadOnly, Spacer, User,
+};
 use crate::terminal::*;
 use crate::themes::CompleteTheme;
 
@@ -66,7 +68,7 @@ impl From<&SeparatorStyle> for Separator {
     fn from(style: &SeparatorStyle) -> Self {
         match style {
             SeparatorStyle::Chevron => Separator::Chevron,
-            SeparatorStyle::Round => Separator::Round
+            SeparatorStyle::Round => Separator::Round,
         }
     }
 }
@@ -273,21 +275,28 @@ impl Powerline {
     fn add_conf_modules<T: CompleteTheme>(&mut self, modules: &Vec<LineSegment>) {
         for module in modules {
             match module {
-                LineSegment::SmallSpacer => Spacer::<T>::small().append_segments(self),
-                LineSegment::LargeSpacer => Spacer::<T>::large().append_segments(self),
-                LineSegment::LastCmdDuration { min_run_time } => LastCmdDuration::<T>::new(
-                    Duration::from_secs(1),
-                    min_run_time.clone(),
-                ).append_segments(self),
+                LineSegment::SmallSpacer => self.add_module(Spacer::<T>::small()),
+                LineSegment::LargeSpacer => self.add_module(Spacer::<T>::large()),
+                LineSegment::PythonEnv => self.add_module(PythonEnv::<T>::new()),
+                LineSegment::Cmd => self.add_module(Cmd::<T>::new("0".into())),
+                LineSegment::Git => self.add_module(Git::<T>::new()),
+                LineSegment::Separator(style) => self.set_separator(style.into()),
+                LineSegment::ReadOnly => self.add_module(ReadOnly::<T>::new()),
+                LineSegment::Host => self.add_module(Host::<T>::new()),
+                LineSegment::User => self.add_module(User::<T>::new()),
+                LineSegment::Padding(size) => self.add_padding(*size),
+                LineSegment::LastCmdDuration { min_run_time } => self.add_module(
+                    LastCmdDuration::<T>::new(Duration::from_secs(1), *min_run_time),
+                ),
                 LineSegment::Cwd {
                     max_length,
                     wanted_seg_num,
                     resolve_symlinks,
-                } => Cwd::<T>::new(*max_length, *wanted_seg_num, *resolve_symlinks).append_segments(self),
-                LineSegment::PythonEnv => PythonEnv::<T>::new().append_segments(self),
-                LineSegment::Cmd => Cmd::<T>::new("0".into()).append_segments(self),
-                LineSegment::Git => Git::<T>::new().append_segments(self),
-                _ => todo!(),
+                } => self.add_module(Cwd::<T>::new(
+                    *max_length,
+                    *wanted_seg_num,
+                    *resolve_symlinks,
+                )),
             };
         }
     }
@@ -313,7 +322,7 @@ impl Powerline {
                         "{}{}{}{}{}",
                         Reset, sep_fg, sep, Reset, padding
                     )
-                        .unwrap();
+                    .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();

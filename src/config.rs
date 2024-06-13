@@ -38,7 +38,7 @@ pub enum LineSegment {
         #[serde(deserialize_with = "deserialize_duration")]
         min_run_time: Duration,
     },
-    Padding(u16),
+    Padding(usize),
 }
 
 #[derive(Debug, Serialize, Deserialize)]

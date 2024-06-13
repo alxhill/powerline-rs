@@ -1,12 +1,14 @@
 extern crate powerline;
 
+use powerline::powerline::PowerlineRightBuilder;
+
 use powerline::modules::Time;
 use powerline::modules::*;
 use powerline::themes::SimpleTheme;
 use std::env::args;
 
 fn main() {
-    let prompt = powerline::Powerline::new()
+    let prompt = powerline::Powerline::builder()
         .add_module(Time::<SimpleTheme>::with_time_format("%H:%M:%S"))
         .add_module(User::<SimpleTheme>::new())
         .add_module(Host::<SimpleTheme>::new())
