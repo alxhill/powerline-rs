@@ -41,8 +41,9 @@ pub trait GitScheme {
     const GIT_REPO_DIRTY_FG: Color;
 
     const NOT_STAGED_SYMBOL: &'static str = PENCIL;
-    const STAGED_SYMBOL: &'static str = TICK; // plus
+    const STAGED_SYMBOL: &'static str = TICK;
     const UNTRACKED_SYMBOL: &'static str = QUESTION_MARK;
+    const CONFLICTED_SYMBOL: &'static str = FANCY_STAR;
 }
 
 impl<S: GitScheme> Default for Git<S> {
@@ -146,7 +147,7 @@ impl<S: GitScheme> Module for Git<S> {
         );
         add_elem(
             stats.untracked,
-            QUESTION_MARK,
+            S::UNTRACKED_SYMBOL,
             S::GIT_UNTRACKED_FG,
             S::GIT_UNTRACKED_BG,
         );
@@ -158,7 +159,7 @@ impl<S: GitScheme> Module for Git<S> {
         );
         add_elem(
             stats.conflicted,
-            FANCY_STAR,
+            S::CONFLICTED_SYMBOL,
             S::GIT_CONFLICTED_FG,
             S::GIT_CONFLICTED_BG,
         );

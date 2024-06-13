@@ -1,4 +1,4 @@
-use std::fmt::{self, Display, Write};
+use std::fmt::{Display, Write};
 
 use crate::modules::Module;
 use crate::terminal::*;
@@ -137,10 +137,9 @@ impl Powerline {
             write!(self.left_buffer, "{}", seg)
         };
 
-        // attempt to account for symbols in the segment
-        for char in self.left_buffer[orig_len..].chars() {
-            self.left_columns += char.len_utf8()
-        }
+        // attempt to account for symbols in the segment by assuming all chars
+        // printed are of length 1
+        self.left_columns += self.left_buffer[orig_len..].chars().count();
 
         self.last_style = Some(style)
     }
@@ -149,16 +148,22 @@ impl Powerline {
         let sep: char = style.sep.unwrap_or(self.separator).into();
         // write the separator directly onto the current background
         let _ = write!(self.right_buffer, "{}{}{}", style.sep_fg, sep, style.bg);
+        self.right_columns += 1;
 
         if self.last_style_right.as_ref().map(|s| s.sep_fg) != Some(style.fg) {
             let _ = write!(self.right_buffer, "{}", style.fg);
         }
 
+        let orig_len = self.right_buffer.len();
         let _ = if spaces {
             write!(self.right_buffer, " {} ", seg)
         } else {
             write!(self.right_buffer, "{}", seg)
         };
+
+        // attempt to account for symbols in the segment by assuming all chars
+        // printed are of length 1 (so multi-byte chars don't over-inflate the size)
+        self.right_columns += self.right_buffer[orig_len..].chars().count();
 
         self.last_style_right = Some(style)
     }
@@ -201,42 +206,35 @@ impl Powerline {
         self.last_style.as_mut()
     }
 
-    pub fn render(mut self, total_columns: usize) -> String {
+    pub fn render(self, total_columns: usize) -> String {
         let mut output = String::with_capacity(512);
-        self.right_columns = 5;
-        self.right_buffer = "12345".into();
+
+        // don't print any padding if there's no right prompt
+        if let Direction::Left = self.direction {
+            // to_right closes out the buffer
+            return self.to_right().left_buffer;
+        }
 
         // careful not to underflow
         let padding = total_columns
             .checked_sub(self.left_columns)
             .and_then(|cols| cols.checked_sub(self.right_columns))
+            .and_then(|cols| cols.checked_sub(1)) // extra padding for safety
             .unwrap_or(0);
 
-        println!(
-            "columns: {total_columns}, padding: {padding}, left: {} right: {}",
-            self.left_columns, self.right_columns
-        );
+        // println!(
+        //     "columns: {total_columns}, padding: {padding}, left: {} right: {}",
+        //     self.left_columns, self.right_columns
+        // );
 
         let padding = vec![" "; padding].join("");
 
         let _ = write!(
             output,
-            "{}{}{}",
-            self.left_buffer, padding, self.right_buffer
+            "{}{}{}{}",
+            self.left_buffer, padding, self.right_buffer, Reset
         );
 
         output
-    }
-}
-
-impl fmt::Display for Powerline {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.last_style {
-            Some(Style { sep_fg, sep, .. }) => {
-                let sep: char = sep.unwrap_or(self.separator).into();
-                write!(f, "{}{}{}{}{}", self.left_buffer, Reset, sep_fg, sep, Reset)
-            }
-            None => Ok(()),
-        }
     }
 }

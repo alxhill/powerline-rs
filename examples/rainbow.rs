@@ -38,8 +38,8 @@ impl GitScheme for RainbowTheme {
     const GIT_REPO_DIRTY_BG: Color = Color(202);
     const GIT_REPO_DIRTY_FG: Color = light_grey();
     const NOT_STAGED_SYMBOL: &'static str = "\u{f0deb}"; // pencil with +
-    const STAGED_SYMBOL: &'static str = "\u{f067}"; // plus
-    const UNTRACKED_SYMBOL: &'static str = "\u{f086f}"; // file with ?
+    const STAGED_SYMBOL: &'static str = "+"; // plus
+    const UNTRACKED_SYMBOL: &'static str = "?"; // file with ?
 }
 
 impl ReadOnlyScheme for RainbowTheme {
@@ -95,7 +95,8 @@ fn main() {
             duration,
             Duration::milliseconds(50),
         ))
-        .add_module(Cmd::<RainbowTheme>::new(status.to_owned()));
+        .add_module(Cmd::<RainbowTheme>::new(status.to_owned()))
+        .render(columns);
 
     println!("{}", top_prompt);
     print!("{} ", mini_prompt);
