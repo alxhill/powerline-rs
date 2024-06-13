@@ -45,7 +45,7 @@ fn nice_duration(dur: Duration) -> String {
     }
 
     if dur > Duration::seconds(1) {
-        return format!("{}s", dur.num_seconds())
+        return format!("{:.2}s", dur.num_milliseconds() as f32 / 1000f32)
     }
 
     if dur > Duration::milliseconds(1) {

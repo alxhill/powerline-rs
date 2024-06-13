@@ -3,6 +3,7 @@ use crate::powerline::Separator;
 use crate::{colors, Color, Powerline, Style};
 use std::marker::PhantomData;
 
+#[derive(Copy, Clone)]
 pub struct Spacer<S: SpacerScheme> {
     scheme: PhantomData<S>,
     separator: Separator,
