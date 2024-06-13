@@ -1,6 +1,6 @@
 use crate::modules::Module;
 use crate::{Color, Powerline, Style};
-use chrono::Duration;
+use std::time::Duration;
 use std::marker::PhantomData;
 
 pub struct LastCmdDuration<S> {
@@ -37,17 +37,17 @@ impl<S: LastCmdDurationScheme> Module for LastCmdDuration<S> {
 }
 
 fn nice_duration(dur: Duration) -> String {
-    if dur > Duration::minutes(1) {
-        return format!("{}m{}s", dur.num_minutes(), dur.num_seconds());
+    if dur > Duration::from_secs(60) {
+        return format!("{}m{}s", dur.as_secs() / 60, dur.as_secs() % 60);
     }
 
-    if dur > Duration::seconds(1) {
-        return format!("{:.2}s", dur.num_milliseconds() as f32 / 1000f32);
+    if dur > Duration::from_secs(1) {
+        return format!("{:.2}s", dur.as_millis() as f32 / 1000f32);
     }
 
-    if dur > Duration::milliseconds(1) {
-        return format!("{}ms", dur.num_milliseconds());
+    if dur > Duration::from_millis(1) {
+        return format!("{}ms", dur.as_millis());
     }
 
-    format!("{}µs", dur.num_microseconds().unwrap_or(0))
+    format!("{}µs", dur.as_millis())
 }

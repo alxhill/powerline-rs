@@ -1,8 +1,12 @@
+use crate::config;
+use crate::config::{Config, LineSegment, SeparatorStyle};
 use std::fmt;
 use std::fmt::{Display, Write};
+use std::time::Duration;
 
-use crate::modules::Module;
+use crate::modules::{Cwd, Module, Spacer, LastCmdDuration, PythonEnv, Cmd, Git};
 use crate::terminal::*;
+use crate::themes::CompleteTheme;
 
 #[derive(Clone)]
 pub struct Style {
@@ -58,6 +62,15 @@ impl Separator {
     }
 }
 
+impl From<&SeparatorStyle> for Separator {
+    fn from(style: &SeparatorStyle) -> Self {
+        match style {
+            SeparatorStyle::Chevron => Separator::Chevron,
+            SeparatorStyle::Round => Separator::Round
+        }
+    }
+}
+
 pub struct Powerline {
     left_buffer: String,
     left_columns: usize, // counting only visible characters...hopefully
@@ -89,6 +102,19 @@ impl Powerline {
             direction: Direction::Left,
             last_padding: false,
         }
+    }
+
+    pub fn from_conf<T: CompleteTheme>(conf: &config::CommandLine) -> Self {
+        let mut powerline = Powerline::new();
+        powerline.add_conf_modules::<T>(&conf.left);
+
+        if let Some(right_modules) = &conf.right {
+            let mut powerline = powerline.to_right();
+            powerline.add_conf_modules::<T>(right_modules);
+            return powerline;
+        }
+
+        powerline
     }
 
     pub fn set_separator(mut self, separator: Separator) -> Self {
@@ -198,7 +224,29 @@ impl Powerline {
         self
     }
 
-    pub fn add_padding(mut self, len: usize, bg: Option<Color>) -> Self {
+    fn add_conf_modules<T: CompleteTheme>(&mut self, modules: &Vec<LineSegment>) {
+        for module in modules {
+            match module {
+                LineSegment::SmallSpacer => Spacer::<T>::small().append_segments(self),
+                LineSegment::LargeSpacer => Spacer::<T>::large().append_segments(self),
+                LineSegment::LastCmdDuration { min_run_time } => LastCmdDuration::<T>::new(
+                    Duration::from_secs(1),
+                    min_run_time.clone(),
+                ).append_segments(self),
+                LineSegment::Cwd {
+                    max_length,
+                    wanted_seg_num,
+                    resolve_symlinks,
+                } => Cwd::<T>::new(*max_length, *wanted_seg_num, *resolve_symlinks).append_segments(self),
+                LineSegment::PythonEnv => PythonEnv::<T>::new().append_segments(self),
+                LineSegment::Cmd => Cmd::<T>::new("0".into()).append_segments(self),
+                LineSegment::Git => Git::<T>::new().append_segments(self),
+                _ => todo!(),
+            };
+        }
+    }
+
+    pub fn add_padding(mut self, len: usize) -> Self {
         let padding = vec![" "; len].join("");
         match self.direction {
             Direction::Left => {
@@ -206,12 +254,7 @@ impl Powerline {
                 // to handle adding the alternate separator
                 self.close_left_buffer();
                 self.left_columns += len;
-                match bg {
-                    Some(color) => {
-                        write!(self.left_buffer, "{}{}", BgColor::from(color), padding).unwrap()
-                    }
-                    None => write!(self.left_buffer, "{}{}", Reset, padding).unwrap(),
-                }
+                let _ = write!(self.left_buffer, "{}{}", Reset, padding);
             }
             Direction::Right => {
                 // close out the current blob and write the padding
@@ -224,7 +267,7 @@ impl Powerline {
                         "{}{}{}{}{}",
                         Reset, sep_fg, sep, Reset, padding
                     )
-                    .unwrap();
+                        .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();

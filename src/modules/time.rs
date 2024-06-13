@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use chrono;
+use std::time::Instant;
 
 use super::Module;
 use crate::{Color, Powerline, Style};
@@ -39,8 +39,8 @@ impl<S: TimeScheme> Time<S> {
 
 impl<S: TimeScheme> Module for Time<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        let now = chrono::offset::Local::now().format(self.time_format);
-
-        powerline.add_segment(now, Style::simple(S::TIME_FG, S::TIME_BG));
+        // todo: bring back proper formatting for time
+        let now = Instant::now();
+        powerline.add_segment(format!("{:?}", now), Style::simple(S::TIME_FG, S::TIME_BG));
     }
 }

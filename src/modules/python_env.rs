@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::{File};
+use std::fs::File;
 use std::io::read_to_string;
 use std::marker::PhantomData;
 use std::path::Path;

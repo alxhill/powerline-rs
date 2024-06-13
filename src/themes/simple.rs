@@ -1,8 +1,25 @@
-use crate::{Color, colors};
-use crate::modules::{CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme, ReadOnlyScheme, TimeScheme, UserScheme};
+use crate::modules::{CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme, LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme};
+use crate::{colors, Color};
+use crate::themes::CompleteTheme;
 
 #[derive(Copy, Clone)]
 pub struct SimpleTheme;
+
+impl CompleteTheme for SimpleTheme {}
+
+impl LastCmdDurationScheme for SimpleTheme {
+    const TIME_BG: Color = Color(0);
+    const TIME_FG: Color = Color(0);
+}
+
+impl PythonEnvScheme for SimpleTheme {
+    const PYVENV_FG: Color = Color(0);
+    const PYVENV_BG: Color = Color(0);
+    const PYVER_FG: Color = Color(0);
+    const PYVER_BG: Color = Color(0);
+}
+
+impl SpacerScheme for SimpleTheme {}
 
 impl CmdScheme for SimpleTheme {
     const CMD_PASSED_FG: Color = Color(15);

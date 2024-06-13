@@ -10,7 +10,7 @@ fn main() {
         .add_module(Time::<SimpleTheme>::with_time_format("%H:%M:%S"))
         .add_module(User::<SimpleTheme>::new())
         .add_module(Host::<SimpleTheme>::new())
-        .add_module(Cwd::<1, SimpleTheme>::new(45, 4, false))
+        .add_module(Cwd::<SimpleTheme>::new(45, 4, false))
         .add_module(Git::<SimpleTheme>::new())
         .add_module(ReadOnly::<SimpleTheme>::new())
         .add_module(Cmd::<SimpleTheme>::new(args().nth(1).unwrap_or("0".into())))

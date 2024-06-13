@@ -1,9 +1,17 @@
-use crate::Color;
 use crate::colors::*;
-use crate::modules::{CmdScheme, CwdScheme, GitScheme, LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme};
+use crate::modules::{CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme};
+use crate::Color;
+use crate::themes::CompleteTheme;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
+
+impl CompleteTheme for RainbowTheme {}
+
+impl ExitCodeScheme for RainbowTheme {
+    const EXIT_CODE_BG: Color = red();
+    const EXIT_CODE_FG: Color = white();
+}
 
 impl CmdScheme for RainbowTheme {
     const CMD_PASSED_FG: Color = green();
@@ -15,14 +23,7 @@ impl CmdScheme for RainbowTheme {
 
 impl CwdScheme for RainbowTheme {
     fn path_bg_colors() -> Vec<Color> {
-        vec![
-            red(),
-            orange(),
-            yellow(),
-            green(),
-            blue(),
-            nice_puple(),
-        ]
+        vec![red(), orange(), yellow(), green(), blue(), nice_puple()]
     }
 }
 

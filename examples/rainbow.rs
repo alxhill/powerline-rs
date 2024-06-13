@@ -21,14 +21,14 @@ fn main() {
     let top_prompt = powerline::Powerline::new()
         .set_separator(Separator::Chevron)
         .add_module(Spacer::<RainbowTheme>::small())
-        .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
+        .add_module(Cwd::<RainbowTheme>::new(60, 5, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Git::<RainbowTheme>::new())
         .to_right()
         .set_separator(Separator::Round)
         .add_module(PythonEnv::<RainbowTheme>::new())
-        .add_padding(0, None)
+        .add_padding(0)
         .render(columns);
 
     let mini_prompt = powerline::Powerline::new()
