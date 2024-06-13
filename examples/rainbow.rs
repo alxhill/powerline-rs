@@ -47,10 +47,10 @@ impl ReadOnlyScheme for RainbowTheme {
 
 impl PythonEnvScheme for RainbowTheme {
     const SEPARATOR: Separator = Separator::ChevronLeft;
-    const PYVENV_FG: Color = Color(0);
-    const PYVENV_BG: Color = Color(42);
+    const PYVENV_FG: Color = dark_grey();
+    const PYVENV_BG: Color = light_green();
     const PYVER_FG: Color = dark_grey();
-    const PYVER_BG: Color = light_green();
+    const PYVER_BG: Color = mid_green();
 }
 
 impl SpacerScheme for RainbowTheme {}

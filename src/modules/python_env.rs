@@ -57,8 +57,8 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
                 })
                 .unwrap_or("".into());
 
-            powerline.add_segment(
-                format!("🐍 {}", venv_name),
+            powerline.add_short_segment(
+                format!("\u{e73c} {} ", venv_name),
                 Style::simple(S::PYVENV_FG, S::PYVENV_BG),
             );
             powerline.add_segment(

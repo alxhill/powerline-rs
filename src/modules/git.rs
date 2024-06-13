@@ -160,7 +160,16 @@ impl<S: GitScheme> Module for Git<S> {
         );
 
         if stats.remote {
-            let mut remote: String = format!("{} ", GITHUB_LOGO);
+            let logo_padding = if stats.ahead > 0 || stats.behind > 0 {
+                " "
+            } else {
+                ""
+            };
+            let mut remote: String = format!(
+                "{}{}",
+                GITHUB_LOGO,
+                logo_padding
+            );
 
             if stats.ahead > 0 {
                 let _ = write!(remote, "{}{} ", stats.ahead, UP_ARROW);
