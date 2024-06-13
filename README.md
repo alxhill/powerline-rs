@@ -104,7 +104,6 @@ setup the prompt for your chosen shell.
 ```bash
 function _update_ps1() {
     PS1="$(powerline -s $? -c $COLUMNS $HOME/.config/powerline.json)"
-    
 }
 
 if [ "$TERM" != "linux" ]; then
@@ -120,7 +119,7 @@ You must also compile with `zsh-shell` feature.
 
 ```zsh
 _update_ps1() {
-    PS1="$(powerline $?)"
+    PS1="$(powerline -s $? -c $COLUMNS $HOME/.config/powerline.json)" 
 }
 precmd_functions+=(_update_ps1)
 ```
