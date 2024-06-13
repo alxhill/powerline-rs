@@ -67,8 +67,9 @@ impl PythonEnvScheme for RainbowTheme {
 impl SpacerScheme for RainbowTheme {}
 
 impl LastCmdDurationScheme for RainbowTheme {
-    const TIME_BG: Color = Color(202);
-    const TIME_FG: Color = colors::light_grey();
+    const TIME_BG: Color = colors::black();
+    const TIME_FG: Color = colors::green();
+    const TIME_ICON: &'static str = "";
 }
 
 fn main() {
