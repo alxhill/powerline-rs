@@ -97,7 +97,7 @@ fn left_prompt() {
     top_prompt.add_module(Git::<RainbowTheme>::new());
 
     let mut mini_prompt = powerline::Powerline::new();
-    mini_prompt.add_module(LastCmdDuration::<RainbowTheme>::new(Duration::seconds(1)));
+    mini_prompt.add_module(LastCmdDuration::<RainbowTheme>::new(Duration::milliseconds(50)));
     mini_prompt.add_module(Cmd::<RainbowTheme>::new());
 
     println!("{}", top_prompt);

@@ -32,7 +32,7 @@ impl<S: LastCmdDurationScheme> Module for LastCmdDuration<S> {
             if let Ok(duration) = str::parse::<i64>(&duration) {
                 let cmd_duration = Duration::milliseconds(duration);
                 if cmd_duration > self.min_display_time {
-                    powerline.add_segment(format!("{}{}", cmd_duration, S::TIME_ICON), Style::custom(S::TIME_FG, S::TIME_BG, Separator::RoundRight));
+                    powerline.add_short_segment(format!(" {}{}", nice_duration(cmd_duration), S::TIME_ICON), Style::custom(S::TIME_FG, S::TIME_BG, Separator::RoundRight));
                 }
             }
         }
