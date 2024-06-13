@@ -1,5 +1,9 @@
+_Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and adjusted for personal taste_
+
 # powerline-rust
-[![Build Status](https://travis-ci.org/cirho/powerline-rust.svg)](https://travis-ci.org/cirho/powerline-rust)
+
+![Header shell image](main.png)
+![Shell with pyenv showing](with_pyenv.png)
 
 powerline-rust is an alternative to [powerline-shell](https://github.com/b-ryan/powerline-shell). It's heavily inspired by it, but focuses on **minimalizing time of execution**.
 
