@@ -184,15 +184,7 @@ impl Powerline {
 
     pub fn to_right(mut self) -> Self {
         assert_eq!(self.direction, Direction::Left);
-
-        // close out the left buffer with the right separator
-        if let Some(Style { sep_fg, sep, .. }) = self.last_style {
-            let sep: char = sep.unwrap_or(self.separator).into();
-            write!(self.left_buffer, "{}{}{}{}", Reset, sep_fg, sep, Reset).unwrap();
-            self.left_columns += 1;
-        }
-        self.last_style = None;
-
+        self.close_left_buffer();
         self.direction = Direction::Right;
         self
     }
@@ -202,17 +194,35 @@ impl Powerline {
         self
     }
 
+    pub fn add_padding(mut self, len: usize, bg: Option<Color>) -> Self {
+        let padding = vec![" "; len].join("");
+        self.left_columns += len;
+        match self.direction {
+            Direction::Left => {
+                self.close_left_buffer();
+                match bg {
+                    Some(color) => write!(self.left_buffer, "{}{}", BgColor::from(color), padding).unwrap(),
+                    None => write!(self.left_buffer, "{}{}", Reset, padding).unwrap(),
+                }
+            }
+            Direction::Right => todo!(),
+        }
+
+        self
+    }
+
     pub fn last_style_mut(&mut self) -> Option<&mut Style> {
         self.last_style.as_mut()
     }
 
-    pub fn render(self, total_columns: usize) -> String {
+    pub fn render(mut self, total_columns: usize) -> String {
         let mut output = String::with_capacity(512);
 
         // don't print any padding if there's no right prompt
         if let Direction::Left = self.direction {
             // to_right closes out the buffer
-            return self.to_right().left_buffer;
+            self.close_left_buffer();
+            return self.left_buffer;
         }
 
         // careful not to underflow
@@ -236,5 +246,15 @@ impl Powerline {
         );
 
         output
+    }
+
+    fn close_left_buffer(&mut self) {
+        // close out the left buffer with the right separator
+        if let Some(Style { sep_fg, sep, .. }) = self.last_style {
+            let sep: char = sep.unwrap_or(self.separator).into();
+            write!(self.left_buffer, "{}{}{}{}", Reset, sep_fg, sep, Reset).unwrap();
+            self.left_columns += 1;
+        }
+        self.last_style = None;
     }
 }

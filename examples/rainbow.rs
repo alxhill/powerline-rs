@@ -80,7 +80,7 @@ fn main() {
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
-        .add_module(Spacer::<RainbowTheme>::large())
+        .add_padding(5, None)
         .set_separator(Separator::RoundRight)
         .add_module(Git::<RainbowTheme>::new())
         .to_right()
