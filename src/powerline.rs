@@ -40,6 +40,7 @@ impl Style {
     }
 }
 
+#[derive(Debug, Copy)]
 pub enum Separator {
     ChevronRight,
     ChevronLeft,

@@ -46,9 +46,9 @@ impl<S: SpacerScheme> Spacer<S> {
 impl<S: SpacerScheme> Module for Spacer<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         if self.large {
-            powerline.add_segment("", Style::simple(colors::light_grey(), S::BG_COLOR));
+            powerline.add_segment("", Style::custom(colors::light_grey(), S::BG_COLOR, self.separator));
         } else {
-            powerline.add_short_segment("", Style::simple(colors::light_grey(), S::BG_COLOR));
+            powerline.add_short_segment("", Style::custom(colors::light_grey(), S::BG_COLOR, self.separator));
         }
     }
 }
