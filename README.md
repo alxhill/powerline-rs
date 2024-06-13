@@ -3,10 +3,12 @@ _Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and
 # powerline-rust
 
 ![Header shell image](main.png)
-The 'rainbow' theme in a git repo.
+
+> The 'rainbow' theme in a git repo.
 
 ![Shell with pyenv showing](with_pyenv.png)
-The 'rainbow' theme with a conda environment active.
+
+> The 'rainbow' theme with a conda environment active.
 
 powerline-rust is an alternative to [powerline-shell](https://github.com/b-ryan/powerline-shell). It's heavily inspired by it, but focuses on **minimalizing time of execution**.
 
@@ -128,3 +130,11 @@ fn main() {
 
 ...
 ```
+TODO:
+
+- Change git icon/name based on branch vs commit vs merging
+- Add java / gradle / jenv / sdkman support
+- Add cargo / rust support (not sure what this should actually show tho)
+- Better multiline prompts (e.g lines between)
+- Improve spacing / centering support
+- Calculate column width more accurately
