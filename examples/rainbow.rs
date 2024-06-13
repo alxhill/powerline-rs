@@ -40,6 +40,7 @@ impl GitScheme for RainbowTheme {
 impl ReadOnlyScheme for RainbowTheme {
     const READONLY_FG: Color = Color(254);
     const READONLY_BG: Color = Color(124);
+    const READONLY_SYMBOL: &'static str = "\u{f0221}";
 }
 
 impl PythonEnvScheme for RainbowTheme {

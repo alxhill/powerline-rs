@@ -7,7 +7,6 @@ mod git;
 mod host;
 mod readonly;
 mod user;
-mod venv;
 
 mod duration;
 mod python_env;
@@ -25,7 +24,6 @@ pub use readonly::{ReadOnly, ReadOnlyScheme};
 pub use spacer::{Spacer, SpacerScheme};
 pub use time::{Time, TimeScheme};
 pub use user::{User, UserScheme};
-pub use venv::{VirtualEnv, VirtualEnvScheme};
 
 pub trait Module {
     fn append_segments(&mut self, powerline: &mut Powerline);

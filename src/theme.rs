@@ -55,8 +55,3 @@ impl GitScheme for SimpleTheme {
     const GIT_REPO_DIRTY_BG: Color = Color(161);
     const GIT_REPO_DIRTY_FG: Color = Color(15);
 }
-
-impl VirtualEnvScheme for SimpleTheme {
-    const PYVENV_FG: Color = Color(0);
-    const PYVENV_BG: Color = Color(42);
-}
