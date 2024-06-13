@@ -21,7 +21,7 @@ fn main() {
     let top_prompt = powerline::Powerline::new()
         .set_separator(Separator::Chevron)
         .add_module(Spacer::<RainbowTheme>::small())
-        .add_module(Cwd::<6, RainbowTheme>::new(45, 4, false))
+        .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Git::<RainbowTheme>::new())

@@ -5,20 +5,21 @@ use super::Module;
 use crate::colors::white;
 use crate::{Color, Powerline, Style};
 
-pub struct Cwd<const N: usize, S: CwdScheme<N>> {
+pub struct Cwd<S: CwdScheme> {
     max_length: usize,
     wanted_seg_num: usize,
     resolve_symlinks: bool,
     scheme: PhantomData<S>,
 }
 
-pub trait CwdScheme<const N: usize> {
+pub trait CwdScheme {
     const PATH_FG: Color = white();
-    const PATH_BG_COLORS: [Color; N];
+
+    fn path_bg_colors() -> Vec<Color>;
 }
 
-impl<const N: usize, S: CwdScheme<N>> Cwd<N, S> {
-    pub fn new(max_length: usize, wanted_seg_num: usize, resolve_symlinks: bool) -> Cwd<N, S> {
+impl<S: CwdScheme> Cwd<S> {
+    pub fn new(max_length: usize, wanted_seg_num: usize, resolve_symlinks: bool) -> Cwd<S> {
         Cwd {
             max_length,
             wanted_seg_num,
@@ -30,13 +31,13 @@ impl<const N: usize, S: CwdScheme<N>> Cwd<N, S> {
 
 macro_rules! rainbow_segment {
     ($powerline:ident, $iter_var:ident, $value:expr) => {
-        let r_col = S::PATH_BG_COLORS[$iter_var % S::PATH_BG_COLORS.len()];
+        let r_col = S::path_bg_colors()[$iter_var % S::path_bg_colors().len()];
         $powerline.add_short_segment(format!(" {}", $value), Style::simple(S::PATH_FG, r_col));
         $iter_var = $iter_var.wrapping_add(1);
     };
 }
 
-impl<const N: usize, S: CwdScheme<N>> Module for Cwd<N, S> {
+impl<S: CwdScheme> Module for Cwd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         let current_dir = if self.resolve_symlinks {
             env::current_dir().unwrap()

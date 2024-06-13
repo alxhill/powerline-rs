@@ -13,15 +13,17 @@ impl CmdScheme for RainbowTheme {
     const CMD_USER_SYMBOL: &'static str = "\u{f105}";
 }
 
-impl CwdScheme<6> for RainbowTheme {
-    const PATH_BG_COLORS: [Color; 6] = [
-        red(),
-        orange(),
-        yellow(),
-        green(),
-        blue(),
-        nice_puple(),
-    ];
+impl CwdScheme for RainbowTheme {
+    fn path_bg_colors() -> Vec<Color> {
+        vec![
+            red(),
+            orange(),
+            yellow(),
+            green(),
+            blue(),
+            nice_puple(),
+        ]
+    }
 }
 
 impl GitScheme for RainbowTheme {

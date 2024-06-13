@@ -11,10 +11,10 @@ impl CmdScheme for SimpleTheme {
     const CMD_FAILED_FG: Color = Color(15);
 }
 
-impl CwdScheme<1> for SimpleTheme {
-    const PATH_BG_COLORS: [Color; 1] = [
-        colors::grey()
-    ];
+impl CwdScheme for SimpleTheme {
+    fn path_bg_colors() -> Vec<Color> {
+        vec![colors::grey()]
+    }
 }
 
 impl ExitCodeScheme for SimpleTheme {
