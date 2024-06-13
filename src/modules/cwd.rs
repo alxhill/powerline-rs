@@ -2,7 +2,6 @@ use std::marker::PhantomData;
 use std::{env, path};
 
 use super::Module;
-use crate::powerline::Separator;
 use crate::{colors, Color, Powerline, Style};
 
 pub struct Cwd<S: CwdScheme> {
@@ -91,10 +90,5 @@ impl<S: CwdScheme> Module for Cwd<S> {
                 rainbow_segment!(powerline, current_bg, val);
             }
         };
-
-        if let Some(style) = powerline.last_style_mut() {
-            style.sep = Some(Separator::ChevronRight);
-            style.sep_fg = style.bg.transpose();
-        }
     }
 }

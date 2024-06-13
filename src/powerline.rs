@@ -33,14 +33,9 @@ impl Style {
 
 #[derive(Debug, Copy, Clone)]
 pub enum Separator {
-    ChevronRight,
-    ChevronLeft,
-    RoundRight,
-    RoundLeft,
-    AngleLineRight,
-    AngleLineLeft,
-    ShortAngleBracketRight,
-    ZeroWidthSpace,
+    Chevron,
+    Round,
+    AngleLine,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -49,32 +44,15 @@ enum Direction {
     Right,
 }
 
-// impl Separator {
-//     fn direction(&self) -> Direction {
-//         match self {
-//             Separator::ChevronRight
-//             | Separator::RoundRight
-//             | Separator::AngleLineRight
-//             | Separator::ShortAngleBracketRight => Direction::Right,
-//             Separator::ChevronLeft | Separator::RoundLeft | Separator::AngleLineLeft => {
-//                 Direction::Left
-//             }
-//             Separator::ZeroWidthSpace => Direction::None,
-//         }
-//     }
-// }
-
-impl From<Separator> for char {
-    fn from(value: Separator) -> Self {
-        match value {
-            Separator::ChevronRight => '\u{e0b0}',
-            Separator::ChevronLeft => '\u{e0b2}',
-            Separator::RoundRight => '\u{e0b4}',
-            Separator::RoundLeft => '\u{e0b6}',
-            Separator::AngleLineRight => '\u{e0b1}',
-            Separator::AngleLineLeft => '\u{e0b3}',
-            Separator::ShortAngleBracketRight => '\u{276D}',
-            Separator::ZeroWidthSpace => '\u{200B}',
+impl Separator {
+    fn for_direction(&self, direction: Direction) -> char {
+        match (self, direction) {
+            (Separator::Chevron, Direction::Right) => '\u{e0b0}',
+            (Separator::Chevron, Direction::Left) => '\u{e0b2}',
+            (Separator::Round, Direction::Right) => '\u{e0b4}',
+            (Separator::Round, Direction::Left) => '\u{e0b6}',
+            (Separator::AngleLine, Direction::Right) => '\u{e0b1}',
+            (Separator::AngleLine, Direction::Left) => '\u{e0b3}',
         }
     }
 }
@@ -105,7 +83,7 @@ impl Powerline {
             right_columns: 0,
             last_style: None,
             last_style_right: None,
-            separator: Separator::ChevronRight,
+            separator: Separator::Chevron,
             direction: Direction::Left,
         }
     }
@@ -119,7 +97,9 @@ impl Powerline {
     fn write_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) {
         // write the last style's separator on the new style's background
         let _ = if let Some(Style { sep_fg, sep, .. }) = self.last_style {
-            let sep: char = sep.unwrap_or(self.separator).into();
+            let sep: char = sep
+                .unwrap_or(self.separator)
+                .for_direction(Direction::Right);
             self.left_columns += 1;
             write!(self.left_buffer, "{}{}{}", style.bg, sep_fg, sep)
         } else {
@@ -145,7 +125,10 @@ impl Powerline {
     }
 
     fn write_segment_right<D: Display>(&mut self, seg: D, style: Style, spaces: bool) {
-        let sep: char = style.sep.unwrap_or(self.separator).into();
+        let sep: char = style
+            .sep
+            .unwrap_or(self.separator)
+            .for_direction(Direction::Left);
         // write the separator directly onto the current background
         let _ = write!(self.right_buffer, "{}{}{}", style.sep_fg, sep, style.bg);
         self.right_columns += 1;
@@ -201,7 +184,9 @@ impl Powerline {
             Direction::Left => {
                 self.close_left_buffer();
                 match bg {
-                    Some(color) => write!(self.left_buffer, "{}{}", BgColor::from(color), padding).unwrap(),
+                    Some(color) => {
+                        write!(self.left_buffer, "{}{}", BgColor::from(color), padding).unwrap()
+                    }
                     None => write!(self.left_buffer, "{}{}", Reset, padding).unwrap(),
                 }
             }
@@ -209,10 +194,6 @@ impl Powerline {
         }
 
         self
-    }
-
-    pub fn last_style_mut(&mut self) -> Option<&mut Style> {
-        self.last_style.as_mut()
     }
 
     pub fn render(mut self, total_columns: usize) -> String {
@@ -232,11 +213,6 @@ impl Powerline {
             .and_then(|cols| cols.checked_sub(1)) // extra padding for safety
             .unwrap_or(0);
 
-        // println!(
-        //     "columns: {total_columns}, padding: {padding}, left: {} right: {}",
-        //     self.left_columns, self.right_columns
-        // );
-
         let padding = vec![" "; padding].join("");
 
         let _ = write!(
@@ -251,7 +227,9 @@ impl Powerline {
     fn close_left_buffer(&mut self) {
         // close out the left buffer with the right separator
         if let Some(Style { sep_fg, sep, .. }) = self.last_style {
-            let sep: char = sep.unwrap_or(self.separator).into();
+            let sep: char = sep
+                .unwrap_or(self.separator)
+                .for_direction(Direction::Right);
             write!(self.left_buffer, "{}{}{}{}", Reset, sep_fg, sep, Reset).unwrap();
             self.left_columns += 1;
         }

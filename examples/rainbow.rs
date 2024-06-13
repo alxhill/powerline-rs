@@ -46,7 +46,6 @@ impl ReadOnlyScheme for RainbowTheme {
 }
 
 impl PythonEnvScheme for RainbowTheme {
-    const SEPARATOR: Separator = Separator::ChevronLeft;
     const PYVENV_FG: Color = dark_grey();
     const PYVENV_BG: Color = light_green();
     const PYVER_FG: Color = dark_grey();
@@ -76,15 +75,15 @@ fn main() {
         .unwrap_or(Duration::seconds(0));
 
     let top_prompt = powerline::Powerline::new()
-        .set_separator(Separator::ChevronRight)
+        .set_separator(Separator::Chevron)
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
         .add_padding(5, None)
-        .set_separator(Separator::RoundRight)
+        .set_separator(Separator::Round)
         .add_module(Git::<RainbowTheme>::new())
         .to_right()
-        .set_separator(Separator::RoundLeft)
+        .set_separator(Separator::Round)
         .add_module(PythonEnv::<RainbowTheme>::new())
         .render(columns);
 

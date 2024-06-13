@@ -4,7 +4,6 @@ use std::path::Path;
 use std::process::Command;
 
 use super::Module;
-use crate::powerline::Separator;
 use crate::{Color, Powerline, Style};
 
 pub struct PythonEnv<S: PythonEnvScheme> {
@@ -12,7 +11,6 @@ pub struct PythonEnv<S: PythonEnvScheme> {
 }
 
 pub trait PythonEnvScheme {
-    const SEPARATOR: Separator;
     const PYVENV_FG: Color;
     const PYVENV_BG: Color;
     const PYVER_FG: Color;
