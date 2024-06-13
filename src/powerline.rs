@@ -71,6 +71,50 @@ impl From<&SeparatorStyle> for Separator {
     }
 }
 
+pub struct PowerlineBuilder {
+    powerline: Powerline,
+}
+
+pub trait PowerlineRightBuilder {
+    fn add_module<M: Module>(self, module: M) -> Self;
+    fn change_separator(self, separator: Separator) -> Self;
+    fn add_padding(self, padding: usize) -> Self;
+
+    fn render(self, columns: usize) -> String;
+}
+
+pub trait PowerlineLeftBuilder: PowerlineRightBuilder {
+    fn start_right(self) -> impl PowerlineRightBuilder;
+}
+
+impl PowerlineRightBuilder for PowerlineBuilder {
+    fn add_module<M: Module>(mut self, module: M) -> Self {
+        self.powerline.add_module(module);
+        self
+    }
+
+    fn change_separator(mut self, separator: Separator) -> Self {
+        self.powerline.set_separator(separator);
+        self
+    }
+
+    fn add_padding(mut self, padding: usize) -> Self {
+        self.powerline.add_padding(padding);
+        self
+    }
+
+    fn render(self, columns: usize) -> String {
+        self.powerline.render(columns)
+    }
+}
+
+impl PowerlineLeftBuilder for PowerlineBuilder {
+    fn start_right(mut self) -> impl PowerlineRightBuilder {
+        self.powerline.start_right();
+        self
+    }
+}
+
 pub struct Powerline {
     left_buffer: String,
     left_columns: usize, // counting only visible characters...hopefully
@@ -104,22 +148,26 @@ impl Powerline {
         }
     }
 
+    pub fn builder() -> impl PowerlineLeftBuilder {
+        PowerlineBuilder {
+            powerline: Default::default(),
+        }
+    }
+
     pub fn from_conf<T: CompleteTheme>(conf: &config::CommandLine) -> Self {
         let mut powerline = Powerline::new();
         powerline.add_conf_modules::<T>(&conf.left);
 
         if let Some(right_modules) = &conf.right {
-            let mut powerline = powerline.to_right();
+            powerline.start_right();
             powerline.add_conf_modules::<T>(right_modules);
-            return powerline;
         }
 
         powerline
     }
 
-    pub fn set_separator(mut self, separator: Separator) -> Self {
+    pub fn set_separator(&mut self, separator: Separator) {
         self.separator = separator;
-        self
     }
 
     #[inline(always)]
@@ -212,16 +260,14 @@ impl Powerline {
         };
     }
 
-    pub fn to_right(mut self) -> Self {
+    pub fn start_right(&mut self) {
         assert_eq!(self.direction, Direction::Left);
         self.close_left_buffer();
         self.direction = Direction::Right;
-        self
     }
 
-    pub fn add_module<M: Module>(mut self, mut module: M) -> Self {
-        module.append_segments(&mut self);
-        self
+    pub fn add_module<M: Module>(&mut self, mut module: M) {
+        module.append_segments(self);
     }
 
     fn add_conf_modules<T: CompleteTheme>(&mut self, modules: &Vec<LineSegment>) {
@@ -246,7 +292,7 @@ impl Powerline {
         }
     }
 
-    pub fn add_padding(mut self, len: usize) -> Self {
+    pub fn add_padding(&mut self, len: usize) {
         let padding = vec![" "; len].join("");
         match self.direction {
             Direction::Left => {
@@ -278,8 +324,6 @@ impl Powerline {
         }
 
         self.last_padding = true;
-
-        self
     }
 
     pub fn render(mut self, total_columns: usize) -> String {

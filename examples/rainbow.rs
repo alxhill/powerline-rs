@@ -1,8 +1,9 @@
-use chrono::Duration;
 use powerline::modules::*;
 use powerline::powerline::Separator;
+use powerline::powerline::{PowerlineRightBuilder, PowerlineLeftBuilder};
 use powerline::themes::RainbowTheme;
 use std::env;
+use std::time::Duration;
 
 fn main() {
     let args = env::args().collect::<Vec<String>>();
@@ -14,27 +15,26 @@ fn main() {
     };
 
     let columns = str::parse::<usize>(columns).unwrap_or(0);
-    let duration = str::parse::<i64>(duration)
-        .map(Duration::milliseconds)
-        .unwrap_or(Duration::seconds(0));
+    let duration = str::parse::<u64>(duration)
+        .map(Duration::from_millis)
+        .unwrap_or(Duration::from_secs(0));
 
-    let top_prompt = powerline::Powerline::new()
-        .set_separator(Separator::Chevron)
+    let top_prompt = powerline::Powerline::builder()
+        .change_separator(Separator::Chevron)
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Cwd::<RainbowTheme>::new(60, 5, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Git::<RainbowTheme>::new())
-        .to_right()
-        .set_separator(Separator::Round)
+        .start_right()
+        .change_separator(Separator::Round)
         .add_module(PythonEnv::<RainbowTheme>::new())
         .add_padding(0)
         .render(columns);
 
-    let mini_prompt = powerline::Powerline::new()
+    let mini_prompt = powerline::Powerline::builder()
         .add_module(LastCmdDuration::<RainbowTheme>::new(
-            duration,
-            Duration::milliseconds(0),
+            duration, Duration::from_millis(0),
         ))
         .add_module(Cmd::<RainbowTheme>::new(status.to_owned()))
         .render(columns);
