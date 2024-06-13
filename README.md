@@ -18,14 +18,22 @@ if you want every last bit of a performance you can try disabling this feature a
 
 ## Advantages
 
-- blazing fast (less than 0.010s)
-- runs git backend only when needed (huge time improvements in directories not in git tree)
+- blazing fast (~15ms when reading from a config file, 9ms for a compiled binary)
+- runs backends only when needed (huge time improvements when not in a git repo or python venv)
 - optional caching git results in memory or file
 - supports fully compiled prompts (see `examples/rainbow.rs`) or can read from a provided config file.
 - new themes and modules can be added easily (currently only Rainbow and Simple are included)
 - supports multiline prompts as well as showing info on the right hand side of the terminal.
 
 ## Simple installation
+
+powerline-rust relies on using a [Nerd Font](https://www.nerdfonts.com/) - configure your shell to use a nerdfont,
+otherwise many of the characters will not render correctly.
+
+iTerm2 users are recommended to enable the "Use builtin Powerline glyphs" option even when using a nerdfont as this
+seems to fix any potential character alignment issues.
+
+![iTerm2 Profile configuration](iterm_config.png)
 
 ```bash
 git clone https://github.com/cirho/powerline-rust
@@ -40,15 +48,25 @@ cargo install --path . --no-default-features --features=bare-shell,libgit
 
 You can also install one of examples by adding `--example {name}` to cargo command.
 
+### Create a config.json
+
+The config for the shell in the screenshot is:
+
+```json
+
+```
+
 ## Setting up shell
 
-#### Make sure you have executable in `$PATH`
+First, create a config.json file (see "config file" section below). Then, ensuring the `powerline` binary is in `$PATH`,
+setup the prompt for your chosen shell.
 
 ### bash
 
 ```bash
 function _update_ps1() {
-    PS1="$(powerline $?)"
+    PS1="$(powerline -s $? -c $COLUMNS $HOME/.config/powerline.json)"
+    
 }
 
 if [ "$TERM" != "linux" ]; then
@@ -78,6 +96,16 @@ end
 ```
 
 ## Custom shell prompt
+
+There are two ways to customize the prompt - writing a config.json file using the default `powerline` command, or
+writing a custom program.
+Custom programs allow creating new themes and modules, but require recompilation to make even minor changes.
+
+### Config file
+
+`config.rs` has the full definition of all valid types in the config directory.
+
+### Custom program
 
 Simply create new rust program that fulfils your requirements.
 
