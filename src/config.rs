@@ -2,6 +2,12 @@ use duration_str::deserialize_duration;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
+pub trait TerminalRuntimeMetadata {
+    fn total_columns(&self) -> usize;
+    fn last_command_duration(&self) -> Option<Duration>;
+    fn last_command_status(&self) -> &str;
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     pub theme: String,

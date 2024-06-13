@@ -18,9 +18,9 @@ pub trait CmdScheme {
 }
 
 impl<S: CmdScheme> Cmd<S> {
-    pub fn new(status: String) -> Cmd<S> {
+    pub fn new(status: &str) -> Cmd<S> {
         Cmd {
-            status,
+            status: status.into(),
             scheme: PhantomData,
         }
     }

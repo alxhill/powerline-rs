@@ -5,7 +5,7 @@ use std::time::Duration;
 
 pub struct LastCmdDuration<S> {
     min_display_time: Duration,
-    cmd_duration: Duration,
+    cmd_duration: Option<Duration>,
     scheme: PhantomData<S>,
 }
 
@@ -16,7 +16,7 @@ pub trait LastCmdDurationScheme {
 }
 
 impl<S: LastCmdDurationScheme> LastCmdDuration<S> {
-    pub fn new(cmd_duration: Duration, min_duration: Duration) -> LastCmdDuration<S> {
+    pub fn new(cmd_duration: Option<Duration>, min_duration: Duration) -> LastCmdDuration<S> {
         LastCmdDuration {
             min_display_time: min_duration,
             cmd_duration,
@@ -27,11 +27,13 @@ impl<S: LastCmdDurationScheme> LastCmdDuration<S> {
 
 impl<S: LastCmdDurationScheme> Module for LastCmdDuration<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        if self.cmd_duration > self.min_display_time {
-            powerline.add_short_segment(
-                format!(" {}{}", nice_duration(self.cmd_duration), S::TIME_ICON),
-                Style::simple(S::TIME_FG, S::TIME_BG),
-            );
+        if let Some(cmd_dur) = self.cmd_duration {
+            if cmd_dur > self.min_display_time {
+                powerline.add_short_segment(
+                    format!(" {}{}", nice_duration(cmd_dur), S::TIME_ICON),
+                    Style::simple(S::TIME_FG, S::TIME_BG),
+                );
+            }
         }
     }
 }
