@@ -13,6 +13,10 @@ pub trait JenvScheme {
 
 impl<S: JenvScheme> Module for Jenv<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        
+        todo!();
     }
+}
+
+fn find_jenv() {
+    todo!();
 }

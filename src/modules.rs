@@ -13,7 +13,6 @@ mod duration;
 mod python_env;
 mod spacer;
 mod time;
-mod rust_detector;
 mod jenv;
 
 pub use cmd::{Cmd, CmdScheme};

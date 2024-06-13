@@ -96,8 +96,6 @@ fn main() {
         .add_module(Cmd::<RainbowTheme>::new(status.to_owned()))
         .render(columns);
 
-    println!("{:?}", env::var("PWD"));
-
     println!("{}", top_prompt);
     print!("{} ", mini_prompt);
 }
