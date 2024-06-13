@@ -1,5 +1,5 @@
+use std::fmt;
 use std::fmt::{Display, Write};
-use std::{fmt};
 
 use crate::modules::Module;
 use crate::terminal::*;
@@ -198,15 +198,14 @@ impl Powerline {
         self
     }
 
-    // todo: write opposite-side separators after padding for a cleaner look
     pub fn add_padding(mut self, len: usize, bg: Option<Color>) -> Self {
         let padding = vec![" "; len].join("");
-        self.left_columns += len;
         match self.direction {
             Direction::Left => {
                 // close out the buffer, write the padding, and leave the next write_segment
                 // to handle adding the alternate separator
                 self.close_left_buffer();
+                self.left_columns += len;
                 match bg {
                     Some(color) => {
                         write!(self.left_buffer, "{}{}", BgColor::from(color), padding).unwrap()
@@ -216,15 +215,18 @@ impl Powerline {
             }
             Direction::Right => {
                 // close out the current blob and write the padding
-                if let Some(Style { sep_fg, sep, .. }) = self.last_style_right {
+                if let Some(Style { sep, sep_fg,  .. }) = self.last_style_right {
                     let sep: char = sep
                         .unwrap_or(self.separator)
                         .for_direction(Direction::Right);
-                    write!(self.left_buffer, "{}{}{}", sep_fg, sep, padding).unwrap();
-                    self.left_columns += 1;
+                    write!(self.right_buffer, "{}{}{}{}{}", Reset, sep_fg, sep, Reset, padding).unwrap();
+                    self.right_columns += 1;
+                } else {
+                    write!(self.right_buffer, "{}", padding).unwrap();
                 }
+                self.right_columns += len;
                 self.last_style = None;
-            },
+            }
         }
 
         self.last_padding = true;

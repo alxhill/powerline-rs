@@ -79,12 +79,13 @@ fn main() {
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Cwd::<RainbowTheme>::new(45, 4, false))
         .add_module(ReadOnly::<RainbowTheme>::new())
-        .add_padding(5, None)
+        .add_padding(8, None)
         .set_separator(Separator::Round)
         .add_module(Git::<RainbowTheme>::new())
         .to_right()
         .set_separator(Separator::Round)
         .add_module(PythonEnv::<RainbowTheme>::new())
+        .add_padding(0, None)
         .render(columns);
 
     let mini_prompt = powerline::Powerline::new()
