@@ -53,7 +53,45 @@ You can also install one of examples by adding `--example {name}` to cargo comma
 The config for the shell in the screenshot is:
 
 ```json
-
+{
+  "theme": "rainbow",
+  "rows": [
+    {
+      "left": [
+        "small_spacer",
+        "read_only",
+        {
+          "cwd": {
+            "max_length": 60,
+            "wanted_seg_num": 5,
+            "resolve_symlinks": false
+          }
+        },
+        "small_spacer",
+        "git"
+      ],
+      "right": [
+        {
+          "separator": "round"
+        },
+        "python_env",
+        {
+          "padding": 0
+        }
+      ]
+    },
+    {
+      "left": [
+        {
+          "last_cmd_duration": {
+            "min_run_time": "5ms"
+          }
+        },
+        "cmd"
+      ]
+    }
+  ]
+}
 ```
 
 ## Setting up shell
@@ -74,6 +112,8 @@ if [ "$TERM" != "linux" ]; then
 fi
 ```
 
+todo: add last command duration + fix last command status
+
 ### zsh
 
 You must also compile with `zsh-shell` feature.
@@ -90,8 +130,17 @@ precmd_functions+=(_update_ps1)
 You must also compile with `bare-shell` feature.
 
 ```bash
+# $CMD_DURATION isn't exported, cache it here for the fish_prompt command + reset it each time
+function cachetime --on-event fish_postexec
+  set -gx duration $CMD_DURATION
+end
+
 function fish_prompt
-    powerline $status
+  powerline -s $status -c $COLUMNS "$HOME/.config/powerline.json" $duration
+  set -gx duration 0
+end
+
+function fish_right_prompt
 end
 ```
 
