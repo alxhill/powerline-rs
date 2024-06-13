@@ -1,4 +1,6 @@
 use std::env;
+use std::fs::{read, File};
+use std::io::read_to_string;
 use std::marker::PhantomData;
 use std::path::Path;
 use std::process::Command;
@@ -33,6 +35,7 @@ impl<S: PythonEnvScheme> PythonEnv<S> {
 
 const PYTHON_VERSION_CMD: &str =
     r#"from sys import version_info as v; print(f"{v.major}.{v.minor}.{v.micro}")"#;
+const PYTHON_LOGO: &str = "\u{e73c}";
 
 impl<S: PythonEnvScheme> Module for PythonEnv<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
@@ -56,13 +59,23 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
                 .unwrap_or("".into());
 
             powerline.add_short_segment(
-                format!("\u{e73c} {} ", venv_name),
+                format!("{} {} ", PYTHON_LOGO, venv_name),
                 Style::simple(S::PYVENV_FG, S::PYVENV_BG),
             );
             powerline.add_segment(
                 py_ver_str.trim().to_string(),
                 Style::simple(S::PYVER_FG, S::PYVER_BG),
             );
+        } else if let Some(cwd) = env::current_dir().ok() {
+            if cwd.join(".python-version").exists() {
+                let py_ver = File::open(cwd.join(".python-version"))
+                    .and_then(|f| read_to_string(f))
+                    .unwrap_or("UNKNOWN".to_string());
+                powerline.add_segment(
+                    format!("{} {}", PYTHON_LOGO, py_ver.trim().to_string()),
+                    Style::simple(S::PYVER_FG, S::PYVER_BG),
+                );
+            }
         }
     }
 }

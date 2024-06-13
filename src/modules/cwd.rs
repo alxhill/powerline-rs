@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 use std::{env, path};
 
 use super::Module;
-use crate::colors::{white};
+use crate::colors::white;
 use crate::{colors, Color, Powerline, Style};
 
 pub struct Cwd<S: CwdScheme> {
