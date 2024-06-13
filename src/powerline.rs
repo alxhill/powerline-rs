@@ -215,11 +215,16 @@ impl Powerline {
             }
             Direction::Right => {
                 // close out the current blob and write the padding
-                if let Some(Style { sep, sep_fg,  .. }) = self.last_style_right {
+                if let Some(Style { sep, sep_fg, .. }) = self.last_style_right {
                     let sep: char = sep
                         .unwrap_or(self.separator)
                         .for_direction(Direction::Right);
-                    write!(self.right_buffer, "{}{}{}{}{}", Reset, sep_fg, sep, Reset, padding).unwrap();
+                    write!(
+                        self.right_buffer,
+                        "{}{}{}{}{}",
+                        Reset, sep_fg, sep, Reset, padding
+                    )
+                    .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();

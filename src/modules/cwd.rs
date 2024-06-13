@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 use std::{env, path};
 
 use super::Module;
+use crate::colors::{white};
 use crate::{colors, Color, Powerline, Style};
 
 pub struct Cwd<S: CwdScheme> {
@@ -12,6 +13,7 @@ pub struct Cwd<S: CwdScheme> {
 }
 
 pub trait CwdScheme {
+    const PATH_FG: Color = white();
     const RAINBOW_CYCLE: [Color; 6] = [
         colors::red(),
         colors::orange(),
@@ -21,7 +23,6 @@ pub trait CwdScheme {
         colors::nice_puple(),
     ];
 }
-
 
 impl<S: CwdScheme> Cwd<S> {
     pub fn new(max_length: usize, wanted_seg_num: usize, resolve_symlinks: bool) -> Cwd<S> {
@@ -54,6 +55,7 @@ impl<S: CwdScheme> Module for Cwd<S> {
 
         let mut current_bg = 0usize;
 
+        #[allow(unused_assignments)]
         if cwd == "/" {
             rainbow_segment!(powerline, current_bg, "~");
             return;

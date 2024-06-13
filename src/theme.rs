@@ -11,10 +11,7 @@ impl CmdScheme for SimpleTheme {
     const CMD_FAILED_FG: Color = Color(15);
 }
 
-impl CwdScheme for SimpleTheme {
-    const PATH_FG: Color = Color(250);
-    const PATH_BG: Color = Color(237);
-}
+impl CwdScheme for SimpleTheme {}
 
 impl ExitCodeScheme for SimpleTheme {
     const EXIT_CODE_BG: Color = Color(161);
