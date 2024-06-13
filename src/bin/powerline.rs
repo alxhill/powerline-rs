@@ -1,6 +1,7 @@
 extern crate powerline;
 
 use std::env::args;
+use std::error::Error;
 use std::fs::File;
 use std::io;
 
@@ -8,26 +9,33 @@ use thiserror::Error;
 
 use powerline::config::Config;
 use powerline::Powerline;
-use powerline::powerline::PowerlineRightBuilder;
 use powerline::themes::{RainbowTheme, SimpleTheme};
 
 fn main() {
-    let conf = load_config().expect("Failed to read config from file");
+    match load_config() {
+        Ok(conf) => {
+            for prompt in conf.rows {
+                let powerline = match conf.theme.as_str() {
+                    "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt),
+                    "simple" => Powerline::from_conf::<SimpleTheme>(&prompt),
+                    _ => panic!("unknown theme, supported themes are simple and rainbow")
+                };
 
-    for prompt in conf.rows {
-        let powerline = match conf.theme.as_str() {
-            "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt),
-            "simple" => Powerline::from_conf::<SimpleTheme>(&prompt),
-            _ => panic!("unknown theme, supported themes are simple and rainbow")
-        };
-
-        println!("{}", powerline.render(100));
+                println!("{}", powerline.render(100));
+            }
+        }
+        Err(e) => {
+            eprintln!("error: {}", e);
+            if let Some(source) = e.source() {
+                eprintln!("source:\n\t{}", source);
+            }
+        }
     }
 }
 
 #[derive(Error, Debug)]
 enum PowerlineError {
-    #[error("config argument not found")]
+    #[error("no config file provided")]
     InvalidArgument,
     #[error("could not read config file")]
     IoError(#[from] io::Error),
