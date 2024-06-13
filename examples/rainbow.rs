@@ -2,6 +2,7 @@ use chrono::Duration;
 use powerline::modules::*;
 use powerline::powerline::Separator;
 use powerline::{colors::*, Color};
+use std::env;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
@@ -50,7 +51,7 @@ impl PythonEnvScheme for RainbowTheme {
     const SEPARATOR: Separator = Separator::ChevronLeft;
     const PYVENV_FG: Color = Color(0);
     const PYVENV_BG: Color = Color(42);
-    const PYVER_FG: Color = light_grey();
+    const PYVER_FG: Color = dark_grey();
     const PYVER_BG: Color = light_green();
 }
 
@@ -63,6 +64,19 @@ impl LastCmdDurationScheme for RainbowTheme {
 }
 
 fn main() {
+    let args = env::args().collect::<Vec<String>>();
+
+    let (status, duration, columns): (&str, &str, &str) = match args.as_slice() {
+        [_, status, duration, columns] => (status, duration, columns),
+        [_, status, duration] => (status, duration, "0"),
+        _ => ("0", "0", "0"),
+    };
+
+    let columns = str::parse::<usize>(columns).unwrap_or(0);
+    let duration = str::parse::<i64>(duration)
+        .map(Duration::milliseconds)
+        .unwrap_or(Duration::seconds(0));
+
     let top_prompt = powerline::Powerline::new()
         .set_separator(Separator::ChevronRight)
         .add_module(Spacer::<RainbowTheme>::small())
@@ -70,13 +84,18 @@ fn main() {
         .add_module(ReadOnly::<RainbowTheme>::new())
         .add_module(Spacer::<RainbowTheme>::large())
         .set_separator(Separator::RoundRight)
-        .add_module(Git::<RainbowTheme>::new());
+        .add_module(Git::<RainbowTheme>::new())
+        .to_right()
+        .set_separator(Separator::RoundLeft)
+        .add_module(PythonEnv::<RainbowTheme>::new())
+        .render(columns);
 
     let mini_prompt = powerline::Powerline::new()
         .add_module(LastCmdDuration::<RainbowTheme>::new(
+            duration,
             Duration::milliseconds(50),
         ))
-        .add_module(Cmd::<RainbowTheme>::new());
+        .add_module(Cmd::<RainbowTheme>::new(status.to_owned()));
 
     println!("{}", top_prompt);
     print!("{} ", mini_prompt);

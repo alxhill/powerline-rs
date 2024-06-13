@@ -1,10 +1,10 @@
-use std::env;
 use std::marker::PhantomData;
 
 use super::Module;
 use crate::{Color, Powerline, Style};
 
 pub struct Cmd<S: CmdScheme> {
+    status: String,
     scheme: PhantomData<S>,
 }
 
@@ -17,15 +17,10 @@ pub trait CmdScheme {
     const CMD_USER_SYMBOL: &'static str = "$";
 }
 
-impl<S: CmdScheme> Default for Cmd<S> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl<S: CmdScheme> Cmd<S> {
-    pub fn new() -> Cmd<S> {
+    pub fn new(status: String) -> Cmd<S> {
         Cmd {
+            status,
             scheme: PhantomData,
         }
     }
@@ -38,10 +33,9 @@ impl<S: CmdScheme> Module for Cmd<S> {
         } else {
             S::CMD_USER_SYMBOL
         };
-        let status_arg = env::args().nth(1);
-        let (symbol, fg, bg) = match status_arg.as_deref() {
-            None | Some("0") => (user_symbol, S::CMD_PASSED_FG, S::CMD_PASSED_BG),
-            Some(non_zero_code) => (non_zero_code, S::CMD_FAILED_FG, S::CMD_FAILED_BG),
+        let (symbol, fg, bg) = match self.status.as_ref() {
+            "0" => (user_symbol, S::CMD_PASSED_FG, S::CMD_PASSED_BG),
+            non_zero_code => (non_zero_code, S::CMD_FAILED_FG, S::CMD_FAILED_BG),
         };
 
         powerline.add_short_segment(symbol, Style::simple(fg, bg));

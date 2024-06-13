@@ -1,12 +1,11 @@
 use crate::modules::Module;
-use crate::powerline::Separator;
 use crate::{Color, Powerline, Style};
 use chrono::Duration;
-use std::env;
 use std::marker::PhantomData;
 
 pub struct LastCmdDuration<S> {
     min_display_time: Duration,
+    cmd_duration: Duration,
     scheme: PhantomData<S>,
 }
 
@@ -17,9 +16,10 @@ pub trait LastCmdDurationScheme {
 }
 
 impl<S: LastCmdDurationScheme> LastCmdDuration<S> {
-    pub fn new(min_duration: Duration) -> LastCmdDuration<S> {
+    pub fn new(cmd_duration: Duration, min_duration: Duration) -> LastCmdDuration<S> {
         LastCmdDuration {
             min_display_time: min_duration,
+            cmd_duration,
             scheme: PhantomData,
         }
     }
@@ -27,16 +27,11 @@ impl<S: LastCmdDurationScheme> LastCmdDuration<S> {
 
 impl<S: LastCmdDurationScheme> Module for LastCmdDuration<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        if let Some(duration) = env::args().nth(2) {
-            if let Ok(duration) = str::parse::<i64>(&duration) {
-                let cmd_duration = Duration::milliseconds(duration);
-                if cmd_duration > self.min_display_time {
-                    powerline.add_short_segment(
-                        format!(" {}{}", nice_duration(cmd_duration), S::TIME_ICON),
-                        Style::simple(S::TIME_FG, S::TIME_BG),
-                    );
-                }
-            }
+        if self.cmd_duration > self.min_display_time {
+            powerline.add_short_segment(
+                format!(" {}{}", nice_duration(self.cmd_duration), S::TIME_ICON),
+                Style::simple(S::TIME_FG, S::TIME_BG),
+            );
         }
     }
 }

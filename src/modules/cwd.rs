@@ -40,10 +40,7 @@ impl<S: CwdScheme> Cwd<S> {
 macro_rules! rainbow_segment {
     ($powerline:ident, $iter_var:ident, $value:expr) => {
         let r_col = RAINBOW_CYCLE[$iter_var % RAINBOW_CYCLE.len()];
-        $powerline.add_short_segment(
-            format!(" {}", $value),
-            Style::simple(S::PATH_FG, r_col),
-        );
+        $powerline.add_short_segment(format!(" {}", $value), Style::simple(S::PATH_FG, r_col));
         $iter_var = $iter_var.wrapping_add(1);
     };
 }

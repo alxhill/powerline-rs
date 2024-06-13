@@ -1,5 +1,4 @@
 use std::env;
-use std::io::Read;
 use std::marker::PhantomData;
 use std::path::Path;
 use std::process::Command;
@@ -34,7 +33,8 @@ impl<S: PythonEnvScheme> PythonEnv<S> {
     }
 }
 
-const PYTHON_VERSION_CMD: &'static str = r#"from sys import version_info as v; print(f"{v.major}.{v.minor}.{v.micro}")"#;
+const PYTHON_VERSION_CMD: &str =
+    r#"from sys import version_info as v; print(f"{v.major}.{v.minor}.{v.micro}")"#;
 
 impl<S: PythonEnvScheme> Module for PythonEnv<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
@@ -48,23 +48,23 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
 
             let py_ver_str = Command::new("python")
                 .args(["-c", PYTHON_VERSION_CMD])
-                .spawn()
+                .output()
                 .ok()
-                .and_then(|child| child.stdout)
-                .and_then(|mut output| {
-                    let mut out = String::new();
-                    output.read_to_string(&mut out)
+                .and_then(|output| {
+                    std::str::from_utf8(&output.stdout)
+                        .map(|s| s.to_owned())
                         .ok()
-                        .map(|_| out)
                 })
                 .unwrap_or("".into());
-
 
             powerline.add_segment(
                 format!("🐍 {}", venv_name),
                 Style::simple(S::PYVENV_FG, S::PYVENV_BG),
             );
-            powerline.add_segment(format!("{}", py_ver_str), Style::simple(S::PYVENV_FG, S::PYVENV_BG));
+            powerline.add_segment(
+                py_ver_str.trim().to_string(),
+                Style::simple(S::PYVER_FG, S::PYVER_BG),
+            );
         }
     }
 }
