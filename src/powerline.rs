@@ -13,7 +13,6 @@ use crate::themes::CompleteTheme;
 pub struct Style {
     pub fg: FgColor,
     pub bg: BgColor,
-    pub sep: Option<Separator>,
     pub sep_fg: FgColor,
 }
 
@@ -22,16 +21,6 @@ impl Style {
         Style {
             fg: fg.into(),
             bg: bg.into(),
-            sep: None, // use the "default" separator
-            sep_fg: bg.into(),
-        }
-    }
-
-    pub fn custom(fg: Color, bg: Color, separator: Separator) -> Style {
-        Style {
-            fg: fg.into(),
-            bg: bg.into(),
-            sep: separator.into(),
             sep_fg: bg.into(),
         }
     }
@@ -178,22 +167,19 @@ impl Powerline {
     fn write_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) -> fmt::Result {
         // write the last style's separator on the new style's background
         if self.last_padding {
-            let new_sep = style.sep.unwrap_or(self.separator);
             write!(
                 self.left_buffer,
-                "{}{}",
+                "{}{}{}",
                 style.sep_fg,
-                new_sep.for_direction(Direction::Left)
+                self.separator.for_direction(Direction::Left),
+                style.bg
             )?;
             self.last_padding = false;
         }
 
-        if let Some(Style { sep_fg, sep, .. }) = self.last_style {
-            let sep: char = sep
-                .unwrap_or(self.separator)
-                .for_direction(Direction::Right);
+        if let Some(Style { sep_fg, .. }) = self.last_style {
             self.left_columns += 1;
-            write!(self.left_buffer, "{}{}{}", style.bg, sep_fg, sep)?;
+            write!(self.left_buffer, "{}{}{}", style.bg, sep_fg, self.separator.for_direction(Direction::Right))?;
         } else {
             write!(self.left_buffer, "{}", style.bg)?;
         };
@@ -223,12 +209,9 @@ impl Powerline {
         style: Style,
         spaces: bool,
     ) -> fmt::Result {
-        let sep: char = style
-            .sep
-            .unwrap_or(self.separator)
-            .for_direction(Direction::Left);
         // write the separator directly onto the current background
-        write!(self.right_buffer, "{}{}{}", style.sep_fg, sep, style.bg)?;
+        write!(self.right_buffer, "{}{}{}", style.bg.transpose(), self.separator
+            .for_direction(Direction::Left), style.bg)?;
         self.right_columns += 1;
 
         if self.last_style_right.as_ref().map(|s| s.sep_fg) != Some(style.fg) {
@@ -321,16 +304,14 @@ impl Powerline {
             }
             Direction::Right => {
                 // close out the current blob and write the padding
-                if let Some(Style { sep, sep_fg, .. }) = self.last_style_right {
-                    let sep: char = sep
-                        .unwrap_or(self.separator)
-                        .for_direction(Direction::Right);
+                if let Some(Style { sep_fg, .. }) = self.last_style_right {
                     write!(
                         self.right_buffer,
                         "{}{}{}{}{}",
-                        Reset, sep_fg, sep, Reset, padding
+                        Reset, sep_fg, self.separator
+                            .for_direction(Direction::Right), Reset, padding
                     )
-                    .unwrap();
+                        .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();
@@ -373,11 +354,8 @@ impl Powerline {
 
     fn close_left_buffer(&mut self) {
         // close out the left buffer with the right separator
-        if let Some(Style { sep_fg, sep, .. }) = self.last_style {
-            let sep: char = sep
-                .unwrap_or(self.separator)
-                .for_direction(Direction::Right);
-            write!(self.left_buffer, "{}{}{}{}", Reset, sep_fg, sep, Reset).unwrap();
+        if let Some(Style { sep_fg, .. }) = self.last_style {
+            write!(self.left_buffer, "{}{}{}{}", Reset, sep_fg, self.separator.for_direction(Direction::Right), Reset).unwrap();
             self.left_columns += 1;
         }
         self.last_style = None;
