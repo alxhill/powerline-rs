@@ -34,16 +34,19 @@ function preexec() {
     fi
 }
 
-function precmd() {
+function _generate_powerline() {
     if [ $__pl_timer ]; then
         _now=$(($(gdate +%s%0N)/1000000))
         if [ $_now -ge $__pl_timer ]; then
             _elapsed=$(($_now-$__pl_timer))
         fi
     fi
-    PS1="$(powerline show -s $? -c $COLUMNS $_elapsed)"
+    powerline show -s $? -c $COLUMNS $_elapsed
     unset __pl_timer _elapsed _now
 }
+
+PS1=""
+precmd_functions+=(_generate_powerline)
 "#;
 
 // note: does not support command duration
