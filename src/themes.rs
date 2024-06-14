@@ -2,8 +2,8 @@ mod rainbow;
 mod simple;
 
 use crate::modules::{
-    CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme, LastCmdDurationScheme,
-    PythonEnvScheme, ReadOnlyScheme, SpacerScheme, UserScheme,
+    CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
+    LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, UserScheme,
 };
 pub use rainbow::RainbowTheme;
 pub use simple::SimpleTheme;
@@ -19,5 +19,6 @@ pub trait CompleteTheme:
     + SpacerScheme
     + HostScheme
     + UserScheme
+    + CargoScheme
 {
 }

@@ -4,7 +4,7 @@ use std::fmt;
 use std::fmt::{Display, Write};
 
 use crate::modules::{
-    Cmd, Cwd, Git, Host, LastCmdDuration, Module, PythonEnv, ReadOnly, Spacer, User,
+    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, PythonEnv, ReadOnly, Spacer, User,
 };
 use crate::terminal::*;
 use crate::themes::CompleteTheme;
@@ -179,7 +179,13 @@ impl Powerline {
 
         if let Some(Style { sep_fg, .. }) = self.last_style {
             self.left_columns += 1;
-            write!(self.left_buffer, "{}{}{}", style.bg, sep_fg, self.separator.for_direction(Direction::Right))?;
+            write!(
+                self.left_buffer,
+                "{}{}{}",
+                style.bg,
+                sep_fg,
+                self.separator.for_direction(Direction::Right)
+            )?;
         } else {
             write!(self.left_buffer, "{}", style.bg)?;
         };
@@ -210,8 +216,13 @@ impl Powerline {
         spaces: bool,
     ) -> fmt::Result {
         // write the separator directly onto the current background
-        write!(self.right_buffer, "{}{}{}", style.bg.transpose(), self.separator
-            .for_direction(Direction::Left), style.bg)?;
+        write!(
+            self.right_buffer,
+            "{}{}{}",
+            style.bg.transpose(),
+            self.separator.for_direction(Direction::Left),
+            style.bg
+        )?;
         self.right_columns += 1;
 
         if self.last_style_right.as_ref().map(|s| s.sep_fg) != Some(style.fg) {
@@ -270,6 +281,7 @@ impl Powerline {
                 LineSegment::Cmd => {
                     self.add_module(Cmd::<T>::new(runtime_data.last_command_status()))
                 }
+                LineSegment::Cargo => self.add_module(Cargo::<T>::new()),
                 LineSegment::Git => self.add_module(Git::<T>::new()),
                 LineSegment::Separator(style) => self.set_separator(style.into()),
                 LineSegment::ReadOnly => self.add_module(ReadOnly::<T>::new()),
@@ -308,10 +320,13 @@ impl Powerline {
                     write!(
                         self.right_buffer,
                         "{}{}{}{}{}",
-                        Reset, sep_fg, self.separator
-                            .for_direction(Direction::Right), Reset, padding
+                        Reset,
+                        sep_fg,
+                        self.separator.for_direction(Direction::Right),
+                        Reset,
+                        padding
                     )
-                        .unwrap();
+                    .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();
@@ -355,7 +370,15 @@ impl Powerline {
     fn close_left_buffer(&mut self) {
         // close out the left buffer with the right separator
         if let Some(Style { sep_fg, .. }) = self.last_style {
-            write!(self.left_buffer, "{}{}{}{}", Reset, sep_fg, self.separator.for_direction(Direction::Right), Reset).unwrap();
+            write!(
+                self.left_buffer,
+                "{}{}{}{}",
+                Reset,
+                sep_fg,
+                self.separator.for_direction(Direction::Right),
+                Reset
+            )
+            .unwrap();
             self.left_columns += 1;
         }
         self.last_style = None;

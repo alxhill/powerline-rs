@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+
 use crate::Color;
 
 macro_rules! term_color {
@@ -42,3 +43,4 @@ term_color!(bright_orange, 202);
 term_color!(dark_yellow, 136);
 term_color!(dark_blue, 19);
 term_color!(nice_puple, 55);
+term_color!(burnt_orange, 214);

@@ -8,11 +8,13 @@ mod host;
 mod readonly;
 mod user;
 
+mod cargo;
 mod duration;
 mod python_env;
 mod spacer;
 mod time;
 
+pub use cargo::{Cargo, CargoScheme};
 pub use cmd::{Cmd, CmdScheme};
 pub use cwd::{Cwd, CwdScheme};
 pub use duration::{LastCmdDuration, LastCmdDurationScheme};

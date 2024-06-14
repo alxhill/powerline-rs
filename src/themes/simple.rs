@@ -1,6 +1,6 @@
 use crate::modules::{
-    CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme, LastCmdDurationScheme,
-    PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
+    CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
+    LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::CompleteTheme;
 use crate::{colors, Color};
@@ -9,6 +9,10 @@ use crate::{colors, Color};
 pub struct SimpleTheme;
 
 impl CompleteTheme for SimpleTheme {}
+
+impl CargoScheme for SimpleTheme {
+    const CARGO_BG: Color = Color(0);
+}
 
 impl LastCmdDurationScheme for SimpleTheme {
     const TIME_BG: Color = Color(0);
