@@ -33,7 +33,7 @@ impl<S: CargoScheme> Module for Cargo<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         if let Ok(cwd) = env::current_dir() {
             if cwd.join("Cargo.toml").exists() {
-                powerline.add_segment(S::ICON.to_string(), Style::simple(S::CARGO_FG, S::CARGO_BG));
+                powerline.add_short_segment(format!("{} ", S::ICON), Style::simple(S::CARGO_FG, S::CARGO_BG));
             }
         }
     }

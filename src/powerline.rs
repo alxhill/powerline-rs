@@ -312,7 +312,7 @@ impl Powerline {
                 // close out the buffer, write the padding, and leave the next write_segment
                 // to handle adding the alternate separator
                 self.close_left_buffer();
-                self.left_columns += len;
+                self.left_columns += len + 1;
                 let _ = write!(self.left_buffer, "{}{}", Reset, padding);
             }
             Direction::Right => {
