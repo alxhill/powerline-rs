@@ -1,19 +1,20 @@
-extern crate powerline;
+extern crate powerline_rs;
 
-use clap::{Args, Parser, Subcommand};
+use std::{env, io};
 use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
 use std::io::Write;
 use std::path::PathBuf;
 use std::time::Duration;
-use std::{env, io};
 
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
-use powerline::config::{Config, TerminalRuntimeMetadata};
-use powerline::themes::{RainbowTheme, SimpleTheme};
-use powerline::Powerline;
+use powerline_rs::config::{Config, TerminalRuntimeMetadata};
+use powerline_rs::Powerline;
+use powerline_rs::terminal::{SHELL, Shell};
+use powerline_rs::themes::{RainbowTheme, SimpleTheme};
 
 const FISH_CONF: &str = r#"
 function __pl_cache_duration --on-event fish_postexec
@@ -21,7 +22,7 @@ function __pl_cache_duration --on-event fish_postexec
 end
 
 function fish_prompt
-  powerline show -s $status -c $COLUMNS $__pl_duration
+  powerline show -s $status -c $COLUMNS fish $__pl_duration
   set -gx __pl_duration 0
 end
 "#;
@@ -33,25 +34,24 @@ function preexec() {
     fi
 }
 
-function _generate_powerline() {
+function _update_ps1() {
     if [ $__pl_timer ]; then
         _now=$(($(gdate +%s%0N)/1000000))
         if [ $_now -ge $__pl_timer ]; then
             _elapsed=$(($_now-$__pl_timer))
         fi
     fi
-    powerline show -s $? -c $COLUMNS $_elapsed
+    PS1="$(powerline show -s $? -c $COLUMNS zsh $_elapsed)"
     unset __pl_timer _elapsed _now
 }
 
-PS1=""
-precmd_functions+=(_generate_powerline)
+precmd_functions=(_update_ps1)
 "#;
 
-// note: does not support command duration
+// note: does not support showing last cmd duration
 const BASH_CONF: &str = r#"
 function _update_ps1() {
-    PS1="$(powerline show -s $? -c $COLUMNS)"
+    PS1="$(powerline show -s $? -c $COLUMNS bash)"
 }
 
 if [ "$TERM" != "linux" ]; then
@@ -63,11 +63,18 @@ fi
 #[command(version, about, long_about = None)]
 enum PowerlineArgs {
     #[command(subcommand)]
-    Init(ShellArg),
+    Init(ShellSubcommand),
     Show(ShowArgs),
 }
 
 #[derive(Debug, Subcommand)]
+enum ShellSubcommand {
+    Bash,
+    Zsh,
+    Fish,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 enum ShellArg {
     Bash,
     Zsh,
@@ -76,7 +83,9 @@ enum ShellArg {
 
 #[derive(Debug, Args)]
 struct ShowArgs {
-    // not an arg to allow it to be empty easily
+    #[arg(value_enum)]
+    shell: ShellArg,
+    // not an arg to allow passing a variable that may be empty
     duration: Option<u64>,
     #[arg(short, long)]
     columns: usize,
@@ -109,17 +118,23 @@ fn main() {
     }
 }
 
-fn print_shell_conf(shell: ShellArg) {
+fn print_shell_conf(shell: ShellSubcommand) {
     match shell {
-        ShellArg::Bash => println!("{}", BASH_CONF),
-        ShellArg::Zsh => println!("{}", ZSH_CONF),
-        ShellArg::Fish => println!("{}", FISH_CONF),
+        ShellSubcommand::Bash => println!("{}", BASH_CONF),
+        ShellSubcommand::Zsh => println!("{}", ZSH_CONF),
+        ShellSubcommand::Fish => println!("{}", FISH_CONF),
     }
 }
 
 fn show(args: ShowArgs) {
     match load_config(args.config.clone()) {
         Ok(conf) => {
+            match args.shell {
+                ShellArg::Bash => SHELL.set(Shell::Bash),
+                ShellArg::Zsh => SHELL.set(Shell::Zsh),
+                ShellArg::Fish => SHELL.set(Shell::Bare)
+            }.expect("failed to set shell");
+
             for prompt in conf.rows {
                 let powerline = match conf.theme.as_str() {
                     "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt, &args),

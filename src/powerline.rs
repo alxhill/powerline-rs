@@ -1,4 +1,4 @@
-use crate::config;
+use crate::{config, terminal};
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use std::fmt;
 use std::fmt::{Display, Write};
@@ -66,6 +66,14 @@ pub struct PowerlineBuilder {
     powerline: Powerline,
 }
 
+pub trait PowerlineShellBuilder {
+    fn set_shell(self, shell: Shell) -> impl PowerlineLeftBuilder;
+}
+
+pub trait PowerlineLeftBuilder: PowerlineRightBuilder {
+    fn start_right(self) -> impl PowerlineRightBuilder;
+}
+
 pub trait PowerlineRightBuilder {
     fn add_module<M: Module>(self, module: M) -> Self;
     fn change_separator(self, separator: Separator) -> Self;
@@ -74,8 +82,11 @@ pub trait PowerlineRightBuilder {
     fn render(self, columns: usize) -> String;
 }
 
-pub trait PowerlineLeftBuilder: PowerlineRightBuilder {
-    fn start_right(self) -> impl PowerlineRightBuilder;
+impl PowerlineShellBuilder for PowerlineBuilder {
+    fn set_shell(self, shell: Shell) -> impl PowerlineLeftBuilder {
+        SHELL.set(shell).expect("Failed to set shell");
+        self
+    }
 }
 
 impl PowerlineRightBuilder for PowerlineBuilder {
@@ -139,7 +150,7 @@ impl Powerline {
         }
     }
 
-    pub fn builder() -> impl PowerlineLeftBuilder {
+    pub fn builder() -> impl PowerlineShellBuilder {
         PowerlineBuilder {
             powerline: Default::default(),
         }
@@ -334,7 +345,7 @@ impl Powerline {
                         Reset,
                         padding
                     )
-                    .unwrap();
+                        .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();
@@ -386,7 +397,7 @@ impl Powerline {
                 self.separator.for_direction(Direction::Right),
                 Reset
             )
-            .unwrap();
+                .unwrap();
             self.left_columns += 1;
         }
         self.last_style = None;

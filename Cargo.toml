@@ -1,6 +1,6 @@
 [package]
-name = "powerline"
-version = "0.4.0"
+name = "powerline_rs"
+version = "0.5.0"
 authors = ["alxhill <me@alxhill.com>", "cirho <me@cirho.com>"]
 edition = "2021"
 description = "Configurable Powerline implementation in pure Rust."
@@ -17,10 +17,7 @@ clap = { version = "4.5.7", features = ["derive"] }
 chrono = "0.4.38"
 
 [features]
-default = ["bare-shell", "libgit"]
-bash-shell = []
-bare-shell = []
-zsh-shell = []
+default = ["libgit"]
 libgit = ["git2"]
 
 [profile.release]

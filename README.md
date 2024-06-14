@@ -4,7 +4,7 @@ _Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and
 
 ![Shell with pyenv showing](with_pyenv.png)
 
-powerline-rs is a pure-rust version of [powerline-shell](https://github.com/b-ryan/powerline-shell). It's heavily
+powerline-rs is a pure-rust version of [powerline-SHELL](https://github.com/b-ryan/powerline-shell). It's heavily
 inspired
 by it, but focuses on minimalizing time of execution and supporting a limited subset of features.
 
@@ -17,80 +17,27 @@ by it, but focuses on minimalizing time of execution and supporting a limited su
 - new themes and modules can be added easily (currently only Rainbow and Simple are included)
 - supports multiline prompts as well as showing info on the right hand side of the terminal.
 
-## Simple installation
+## Installation
 
-powerline-rs relies on using a [Nerd Font](https://www.nerdfonts.com/) - configure your shell to use a Nerd Font,
-otherwise many characters will not render correctly. Meslo LG S is recommended and can be
-found [here](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Meslo.zip).
+powerline-rs relies on [Nerd Font](https://www.nerdfonts.com/) unicode characters - configure your terminal to use a
+Nerd Font, otherwise most segments will not render correctly. Meslo LG S is recommended and can be
+downloaded in patched form [here](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Meslo.zip).
 
-iTerm2 users are recommended to enable the "Use builtin Powerline glyphs" option even when using a nerdfont as this
-seems to fix any potential character alignment issues.
+iTerm2 users are recommended to enable the "Use builtin Powerline glyphs" option even when using a Nerd Font as this
+seems to fix some character alignment issues.
 
 ![iTerm2 Profile configuration](iterm_config.png)
 
+Clone the repo and install for your desired SHELL:
+
 ```bash
-git clone https://github.com/cirho/powerline-rust
-cd powerline-rust
-# bash shell 
+git clone https://github.com/alxhill/powerline-rs
+cd powerline-rs
 cargo install --path .
-# zsh shell 
-cargo install --path . --no-default-features --features=zsh-shell,libgit
-# fish shell
-cargo install --path . --no-default-features --features=bare-shell,libgit
 ```
 
-You can also install one of examples by adding `--example {name}` to cargo command.
-
-### Create a config.json
-
-The config for the shell in the screenshot is:
-
-```json
-{
-  "theme": "rainbow",
-  "rows": [
-    {
-      "left": [
-        "small_spacer",
-        "read_only",
-        {
-          "cwd": {
-            "max_length": 60,
-            "wanted_seg_num": 5,
-            "resolve_symlinks": false
-          }
-        },
-        "small_spacer",
-        "git"
-      ],
-      "right": [
-        {
-          "separator": "round"
-        },
-        "python_env",
-        {
-          "padding": 0
-        }
-      ]
-    },
-    {
-      "left": [
-        {
-          "last_cmd_duration": {
-            "min_run_time": "5ms"
-          }
-        },
-        "cmd"
-      ]
-    }
-  ]
-}
-```
-
-## Setting up shell
-
-First, create a config.json file (see "config file" section below). Then, ensuring the `powerline` binary is in `$PATH`,
-setup the prompt for your chosen shell.
+You can also install (or create your own) compiled config version by adding `--example {name}` to cargo command and
+modifying your SHELL config to call the custom binary.
 
 ### bash
 
@@ -108,7 +55,7 @@ todo: add last command duration + fix last command status
 
 ### zsh
 
-You must also compile with `zsh-shell` feature.
+You must also compile with `zsh-SHELL` feature.
 
 ```zsh
 _generate_powerline() {
@@ -119,7 +66,7 @@ precmd_functions+=(_update_ps1)
 
 ### fish
 
-You must also compile with `bare-shell` feature.
+You must also compile with `bare-SHELL` feature.
 
 ```bash
 # $CMD_DURATION isn't exported, cache it here for the fish_prompt command + reset it each time
@@ -137,7 +84,7 @@ function fish_right_prompt
 end
 ```
 
-## Custom shell prompt
+## Custom SHELL prompt
 
 There are two ways to customize the prompt - writing a config.json file using the default `powerline` command, or
 writing a custom program.
