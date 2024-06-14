@@ -15,11 +15,53 @@ use powerline::config::{Config, TerminalRuntimeMetadata};
 use powerline::themes::{RainbowTheme, SimpleTheme};
 use powerline::Powerline;
 
+
+const FISH_CONF: &'static str = r#"
+function __pl_cache_duration --on-event fish_postexec
+  set -gx __pl_duration $CMD_DURATION
+end
+
+function fish_prompt
+  powerline show -s $status -c $COLUMNS $__pl_duration
+  set -gx __pl_duration 0
+end
+"#;
+
+const ZSH_CONF: &'static str = r#"
+function preexec() {
+    if command -v gdate >/dev/null 2>&1; then
+        __pl_timer=$(($(gdate +%s%0N)/1000000))
+    fi
+}
+
+function precmd() {
+    if [ $__pl_timer ]; then
+        _now=$(($(gdate +%s%0N)/1000000))
+        if [ $_now -ge $__pl_timer ]; then
+            _elapsed=$(($_now-$__pl_timer))
+        fi
+    fi
+    PS1="$(powerline show -s $? -c $COLUMNS $_elapsed)"
+    unset __pl_timer _elapsed _now
+}
+"#;
+
+// note: does not support command duration
+const BASH_CONF: &'static str = r#"
+function _update_ps1() {
+    PS1="$(powerline show -s $? -c $COLUMNS)"
+}
+
+if [ "$TERM" != "linux" ]; then
+    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+fi
+"#;
+
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 enum PowerlineArgs {
     #[command(subcommand)]
-    Shell(ShellArg),
+    Init(ShellArg),
     Show(ShowArgs),
 }
 
@@ -60,16 +102,16 @@ fn main() {
     let args = PowerlineArgs::parse();
 
     match args {
-        PowerlineArgs::Shell(shell) => print_shell_conf(shell),
+        PowerlineArgs::Init(shell) => print_shell_conf(shell),
         PowerlineArgs::Show(args) => show(args),
     }
 }
 
 fn print_shell_conf(shell: ShellArg) {
     match shell {
-        ShellArg::Bash => println!("bash"),
-        ShellArg::Zsh => println!("zsh"),
-        ShellArg::Fish => println!("fish"),
+        ShellArg::Bash => println!("{}", BASH_CONF),
+        ShellArg::Zsh => println!("{}", ZSH_CONF),
+        ShellArg::Fish => println!("{}", FISH_CONF),
     }
 }
 
