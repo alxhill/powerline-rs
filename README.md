@@ -61,8 +61,8 @@ powerline init fish | source
 
 ## Customization
 
-Powerline will create a default config file at $HOME/.config/powerline-rs/config.json. You can edit it to make changes,
-which will be reflected immediately.
+Powerline will create a default config file at `$HOME/.config/powerline-rs/config.json`. You can edit it to make
+changes, which will be reflected immediately.
 
 ### Config file
 
@@ -72,7 +72,80 @@ configuration setup.
 The only two themes at the moment are "rainbow" and "simple". New themes must be added in code at the moment, and the
 simple theme is not recommended.
 
-### Custom program
+The example_config.json shows most of the options available:
+
+```json
+{
+  "theme": "rainbow",
+  "rows": [
+    {
+      "left": [
+        "small_spacer",
+        {
+          "cwd": {
+            "max_length": 60,
+            "wanted_seg_num": 4,
+            "resolve_symlinks": false
+          }
+        },
+        "read_only",
+        "small_spacer",
+        "git"
+      ],
+      "right": [
+        {
+          "separator": "round"
+        },
+        "python_env",
+        {
+          "padding": 0
+        }
+      ]
+    },
+    {
+      "left": [
+        {
+          "last_cmd_duration": {
+            "min_run_time": "0ms"
+          }
+        },
+        "cmd"
+      ]
+    }
+  ]
+}
+```
+
+You can add as many rows as desired. Each row has `left` and `right` properties for adding new segments - `left` is
+required, while `right` is optional. The final row should have only a `left` property so the cursor can show next to
+it - it's not currently possible to have a value showing on the right side next to a one-line prompt.
+
+Inside the `left` and `right` arrays, you can add the following sections to for showing content:
+
+* **cmd** - show `>` before user input. Turns red and shows the error code if the previous command fails.
+* **cwd** - show the current working directory, with configurable size and max segments.
+* **cmd_duration** - show the time taken by the last command if it takes longer than `min_run_time`
+* **host** - the hostname
+* **user** - the current user
+* **read_only** - show a lockfile icon if the current directory is read only
+* **time** - show the current time, with an optional "format" - this has to be present, but can be null
+* **python_env** - if a virtual env (venv, conda, mamba) is active, show the name and current version of python
+* **cargo** - show a crab icon if a `Cargo.toml` file is present in the current dir
+* **git** - show the current git branch and status of the repo (modified, staged, and untracked files, plus git remote
+  ahead/behind stats)
+
+There are also three ways to modify the layout:
+
+* **separator** - change the style between segments (see screenshot above). Options are "chevron" and "round". This
+  command is stateful, and will apply to all subsequent segments on the same section until overridden. The default is "
+  chevron"
+* **small_spacer** and **large_spacer** - show a segment as part of the current block with a black background
+* **padding** - end the current collection of segments and clear the background. The next segment will start with a
+  reversed separator separating it from the previous command.
+
+Usage examples of most of these can be found in the config file shown above.
+
+## Custom program
 
 You can also create a separate rust program to fully customize the appearance. This allows creating a new theme too.
 
@@ -128,3 +201,4 @@ TODO:
 - Better multiline prompts (e.g lines between)
 - Improve spacing / centering support
 - Calculate column width more accurately
+- Improve display when there aren't enough columns to show the whole prompt
