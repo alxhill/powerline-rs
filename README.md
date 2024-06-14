@@ -36,68 +36,45 @@ cd powerline-rs
 cargo install --path .
 ```
 
-You can also install (or create your own) compiled config version by adding `--example {name}` to cargo command and
+You can also install (or create your own) compiled command by adding `--example {name}` to cargo command and
 modifying your SHELL config to call the custom binary.
+
+Make sure cargo's bin directory is in your `$PATH`.
 
 ### bash
 
 ```bash
-function _update_ps1() {
-    PS1="$(powerline -s $? -c $COLUMNS $HOME/.config/powerline.json)"
-}
-
-if [ "$TERM" != "linux" ]; then
-    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
-fi
+source <(powerline init bash)
 ```
-
-todo: add last command duration + fix last command status
 
 ### zsh
 
-You must also compile with `zsh-SHELL` feature.
-
 ```zsh
-_generate_powerline() {
-    __powerline=$(powerline -s $? -c $COLUMNS $HOME/.config/powerline.json)
-}
-precmd_functions+=(_update_ps1)
+source <(powerline init zsh)
 ```
 
 ### fish
 
-You must also compile with `bare-SHELL` feature.
-
 ```bash
-# $CMD_DURATION isn't exported, cache it here for the fish_prompt command + reset it each time
-function cachetime --on-event fish_postexec
-  set -gx duration $CMD_DURATION
-end
-
-function fish_prompt
-  powerline -s $status -c $COLUMNS "$HOME/.config/powerline.json" $duration
-  set -gx duration 0
-end
-
-# disable any default right prompt (e.g python env)
-function fish_right_prompt
-end
+powerline init fish | source
 ```
 
-## Custom SHELL prompt
+## Customization
 
-There are two ways to customize the prompt - writing a config.json file using the default `powerline` command, or
-writing a custom program.
-Custom programs allow creating new themes and modules, but require recompilation to make even minor changes.
+Powerline will create a default config file at $HOME/.config/powerline-rs/config.json. You can edit it to make changes,
+which will be reflected immediately.
 
 ### Config file
 
 `config.rs` has the full definition of all valid types in the config directory, `example_config.json` shows a complete
 configuration setup.
 
+The only two themes at the moment are "rainbow" and "simple". New themes must be added in code at the moment, and the
+simple theme is not recommended.
+
 ### Custom program
 
-Simply create new rust program that fulfils your requirements.
+You can also create a separate rust program to fully customize the appearance. This allows creating a new theme too.
 
 ```rust
 use powerline::{modules::*, theme::SimpleTheme};
@@ -116,35 +93,6 @@ fn main() {
 }
 
 
-```
-
-## Tips and trigs
-
-### Strip executable
-
-Remove unnecessary symbols from file to greatly reduce size of it.
-Theoretically it can reduce time of execution.
-
-```bash
-cd ~/.cargo/bin/
-strip powerline
-```
-
-### Use LTO and other
-
-```toml
-# Cargo.toml
-[profile.release]
-lto = true
-panic = 'abort'
-```
-
-### Target native
-
-Enables optimizations for your specific processor.
-
-```bash
-RUSTFLAGS="-C target-cpu=native" cargo ...
 ```
 
 ### Cache untracked files
@@ -177,7 +125,6 @@ TODO:
 
 - Change git icon/name based on branch vs commit vs merging
 - Add java / gradle / jenv / sdkman support
-- Add cargo / rust support (not sure what this should actually show tho)
 - Better multiline prompts (e.g lines between)
 - Improve spacing / centering support
 - Calculate column width more accurately
