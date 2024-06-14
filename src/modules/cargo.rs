@@ -34,7 +34,7 @@ impl<S: CargoScheme> Module for Cargo<S> {
         if let Ok(cwd) = env::current_dir() {
             if cwd.join("Cargo.toml").exists() {
                 powerline.add_short_segment(
-                    format!("{}", S::ICON),
+                    S::ICON.to_string(),
                     Style::simple(S::CARGO_FG, S::CARGO_BG),
                 );
             }

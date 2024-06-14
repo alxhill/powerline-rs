@@ -1,9 +1,11 @@
-use powerline::modules::*;
-use powerline::powerline::Separator;
-use powerline::powerline::{PowerlineLeftBuilder, PowerlineRightBuilder};
-use powerline::themes::RainbowTheme;
 use std::env;
 use std::time::Duration;
+
+use powerline_rs::modules::*;
+use powerline_rs::powerline::Separator;
+use powerline_rs::powerline::{PowerlineLeftBuilder, PowerlineRightBuilder, PowerlineShellBuilder};
+use powerline_rs::terminal::Shell;
+use powerline_rs::themes::RainbowTheme;
 
 fn main() {
     let args = env::args().collect::<Vec<String>>();
@@ -17,7 +19,8 @@ fn main() {
     let columns = str::parse::<usize>(columns).unwrap_or(0);
     let duration = str::parse::<u64>(duration).map(Duration::from_millis).ok();
 
-    let top_prompt = powerline::Powerline::builder()
+    let top_prompt = powerline_rs::Powerline::builder()
+        .set_shell(Shell::Bare) // override this to whatever shell you use
         .change_separator(Separator::Chevron)
         .add_module(Spacer::<RainbowTheme>::small())
         .add_module(Cwd::<RainbowTheme>::new(60, 5, false))
@@ -30,7 +33,8 @@ fn main() {
         .add_padding(0)
         .render(columns);
 
-    let mini_prompt = powerline::Powerline::builder()
+    let mini_prompt = powerline_rs::Powerline::builder()
+        .set_shell(Shell::Bare) // override this to whatever shell you use
         .add_module(LastCmdDuration::<RainbowTheme>::new(
             duration,
             Duration::from_millis(0),

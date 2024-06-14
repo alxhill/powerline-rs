@@ -1,4 +1,4 @@
-use crate::{config, terminal};
+use crate::config;
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use std::fmt;
 use std::fmt::{Display, Write};
@@ -345,7 +345,7 @@ impl Powerline {
                         Reset,
                         padding
                     )
-                        .unwrap();
+                    .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();
@@ -397,7 +397,7 @@ impl Powerline {
                 self.separator.for_direction(Direction::Right),
                 Reset
             )
-                .unwrap();
+            .unwrap();
             self.left_columns += 1;
         }
         self.last_style = None;
