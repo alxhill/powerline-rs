@@ -1,7 +1,7 @@
 use crate::colors::*;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, UserScheme,
+    LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::CompleteTheme;
 use crate::Color;
@@ -10,6 +10,11 @@ use crate::Color;
 pub struct RainbowTheme;
 
 impl CompleteTheme for RainbowTheme {}
+
+impl TimeScheme for RainbowTheme {
+    const TIME_BG: Color = dark_grey();
+    const TIME_FG: Color = mid_grey();
+}
 
 impl CargoScheme for RainbowTheme {
     const CARGO_BG: Color = burnt_orange();

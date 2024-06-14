@@ -1,12 +1,12 @@
 use std::marker::PhantomData;
 
-use std::time::Instant;
+use chrono::Local;
 
 use super::Module;
 use crate::{Color, Powerline, Style};
 
 pub struct Time<S: TimeScheme> {
-    time_format: &'static str,
+    time_format: String,
     scheme: PhantomData<S>,
 }
 
@@ -24,12 +24,12 @@ impl<S: TimeScheme> Default for Time<S> {
 impl<S: TimeScheme> Time<S> {
     pub fn new() -> Time<S> {
         Time {
-            time_format: "%H:%M:%S",
+            time_format: "%H:%M:%S".into(),
             scheme: PhantomData,
         }
     }
 
-    pub fn with_time_format(time_format: &'static str) -> Time<S> {
+    pub fn with_time_format(time_format: String) -> Time<S> {
         Time {
             time_format,
             scheme: PhantomData,
@@ -39,8 +39,7 @@ impl<S: TimeScheme> Time<S> {
 
 impl<S: TimeScheme> Module for Time<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        // todo: bring back proper formatting for time
-        let now = Instant::now();
-        powerline.add_segment(format!("{:?}", now), Style::simple(S::TIME_FG, S::TIME_BG));
+        let now = Local::now().format(&self.time_format).to_string();
+        powerline.add_segment(now, Style::simple(S::TIME_FG, S::TIME_BG));
     }
 }

@@ -37,7 +37,9 @@ pub enum LineSegment {
     PythonEnv,
     Cargo,
     Host,
-    // Time { format: Option<String> },
+    Time {
+        format: Option<String>,
+    },
     User,
     Cmd,
     LastCmdDuration {
@@ -79,9 +81,7 @@ impl Default for Config {
                 },
                 CommandLine {
                     left: vec![
-                        LineSegment::LastCmdDuration {
-                            min_run_time: 5,
-                        },
+                        LineSegment::LastCmdDuration { min_run_time: 5 },
                         LineSegment::Cmd,
                     ],
                     right: None,

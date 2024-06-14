@@ -1,7 +1,7 @@
 extern crate powerline;
 
 use clap::{Args, Parser, Subcommand};
-use std::env::{VarError};
+use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
 use std::io::Write;
@@ -15,8 +15,7 @@ use powerline::config::{Config, TerminalRuntimeMetadata};
 use powerline::themes::{RainbowTheme, SimpleTheme};
 use powerline::Powerline;
 
-
-const FISH_CONF: &'static str = r#"
+const FISH_CONF: &str = r#"
 function __pl_cache_duration --on-event fish_postexec
   set -gx __pl_duration $CMD_DURATION
 end
@@ -27,7 +26,7 @@ function fish_prompt
 end
 "#;
 
-const ZSH_CONF: &'static str = r#"
+const ZSH_CONF: &str = r#"
 function preexec() {
     if command -v gdate >/dev/null 2>&1; then
         __pl_timer=$(($(gdate +%s%0N)/1000000))
@@ -50,7 +49,7 @@ precmd_functions+=(_generate_powerline)
 "#;
 
 // note: does not support command duration
-const BASH_CONF: &'static str = r#"
+const BASH_CONF: &str = r#"
 function _update_ps1() {
     PS1="$(powerline show -s $? -c $COLUMNS)"
 }
@@ -132,7 +131,7 @@ fn show(args: ShowArgs) {
             }
         }
         Err(e) => {
-            eprintln!("error: {}", e);
+            eprintln!("powerline error: {}", e);
             if let Some(source) = e.source() {
                 eprintln!("source:\n\t{}", source);
             }
