@@ -2,6 +2,7 @@ use crate::config;
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use std::fmt;
 use std::fmt::{Display, Write};
+use std::time::Duration;
 
 use crate::modules::{
     Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, PythonEnv, ReadOnly, Spacer, User,
@@ -289,7 +290,7 @@ impl Powerline {
                 LineSegment::User => self.add_module(User::<T>::new()),
                 LineSegment::Padding(size) => self.add_padding(*size),
                 LineSegment::LastCmdDuration { min_run_time } => self.add_module(
-                    LastCmdDuration::<T>::new(runtime_data.last_command_duration(), *min_run_time),
+                    LastCmdDuration::<T>::new(runtime_data.last_command_duration(), Duration::from_millis(*min_run_time)),
                 ),
                 LineSegment::Cwd {
                     max_length,
@@ -326,7 +327,7 @@ impl Powerline {
                         Reset,
                         padding
                     )
-                    .unwrap();
+                        .unwrap();
                     self.right_columns += 1;
                 } else {
                     write!(self.right_buffer, "{}", padding).unwrap();
@@ -378,7 +379,7 @@ impl Powerline {
                 self.separator.for_direction(Direction::Right),
                 Reset
             )
-            .unwrap();
+                .unwrap();
             self.left_columns += 1;
         }
         self.last_style = None;

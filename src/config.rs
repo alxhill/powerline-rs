@@ -1,4 +1,3 @@
-use duration_str::deserialize_duration;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -42,8 +41,7 @@ pub enum LineSegment {
     User,
     Cmd,
     LastCmdDuration {
-        #[serde(deserialize_with = "deserialize_duration")]
-        min_run_time: Duration,
+        min_run_time: u64, // milliseconds
     },
     Padding(usize),
 }
@@ -53,4 +51,42 @@ pub enum LineSegment {
 pub enum SeparatorStyle {
     Chevron,
     Round,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            theme: "rainbow".into(),
+            rows: vec![
+                CommandLine {
+                    left: vec![
+                        LineSegment::SmallSpacer,
+                        LineSegment::ReadOnly,
+                        LineSegment::Cwd {
+                            max_length: 60,
+                            wanted_seg_num: 5,
+                            resolve_symlinks: false,
+                        },
+                        LineSegment::SmallSpacer,
+                        LineSegment::Git,
+                    ],
+                    right: Some(vec![
+                        LineSegment::Separator(SeparatorStyle::Round),
+                        LineSegment::Cargo,
+                        LineSegment::PythonEnv,
+                        LineSegment::Padding(0),
+                    ]),
+                },
+                CommandLine {
+                    left: vec![
+                        LineSegment::LastCmdDuration {
+                            min_run_time: 5,
+                        },
+                        LineSegment::Cmd,
+                    ],
+                    right: None,
+                },
+            ],
+        }
+    }
 }

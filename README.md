@@ -1,20 +1,10 @@
+# powerline-rs
 _Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and adjusted for personal taste_
-
-# powerline-rust
-
-![Header shell image](main.png)
-
-> The 'rainbow' theme in a git repo.
 
 ![Shell with pyenv showing](with_pyenv.png)
 
-> The 'rainbow' theme with a conda environment active.
-
-powerline-rust is an alternative to [powerline-shell](https://github.com/b-ryan/powerline-shell). It's heavily inspired
+powerline-rs is a pure-rust version of [powerline-shell](https://github.com/b-ryan/powerline-shell). It's heavily inspired
 by it, but focuses on minimalizing time of execution and supporting a limited subset of features.
-
-With default settings `powerline-rust` uses `libgit` for git prompt. Unfortunately results vary from system to system so
-if you want every last bit of a performance you can try disabling this feature and benchmarking.
 
 ## Advantages
 
@@ -27,8 +17,8 @@ if you want every last bit of a performance you can try disabling this feature a
 
 ## Simple installation
 
-powerline-rust relies on using a [Nerd Font](https://www.nerdfonts.com/) - configure your shell to use a nerdfont,
-otherwise many of the characters will not render correctly.
+powerline-rs relies on using a [Nerd Font](https://www.nerdfonts.com/) - configure your shell to use a Nerd Font,
+otherwise many characters will not render correctly. Meslo LG S is recommended and can be found [here](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Meslo.zip).
 
 iTerm2 users are recommended to enable the "Use builtin Powerline glyphs" option even when using a nerdfont as this
 seems to fix any potential character alignment issues.
