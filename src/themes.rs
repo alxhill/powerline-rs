@@ -6,6 +6,7 @@ use crate::modules::{
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 
+mod light;
 mod rainbow;
 mod simple;
 

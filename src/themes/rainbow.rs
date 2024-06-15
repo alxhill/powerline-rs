@@ -1,10 +1,10 @@
+use crate::Color;
 use crate::colors::*;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::CompleteTheme;
-use crate::Color;
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
@@ -17,6 +17,7 @@ impl TimeScheme for RainbowTheme {
 }
 
 impl CargoScheme for RainbowTheme {
+    const CARGO_FG: Color = dark_grey();
     const CARGO_BG: Color = burnt_orange();
 }
 

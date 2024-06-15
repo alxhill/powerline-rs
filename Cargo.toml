@@ -22,7 +22,7 @@ libgit = ["git2"]
 
 [profile.release]
 opt-level = 3
-lto = true
+lto = "fat"
 debug = false
 strip = "debuginfo"
 codegen-units = 1
