@@ -1,20 +1,21 @@
 extern crate powerline_rs;
 
+use std::{env, io};
 use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
 use std::io::Write;
 use std::path::PathBuf;
+use std::process::Command;
 use std::time::Duration;
-use std::{env, io};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
 use powerline_rs::config::{Config, TerminalRuntimeMetadata};
+use powerline_rs::Powerline;
 use powerline_rs::terminal::{Shell, SHELL};
 use powerline_rs::themes::{RainbowTheme, SimpleTheme};
-use powerline_rs::Powerline;
 
 const FISH_CONF: &str = r#"
 function __pl_cache_duration --on-event fish_postexec
@@ -65,6 +66,7 @@ enum PowerlineArgs {
     #[command(subcommand)]
     Init(ShellSubcommand),
     Show(ShowArgs),
+    Config,
 }
 
 #[derive(Debug, Subcommand)]
@@ -115,7 +117,19 @@ fn main() {
     match args {
         PowerlineArgs::Init(shell) => print_shell_conf(shell),
         PowerlineArgs::Show(args) => show(args),
+        PowerlineArgs::Config => open_config(),
     }
+}
+
+fn open_config() {
+    let conf = get_or_create_conf_file().unwrap();
+
+    let editor = env::var("EDITOR").unwrap_or("vim".to_string());
+
+    Command::new(editor)
+        .arg(conf)
+        .status()
+        .expect("Failed to get editor exit status");
 }
 
 fn print_shell_conf(shell: ShellSubcommand) {
@@ -134,7 +148,7 @@ fn show(args: ShowArgs) {
                 ShellArg::Zsh => SHELL.set(Shell::Zsh),
                 ShellArg::Fish => SHELL.set(Shell::Bare),
             }
-            .expect("failed to set shell");
+                .expect("failed to set shell");
 
             for prompt in conf.rows {
                 let powerline = match conf.theme.as_str() {
