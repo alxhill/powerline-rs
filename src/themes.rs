@@ -1,12 +1,13 @@
-mod rainbow;
-mod simple;
+pub use rainbow::RainbowTheme;
+pub use simple::SimpleTheme;
 
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
-pub use rainbow::RainbowTheme;
-pub use simple::SimpleTheme;
+
+mod rainbow;
+mod simple;
 
 pub trait CompleteTheme:
     CmdScheme
