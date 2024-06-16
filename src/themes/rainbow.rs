@@ -1,13 +1,23 @@
+use crate::Color;
 use crate::colors::*;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
-use crate::themes::CompleteTheme;
-use crate::Color;
+use crate::themes::{CompleteTheme, DefaultColors};
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
+
+impl DefaultColors for RainbowTheme {
+    fn default_bg() -> Color {
+        blue()
+    }
+
+    fn default_fg() -> Color {
+        light_grey()
+    }
+}
 
 impl CompleteTheme for RainbowTheme {}
 
@@ -17,8 +27,13 @@ impl TimeScheme for RainbowTheme {
 }
 
 impl CargoScheme for RainbowTheme {
-    const CARGO_FG: Color = dark_grey();
-    const CARGO_BG: Color = burnt_orange();
+    fn cargo_fg() -> Color {
+        dark_grey()
+    }
+
+    fn cargo_bg() -> Color {
+        burnt_orange()
+    }
 }
 
 impl UserScheme for RainbowTheme {
@@ -38,11 +53,23 @@ impl ExitCodeScheme for RainbowTheme {
 }
 
 impl CmdScheme for RainbowTheme {
-    const CMD_PASSED_FG: Color = green();
-    const CMD_PASSED_BG: Color = black();
-    const CMD_FAILED_BG: Color = warning_red();
-    const CMD_FAILED_FG: Color = white();
     const CMD_USER_SYMBOL: &'static str = "\u{f105}";
+
+    fn cmd_passed_fg() -> Color {
+        green()
+    }
+
+    fn cmd_passed_bg() -> Color {
+        black()
+    }
+
+    fn cmd_failed_bg() -> Color {
+        warning_red()
+    }
+
+    fn cmd_failed_fg() -> Color {
+        white()
+    }
 }
 
 impl CwdScheme for RainbowTheme {

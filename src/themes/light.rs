@@ -1,19 +1,25 @@
+use crate::Color;
+use crate::colors::{dark_grey, light_grey};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
-use crate::themes::CompleteTheme;
-use crate::Color;
+use crate::themes::{CompleteTheme, DefaultColors};
 
 #[derive(Copy, Clone)]
 pub struct LightTheme;
 
-impl CmdScheme for LightTheme {
-    const CMD_PASSED_FG: Color = Color(0);
-    const CMD_PASSED_BG: Color = Color(0);
-    const CMD_FAILED_BG: Color = Color(0);
-    const CMD_FAILED_FG: Color = Color(0);
+impl DefaultColors for LightTheme {
+    fn default_bg() -> Color {
+        dark_grey()
+    }
+
+    fn default_fg() -> Color {
+        light_grey()
+    }
 }
+
+impl CmdScheme for LightTheme {}
 
 impl CwdScheme for LightTheme {
     fn path_bg_colors() -> Vec<Color> {
@@ -74,7 +80,9 @@ impl UserScheme for LightTheme {
 }
 
 impl CargoScheme for LightTheme {
-    const CARGO_BG: Color = Color(0);
+    fn cargo_bg() -> Color {
+        dark_grey()
+    }
 }
 
 impl TimeScheme for LightTheme {

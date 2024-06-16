@@ -1,19 +1,26 @@
 use std::env;
 use std::marker::PhantomData;
 
-use crate::colors::white;
-use crate::modules::Module;
 use crate::{Color, Powerline, Style};
+use crate::modules::Module;
+use crate::themes::DefaultColors;
 
 pub struct Cargo<S> {
     scheme: PhantomData<S>,
 }
 
-pub trait CargoScheme {
-    const CARGO_FG: Color = white();
-    const CARGO_BG: Color;
+pub trait CargoScheme: DefaultColors {
+    fn cargo_fg() -> Color {
+        Self::default_fg()
+    }
 
-    const ICON: &'static str = "\u{e68b}";
+    fn cargo_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn icon() -> &'static str {
+        "\u{e68b}"
+    }
 }
 
 impl<S: CargoScheme> Default for Cargo<S> {
@@ -34,7 +41,10 @@ impl<S: CargoScheme> Module for Cargo<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         if let Ok(cwd) = env::current_dir() {
             if cwd.join("Cargo.toml").exists() {
-                powerline.add_segment(S::ICON.to_string(), Style::simple(S::CARGO_FG, S::CARGO_BG));
+                powerline.add_segment(
+                    S::icon().to_string(),
+                    Style::simple(S::cargo_fg(), S::cargo_bg()),
+                );
             }
         }
     }

@@ -1,17 +1,30 @@
+use crate::{Color, colors};
+use crate::colors::{black, dark_grey, light_grey};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
-use crate::themes::CompleteTheme;
-use crate::{colors, Color};
+use crate::themes::{CompleteTheme, DefaultColors};
 
 #[derive(Copy, Clone)]
 pub struct SimpleTheme;
 
+impl DefaultColors for SimpleTheme {
+    fn default_bg() -> Color {
+        black()
+    }
+
+    fn default_fg() -> Color {
+        light_grey()
+    }
+}
+
 impl CompleteTheme for SimpleTheme {}
 
 impl CargoScheme for SimpleTheme {
-    const CARGO_BG: Color = Color(0);
+    fn cargo_bg() -> Color {
+        dark_grey()
+    }
 }
 
 impl LastCmdDurationScheme for SimpleTheme {
@@ -29,10 +42,21 @@ impl PythonEnvScheme for SimpleTheme {
 impl SpacerScheme for SimpleTheme {}
 
 impl CmdScheme for SimpleTheme {
-    const CMD_PASSED_FG: Color = Color(15);
-    const CMD_PASSED_BG: Color = Color(236);
-    const CMD_FAILED_BG: Color = Color(161);
-    const CMD_FAILED_FG: Color = Color(15);
+    fn cmd_passed_fg() -> Color {
+        Color(15)
+    }
+
+    fn cmd_passed_bg() -> Color {
+        Color(236)
+    }
+
+    fn cmd_failed_bg() -> Color {
+        Color(161)
+    }
+
+    fn cmd_failed_fg() -> Color {
+        Color(15)
+    }
 }
 
 impl CwdScheme for SimpleTheme {

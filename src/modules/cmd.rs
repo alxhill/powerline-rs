@@ -1,20 +1,34 @@
 use std::marker::PhantomData;
 
-use super::Module;
 use crate::{Color, Powerline, Style};
+use crate::themes::DefaultColors;
+
+use super::Module;
 
 pub struct Cmd<S: CmdScheme> {
     status: String,
     scheme: PhantomData<S>,
 }
 
-pub trait CmdScheme {
-    const CMD_PASSED_FG: Color;
-    const CMD_PASSED_BG: Color;
-    const CMD_FAILED_BG: Color;
-    const CMD_FAILED_FG: Color;
+pub trait CmdScheme: DefaultColors {
     const CMD_ROOT_SYMBOL: &'static str = "#";
     const CMD_USER_SYMBOL: &'static str = "$";
+
+    fn cmd_passed_fg() -> Color {
+        Self::default_fg()
+    }
+
+    fn cmd_passed_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn cmd_failed_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn cmd_failed_fg() -> Color {
+        Self::default_fg()
+    }
 }
 
 impl<S: CmdScheme> Cmd<S> {
@@ -34,8 +48,8 @@ impl<S: CmdScheme> Module for Cmd<S> {
             S::CMD_USER_SYMBOL
         };
         let (symbol, fg, bg) = match self.status.as_ref() {
-            "0" => (user_symbol, S::CMD_PASSED_FG, S::CMD_PASSED_BG),
-            non_zero_code => (non_zero_code, S::CMD_FAILED_FG, S::CMD_FAILED_BG),
+            "0" => (user_symbol, S::cmd_passed_fg(), S::cmd_passed_bg()),
+            non_zero_code => (non_zero_code, S::cmd_failed_fg(), S::cmd_failed_bg()),
         };
 
         powerline.add_short_segment(symbol, Style::simple(fg, bg));

@@ -15,7 +15,7 @@ use thiserror::Error;
 use powerline_rs::config::{Config, TerminalRuntimeMetadata};
 use powerline_rs::Powerline;
 use powerline_rs::terminal::{Shell, SHELL};
-use powerline_rs::themes::{RainbowTheme, SimpleTheme};
+use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
 
 const FISH_CONF: &str = r#"
 function __pl_cache_duration --on-event fish_postexec
@@ -148,12 +148,18 @@ fn show(args: ShowArgs) {
                 ShellArg::Zsh => SHELL.set(Shell::Zsh),
                 ShellArg::Fish => SHELL.set(Shell::Bare),
             }
-                .expect("failed to set shell");
+            .expect("failed to set shell");
 
             for prompt in conf.rows {
                 let powerline = match conf.theme.as_str() {
                     "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt, &args),
                     "simple" => Powerline::from_conf::<SimpleTheme>(&prompt, &args),
+                    "theme.json" => {
+                        CustomTheme::load(PathBuf::from(
+                            "/Users/alxhill/.config/powerline-rs/theme.json",
+                        ));
+                        Powerline::from_conf::<CustomTheme>(&prompt, &args)
+                    }
                     _ => panic!("unknown theme, supported themes are simple and rainbow"),
                 };
 
