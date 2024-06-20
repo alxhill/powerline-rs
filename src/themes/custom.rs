@@ -3,6 +3,7 @@ use std::fs::File;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
+use serde::Deserialize;
 use serde_json::Value;
 
 use crate::Color;
@@ -13,15 +14,42 @@ use crate::modules::{
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
-static THEME: OnceLock<HashMap<String, Value>> = OnceLock::new();
-
 #[derive(Clone)]
 pub struct CustomTheme;
 
+static THEME: OnceLock<CustomThemeImpl> = OnceLock::new();
+
+#[derive(Deserialize)]
+enum ColorsJson {
+    Named(String),
+    Code(u8),
+}
+
+#[derive(Deserialize)]
+struct DefaultColorsJson {
+    default_bg: ColorsJson,
+    default_fg: ColorsJson,
+    secondary_bg: Option<ColorsJson>,
+    secondary_fg: Option<ColorsJson>,
+    alert_bg: Option<ColorsJson>,
+    alert_fg: Option<ColorsJson>,
+}
+
+#[derive(Deserialize)]
+struct CustomThemeImpl {
+    defaults: DefaultColorsJson,
+    modules: HashMap<String, HashMap<String, ColorsJson>>,
+}
+
+impl CustomThemeImpl {
+    fn get_color(module: String, color: String) -> Color {
+        let module = THEME.get().unwrap().modules.get(&module);
+    }
+}
+
 impl CustomTheme {
     pub fn load(path: PathBuf) {
-        let theme: HashMap<String, Value> =
-            serde_json::from_reader(File::open(path).unwrap()).unwrap();
+        let theme: CustomThemeImpl = serde_json::from_reader(File::open(path).unwrap()).unwrap();
         let _ = THEME.set(theme);
 
         // todo: figure out why this is being set twice...

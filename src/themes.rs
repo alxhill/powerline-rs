@@ -16,6 +16,22 @@ mod simple;
 pub trait DefaultColors {
     fn default_bg() -> Color;
     fn default_fg() -> Color;
+
+    fn secondary_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn secondary_fg() -> Color {
+        Self::default_fg()
+    }
+
+    fn alert_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn alert_fg() -> Color {
+        Self::default_fg()
+    }
 }
 
 pub trait CompleteTheme:
