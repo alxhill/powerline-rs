@@ -4,10 +4,9 @@ use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use serde::Deserialize;
-use serde_json::Value;
 
 use crate::Color;
-use crate::colors::{black, burnt_orange, dark_grey, white};
+use crate::colors::{black, burnt_orange, dark_grey, light_grey, white};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -20,19 +19,34 @@ pub struct CustomTheme;
 static THEME: OnceLock<CustomThemeImpl> = OnceLock::new();
 
 #[derive(Deserialize)]
+#[serde(untagged)]
 enum ColorsJson {
     Named(String),
     Code(u8),
 }
 
+impl From<&ColorsJson> for Color {
+    fn from(value: &ColorsJson) -> Self {
+        match value {
+            ColorsJson::Named(col_name) => match col_name.as_str() {
+                "black" => black(),
+                "burnt_orange" => burnt_orange(),
+                "light_grey" => light_grey(),
+                _ => unimplemented!(),
+            },
+            ColorsJson::Code(col_code) => Color(*col_code),
+        }
+    }
+}
+
 #[derive(Deserialize)]
 struct DefaultColorsJson {
-    default_bg: ColorsJson,
-    default_fg: ColorsJson,
-    secondary_bg: Option<ColorsJson>,
+    fg: ColorsJson,
+    bg: ColorsJson,
     secondary_fg: Option<ColorsJson>,
-    alert_bg: Option<ColorsJson>,
+    secondary_bg: Option<ColorsJson>,
     alert_fg: Option<ColorsJson>,
+    alert_bg: Option<ColorsJson>,
 }
 
 #[derive(Deserialize)]
@@ -42,8 +56,11 @@ struct CustomThemeImpl {
 }
 
 impl CustomThemeImpl {
-    fn get_color(module: String, color: String) -> Color {
-        let module = THEME.get().unwrap().modules.get(&module);
+    fn get_color(&self, module: &str, color: &str) -> Option<Color> {
+        self.modules
+            .get(module)
+            .and_then(|colors| colors.get(color))
+            .map(|col_json| col_json.into())
     }
 }
 
@@ -78,39 +95,21 @@ impl CompleteTheme for CustomTheme {}
 
 impl CargoScheme for CustomTheme {
     fn cargo_fg() -> Color {
-        let fg_value = THEME
+        THEME
             .get()
             .unwrap()
-            .get::<String>(&"cargo".to_string())
-            .expect("no cargo theme found"); // todo: use defaults
-
-        match fg_value.get("fg").unwrap() {
-            Value::Number(col_idx) => Color(col_idx.as_u64().unwrap() as u8),
-            Value::String(color_name) => match color_name.as_str() {
-                "black" => black(),
-                "burnt_orange" => burnt_orange(),
-                _ => panic!("unknown color"),
-            },
-            _ => panic!("invalid json"),
-        }
+            .get_color("cargo", "fg")
+            // todo: use defaults
+            .expect("no cargo theme found")
     }
 
     fn cargo_bg() -> Color {
-        let bg_value = THEME
+        THEME
             .get()
             .unwrap()
-            .get::<String>(&"cargo".to_string())
-            .expect("no cargo theme found"); // todo: use defaults
-
-        match bg_value.get("bg").unwrap() {
-            Value::Number(col_idx) => Color(col_idx.as_u64().unwrap() as u8),
-            Value::String(color_name) => match color_name.as_str() {
-                "black" => black(),
-                "burnt_orange" => burnt_orange(),
-                _ => panic!("unknown color"),
-            },
-            _ => panic!("invalid json"),
-        }
+            .get_color("cargo", "bg")
+            // todo: use defaults
+            .expect("no cargo theme found")
     }
 }
 
