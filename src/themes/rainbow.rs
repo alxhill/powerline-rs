@@ -93,6 +93,10 @@ impl CmdScheme for RainbowTheme {
 }
 
 impl CwdScheme for RainbowTheme {
+    fn path_fg() -> Color {
+        white()
+    }
+
     fn path_bg_colors() -> Vec<Color> {
         vec![red(), orange(), yellow(), green(), blue(), nice_puple()]
     }
