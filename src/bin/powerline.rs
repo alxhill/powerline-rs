@@ -1,5 +1,6 @@
 extern crate powerline_rs;
 
+use std::{env, io};
 use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
@@ -7,15 +8,14 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
-use std::{env, io};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
 use powerline_rs::config::{Config, TerminalRuntimeMetadata};
+use powerline_rs::Powerline;
 use powerline_rs::terminal::{Shell, SHELL};
 use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
-use powerline_rs::Powerline;
 
 const FISH_CONF: &str = r#"
 function __pl_cache_duration --on-event fish_postexec
@@ -142,7 +142,7 @@ fn print_shell_conf(shell: ShellSubcommand) {
 
 fn show(args: ShowArgs) {
     match load_config(args.config.clone()) {
-        Ok(conf) => {
+        Ok((conf, conf_root)) => {
             match args.shell {
                 ShellArg::Bash => SHELL.set(Shell::Bash),
                 ShellArg::Zsh => SHELL.set(Shell::Zsh),
@@ -150,14 +150,17 @@ fn show(args: ShowArgs) {
             }
             .expect("failed to set shell");
 
-            println!("current dir: {:?}", env::current_dir().unwrap());
-
             for prompt in conf.rows {
                 let powerline = match conf.theme.as_str() {
                     "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt, &args),
                     "simple" => Powerline::from_conf::<SimpleTheme>(&prompt, &args),
                     theme_path => {
-                        CustomTheme::load(PathBuf::from(theme_path));
+                        let path = match theme_path.as_bytes() {
+                            [b'/', ..] => PathBuf::from(theme_path),
+                            _ => conf_root.join(theme_path),
+                        };
+
+                        CustomTheme::load(path);
                         Powerline::from_conf::<CustomTheme>(&prompt, &args)
                     }
                 };
@@ -184,11 +187,11 @@ enum PowerlineError {
     InvalidConfig(#[from] serde_json::Error),
 }
 
-fn load_config(conf_file: Option<PathBuf>) -> Result<Config, PowerlineError> {
-    let conf_file = conf_file.unwrap_or_else(|| get_or_create_conf_file().unwrap());
-    let conf_file = File::open(conf_file)?;
+fn load_config(conf_file: Option<PathBuf>) -> Result<(Config, PathBuf), PowerlineError> {
+    let conf_path = conf_file.unwrap_or_else(|| get_or_create_conf_file().unwrap());
+    let conf_file = File::open(&conf_path)?;
     let conf: Config = serde_json::from_reader(conf_file)?;
-    Ok(conf)
+    Ok((conf, conf_path.parent().unwrap().into()))
 }
 
 fn get_or_create_conf_file() -> Result<PathBuf, PowerlineError> {
