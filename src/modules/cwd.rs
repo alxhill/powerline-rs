@@ -2,8 +2,8 @@ use std::marker::PhantomData;
 use std::{env, path};
 
 use super::Module;
-use crate::colors::white;
-use crate::{Color, Powerline, Style};
+use crate::colors::{white, Color};
+use crate::{Powerline, Style};
 
 pub struct Cwd<S: CwdScheme> {
     max_length: usize,

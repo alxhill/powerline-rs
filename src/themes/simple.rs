@@ -1,5 +1,5 @@
-use crate::{Color, colors};
-use crate::colors::{black, dark_grey, light_grey};
+use crate::colors;
+use crate::colors::{black, dark_grey, light_grey, Color};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,

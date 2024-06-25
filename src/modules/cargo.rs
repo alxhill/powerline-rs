@@ -1,9 +1,10 @@
 use std::env;
 use std::marker::PhantomData;
 
-use crate::{Color, Powerline, Style};
+use crate::colors::Color;
 use crate::modules::Module;
 use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
 
 pub struct Cargo<S> {
     scheme: PhantomData<S>,

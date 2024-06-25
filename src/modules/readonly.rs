@@ -2,7 +2,8 @@ use std::ffi::CString;
 use std::marker::PhantomData;
 
 use super::Module;
-use crate::{Color, Powerline, Style};
+use crate::colors::Color;
+use crate::{Powerline, Style};
 
 pub struct ReadOnly<S>(PhantomData<S>);
 

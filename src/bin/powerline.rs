@@ -1,6 +1,5 @@
 extern crate powerline_rs;
 
-use std::{env, io};
 use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
@@ -8,14 +7,15 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
+use std::{env, io};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
 use powerline_rs::config::{Config, TerminalRuntimeMetadata};
-use powerline_rs::Powerline;
 use powerline_rs::terminal::{Shell, SHELL};
 use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
+use powerline_rs::Powerline;
 
 const FISH_CONF: &str = r#"
 function __pl_cache_duration --on-event fish_postexec

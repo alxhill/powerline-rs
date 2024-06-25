@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 
 use serde::Deserialize;
 
-use crate::Color;
+use crate::colors::Color;
 use crate::colors::{black, burnt_orange, dark_grey, light_grey, white};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,

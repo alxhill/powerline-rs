@@ -1,5 +1,6 @@
+use crate::colors::Color;
 use crate::modules::Module;
-use crate::{colors, Color, Powerline, Style};
+use crate::{colors, Powerline, Style};
 use std::marker::PhantomData;
 
 #[derive(Copy, Clone)]

@@ -2,7 +2,7 @@ pub use custom::CustomTheme;
 pub use rainbow::RainbowTheme;
 pub use simple::SimpleTheme;
 
-use crate::Color;
+use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,

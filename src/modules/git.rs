@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 use std::path::PathBuf;
 
 use super::Module;
-use crate::{Color, Powerline, Style};
+use crate::{Powerline, Style};
 
 #[cfg(not(feature = "libgit"))]
 mod process;
@@ -16,6 +16,7 @@ use process as internal;
 #[cfg(feature = "libgit")]
 mod libgit;
 
+use crate::colors::Color;
 #[cfg(feature = "libgit")]
 use libgit as internal;
 

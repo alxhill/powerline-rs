@@ -3,7 +3,8 @@ use std::marker::PhantomData;
 use chrono::Local;
 
 use super::Module;
-use crate::{Color, Powerline, Style};
+use crate::colors::Color;
+use crate::{Powerline, Style};
 
 pub struct Time<S: TimeScheme> {
     time_format: String,

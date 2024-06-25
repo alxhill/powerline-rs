@@ -1,7 +1,8 @@
 use std::marker::PhantomData;
 
-use crate::{Color, Powerline, Style};
+use crate::colors::Color;
 use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
 
 use super::Module;
 
@@ -28,6 +29,14 @@ pub trait CmdScheme: DefaultColors {
 
     fn cmd_failed_fg() -> Color {
         Self::default_fg()
+    }
+
+    fn cmd_root_symbol() -> &'static str {
+        "#"
+    }
+
+    fn cmd_user_symbol() -> &'static str {
+        "$"
     }
 }
 

@@ -1,5 +1,7 @@
 use std::sync::OnceLock;
 
+use crate::colors::Color;
+
 pub static SHELL: OnceLock<Shell> = OnceLock::new();
 
 #[derive(Debug)]
@@ -10,25 +12,12 @@ pub enum Shell {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub struct Color(pub u8);
-
-#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct BgColor(u8);
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FgColor(u8);
 
 pub struct Reset;
-
-impl Color {
-    pub fn to_u8(self) -> u8 {
-        self.0
-    }
-
-    pub fn from_u8(val: u8) -> Color {
-        Color(val)
-    }
-}
 
 impl FgColor {
     pub fn transpose(self) -> BgColor {

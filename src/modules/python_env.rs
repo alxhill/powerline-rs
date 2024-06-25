@@ -5,8 +5,10 @@ use std::marker::PhantomData;
 use std::path::Path;
 use std::process::Command;
 
+use crate::colors::Color;
+use crate::{Powerline, Style};
+
 use super::Module;
-use crate::{Color, Powerline, Style};
 
 pub struct PythonEnv<S: PythonEnvScheme> {
     scheme: PhantomData<S>,

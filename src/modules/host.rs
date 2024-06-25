@@ -1,7 +1,9 @@
 use std::marker::PhantomData;
 
+use crate::colors::Color;
+use crate::{utils, Powerline, Style};
+
 use super::Module;
-use crate::{utils, Color, Powerline, Style};
 
 pub struct Host<S: HostScheme> {
     show_on_local: bool,

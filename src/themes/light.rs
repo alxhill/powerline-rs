@@ -1,4 +1,4 @@
-use crate::Color;
+use crate::colors::Color;
 use crate::colors::{dark_grey, light_grey};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,

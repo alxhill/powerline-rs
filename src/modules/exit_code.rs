@@ -2,7 +2,8 @@ use std::env;
 use std::marker::PhantomData;
 
 use super::Module;
-use crate::{Color, Powerline, Style};
+use crate::colors::Color;
+use crate::{Powerline, Style};
 
 pub struct ExitCode<S: ExitCodeScheme> {
     scheme: PhantomData<S>,

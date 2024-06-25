@@ -1,7 +1,9 @@
-use crate::modules::Module;
-use crate::{Color, Powerline, Style};
 use std::marker::PhantomData;
 use std::time::Duration;
+
+use crate::colors::Color;
+use crate::modules::Module;
+use crate::{Powerline, Style};
 
 pub struct LastCmdDuration<S> {
     min_display_time: Duration,

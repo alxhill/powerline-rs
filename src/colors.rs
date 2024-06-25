@@ -1,6 +1,10 @@
 #![allow(dead_code)]
 
-use crate::Color;
+use std::collections::HashMap;
+use std::sync::OnceLock;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct Color(pub u8);
 
 macro_rules! term_color {
     ($name:ident, $code:expr) => {
@@ -10,37 +14,73 @@ macro_rules! term_color {
     };
 }
 
-term_color!(black, 0);
-term_color!(red, 1);
-term_color!(light_red, 9);
-term_color!(green, 2);
-term_color!(light_green, 10);
-term_color!(yellow, 3);
-term_color!(light_yellow, 11);
-term_color!(blue, 4);
-term_color!(light_blue, 12);
-term_color!(purple, 5);
-term_color!(light_purple, 13);
-term_color!(turquoise, 6);
-term_color!(light_turquoise, 14);
-term_color!(grey, 7);
-term_color!(white, 15);
-term_color!(dark_grey, 234);
-term_color!(light_grey, 250);
-term_color!(mid_grey, 240);
+macro_rules! define_colors {
+    ($($name:ident => $code:expr),* $(,)?) => {
+        $(
+            term_color!($name, $code);
+        )*
+        fn color_map() -> &'static HashMap<&'static str, Color> {
+            static COLOR_MAP: OnceLock<HashMap<&'static str, Color>> = OnceLock::new();
+            COLOR_MAP.get_or_init(|| {
+                let mut m = HashMap::new();
+                $(
+                    m.insert(stringify!($name), $name());
+                )*
+                m
+            })
+        }
 
-term_color!(turquoise_blue, 31);
-term_color!(dark_green, 22);
-term_color!(mid_green, 28);
-term_color!(mid_red, 124);
-term_color!(forest_green, 22);
-term_color!(warning_red, 160);
-term_color!(burgundy, 52);
+        impl Color {
+            pub fn from_name(name: &str) -> Option<Color> {
+                color_map().get(name).copied()
+            }
+        }
+    };
+}
 
-term_color!(dark_red, 52);
-term_color!(orange, 130);
-term_color!(bright_orange, 202);
-term_color!(dark_yellow, 136);
-term_color!(dark_blue, 19);
-term_color!(nice_puple, 55);
-term_color!(burnt_orange, 214);
+define_colors! {
+    black => 0,
+    red => 1,
+    light_red => 9,
+    green => 2,
+    light_green => 10,
+    yellow => 3,
+    light_yellow => 11,
+    blue => 4,
+    light_blue => 12,
+    purple => 5,
+    light_purple => 13,
+    turquoise => 6,
+    light_turquoise => 14,
+    grey => 7,
+    white => 15,
+    dark_grey => 234,
+    light_grey => 250,
+    mid_grey => 240,
+
+    turquoise_blue => 31,
+    dark_green => 22,
+    mid_green => 28,
+    mid_red => 124,
+    forest_green => 22,
+    warning_red => 160,
+    burgundy => 52,
+
+    dark_red => 52,
+    orange => 130,
+    bright_orange => 202,
+    dark_yellow => 136,
+    dark_blue => 19,
+    nice_puple => 55,
+    burnt_orange => 214
+}
+
+impl Color {
+    pub fn to_u8(self) -> u8 {
+        self.0
+    }
+
+    pub fn from_u8(val: u8) -> Color {
+        Color(val)
+    }
+}
