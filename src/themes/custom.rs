@@ -5,8 +5,8 @@ use std::sync::OnceLock;
 
 use serde::Deserialize;
 
+use crate::colors::{black, dark_grey, white};
 use crate::colors::Color;
-use crate::colors::{black, burnt_orange, dark_grey, light_grey, white};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -28,12 +28,10 @@ enum ColorsJson {
 impl From<&ColorsJson> for Color {
     fn from(value: &ColorsJson) -> Self {
         match value {
-            ColorsJson::Named(col_name) => match col_name.as_str() {
-                "black" => black(),
-                "burnt_orange" => burnt_orange(),
-                "light_grey" => light_grey(),
-                _ => unimplemented!(),
-            },
+            ColorsJson::Named(col_name) => {
+                let c = col_name.as_str();
+                Color::from_name(c).expect("unknown color")
+            }
             ColorsJson::Code(col_code) => Color(*col_code),
         }
     }
@@ -79,6 +77,11 @@ impl CustomTheme {
         //     }
         // }
     }
+
+    pub fn get_color(module: &str, color: &str) -> Option<Color> {
+        let theme = THEME.get().expect("custom theme not set");
+        theme.get_color(module, color)
+    }
 }
 
 impl DefaultColors for CustomTheme {
@@ -95,21 +98,11 @@ impl CompleteTheme for CustomTheme {}
 
 impl CargoScheme for CustomTheme {
     fn cargo_fg() -> Color {
-        THEME
-            .get()
-            .unwrap()
-            .get_color("cargo", "fg")
-            // todo: use defaults
-            .expect("no cargo theme found")
+        Self::get_color("cargo", "fg").unwrap_or_else(Self::default_fg)
     }
 
     fn cargo_bg() -> Color {
-        THEME
-            .get()
-            .unwrap()
-            .get_color("cargo", "bg")
-            // todo: use defaults
-            .expect("no cargo theme found")
+        Self::get_color("cargo", "bg").unwrap_or_else(Self::default_bg)
     }
 }
 

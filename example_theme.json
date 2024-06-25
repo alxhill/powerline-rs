@@ -1,0 +1,12 @@
+{
+  "defaults": {
+    "fg": "light_grey",
+    "bg": "black"
+  },
+  "modules": {
+    "cargo": {
+      "bg": "burnt_orange",
+      "fg": "black"
+    }
+  }
+}
