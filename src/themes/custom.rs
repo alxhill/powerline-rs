@@ -159,6 +159,12 @@ impl CmdScheme for CustomTheme {
 
     color_from_json!(cmd_failed_bg, cmd, failed_fg, default_fg);
     color_from_json!(cmd_failed_fg, cmd, failed_bg, default_bg);
+
+    fn cmd_user_symbol() -> &'static str {
+        Self::get_str("cmd", "user_symbol")
+            .map(|str| str.leak() as &'static str)
+            .unwrap_or(Self::DEFAULT_USER_SYMBOL)
+    }
 }
 
 impl CwdScheme for CustomTheme {
@@ -169,8 +175,14 @@ impl CwdScheme for CustomTheme {
 }
 
 impl LastCmdDurationScheme for CustomTheme {
-    color_from_json!(time_bg, time, bg, default_bg);
-    color_from_json!(time_fg, time, fg, default_fg);
+    color_from_json!(time_bg, last_cmd_duration, bg, default_bg);
+    color_from_json!(time_fg, last_cmd_duration, fg, default_fg);
+
+    fn time_icon() -> &'static str {
+        Self::get_str("last_cmd_duration", "time_icon")
+            .map(|str| str.leak() as &'static str)
+            .unwrap_or(Self::DEFAULT_TIME_ICON)
+    }
 }
 
 impl ExitCodeScheme for CustomTheme {

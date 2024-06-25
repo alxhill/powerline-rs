@@ -1,10 +1,10 @@
 use std::marker::PhantomData;
 use std::time::Duration;
 
+use crate::{Powerline, Style};
 use crate::colors::Color;
 use crate::modules::Module;
 use crate::themes::DefaultColors;
-use crate::{Powerline, Style};
 
 pub struct LastCmdDuration<S> {
     min_display_time: Duration,
@@ -13,6 +13,7 @@ pub struct LastCmdDuration<S> {
 }
 
 pub trait LastCmdDurationScheme: DefaultColors {
+    const DEFAULT_TIME_ICON: &'static str = "\u{f1acc}";
     fn time_bg() -> Color {
         Self::default_bg()
     }
@@ -21,7 +22,7 @@ pub trait LastCmdDurationScheme: DefaultColors {
     }
 
     fn time_icon() -> &'static str {
-        "\u{f1acc}" // clock with ! after
+        Self::DEFAULT_TIME_ICON // clock with ! after
     }
 }
 

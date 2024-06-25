@@ -35,6 +35,25 @@
     "time": {
       "bg": "dark_grey",
       "fg": "mid_grey"
+    },
+    "cmd": {
+      "passed_fg": "green",
+      "failed_bg": "warning_red",
+      "failed_fg": "white",
+      "user_symbol": "\uf105"
+    },
+    "username": {
+      "bg": "black",
+      "fg": "green"
+    },
+    "host": {
+      "bg": "black",
+      "fg": "green"
+    },
+    "last_cmd_duration": {
+      "bg": "black",
+      "fg": "green",
+      "time_icon": ""
     }
   }
 }
