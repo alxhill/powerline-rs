@@ -1,5 +1,5 @@
-use crate::colors::Color;
 use crate::colors::*;
+use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -98,7 +98,7 @@ impl CwdScheme for RainbowTheme {
     }
 
     fn path_bg_colors() -> Vec<Color> {
-        vec![red(), orange(), yellow(), green(), blue(), nice_puple()]
+        vec![red(), orange(), yellow(), green(), blue(), nice_purple()]
     }
 }
 

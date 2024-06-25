@@ -71,7 +71,7 @@ define_colors! {
     bright_orange => 202,
     dark_yellow => 136,
     dark_blue => 19,
-    nice_puple => 55,
+    nice_purple => 55,
     burnt_orange => 214
 }
 

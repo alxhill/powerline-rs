@@ -196,11 +196,11 @@ impl GitScheme for CustomTheme {
 }
 
 impl PythonEnvScheme for CustomTheme {
-    color_from_json!(pyenv_fg, py, venv_fg, default_fg);
-    color_from_json!(pyenv_bg, py, venv_bg, default_bg);
+    color_from_json!(pyenv_fg, py, env_fg, default_fg);
+    color_from_json!(pyenv_bg, py, env_bg, default_bg);
 
-    color_from_json!(pyver_fg, py, ver_fg, default_fg);
-    color_from_json!(pyver_bg, py, ver_bg, default_bg);
+    color_from_json!(pyver_fg, py, version_fg, default_fg);
+    color_from_json!(pyver_bg, py, version_bg, default_bg);
 }
 
 impl ReadOnlyScheme for CustomTheme {
