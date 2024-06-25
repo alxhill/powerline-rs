@@ -1,12 +1,13 @@
 use std::collections::HashMap;
+use std::error::Error;
 use std::fs::File;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use serde::Deserialize;
+use serde_json::Value;
 
 use crate::colors::Color;
-use crate::colors::dark_grey;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -50,22 +51,41 @@ struct DefaultColorsJson {
 #[derive(Deserialize)]
 struct CustomThemeImpl {
     defaults: DefaultColorsJson,
-    modules: HashMap<String, HashMap<String, ColorsJson>>,
+    modules: HashMap<String, HashMap<String, Value>>,
 }
 
 impl CustomThemeImpl {
     fn get_color(&self, module: &str, color: &str) -> Option<Color> {
         self.modules
             .get(module)
-            .and_then(|colors| colors.get(color))
-            .map(|col_json| col_json.into())
+            .and_then(|module| module.get(color))
+            .map(|value| {
+                serde_json::from_value::<ColorsJson>(value.to_owned())
+                    .expect("property was not a color")
+            })
+            .map(|col_json| (&col_json).into())
+    }
+
+    fn get_property(&self, module: &str, property: &str) -> Option<&Value> {
+        self.modules
+            .get(module)
+            .and_then(|module| module.get(property))
     }
 }
 
 impl CustomTheme {
     pub fn load(path: PathBuf) {
-        let theme: CustomThemeImpl = serde_json::from_reader(File::open(path).unwrap()).unwrap();
-        let _ = THEME.set(theme);
+        match serde_json::from_reader(File::open(path).unwrap()) {
+            Ok(theme) => {
+                let _ = THEME.set(theme);
+            }
+            Err(e) => {
+                eprintln!("Failed to read theme.json: {}", e);
+                if let Some(source) = e.source() {
+                    eprintln!("{}", source);
+                }
+            }
+        }
 
         // todo: figure out why this is being set twice...
         // match THEME.set(theme) {
@@ -81,6 +101,28 @@ impl CustomTheme {
     pub fn get_color(module: &str, color: &str) -> Option<Color> {
         let theme = THEME.get().expect("custom theme not set");
         theme.get_color(module, color)
+    }
+
+    pub fn get_color_list(module: &str, property: &str) -> Option<Vec<Color>> {
+        let theme = THEME.get().expect("custom theme not set");
+        let value = theme.get_property(module, property);
+
+        value.map(|value| {
+            value
+                .as_array()
+                .expect("property is not an array")
+                .iter()
+                .map(|val| {
+                    serde_json::from_value::<ColorsJson>(val.to_owned())
+                        .expect("could not read value as color")
+                })
+                .map(|color_json| (&color_json).into())
+                .collect()
+        })
+    }
+
+    pub fn get_str(module: &str, property: &str) -> String {
+        todo!()
     }
 }
 
@@ -121,9 +163,9 @@ impl CmdScheme for CustomTheme {
 }
 
 impl CwdScheme for CustomTheme {
-    // todo: figure out how to handle additional props
+    color_from_json!(path_fg, cwd, path_fg, default_fg);
     fn path_bg_colors() -> Vec<Color> {
-        vec![dark_grey()]
+        Self::get_color_list("cwd", "bg_colors").unwrap_or(vec![Self::default_bg()])
     }
 }
 

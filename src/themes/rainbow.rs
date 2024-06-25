@@ -15,7 +15,7 @@ impl DefaultColors for RainbowTheme {
     }
 
     fn default_fg() -> Color {
-        light_grey()
+        white()
     }
 }
 

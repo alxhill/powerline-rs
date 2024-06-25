@@ -7,6 +7,10 @@
     "cargo": {
       "bg": "burnt_orange",
       "fg": "black"
+    },
+    "cwd": {
+      "path_fg": "black",
+      "bg_colors": ["burnt_orange", "blue"]
     }
   }
 }
