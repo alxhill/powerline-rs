@@ -9,7 +9,6 @@ use crate::modules::{
 };
 
 mod custom;
-mod light;
 mod rainbow;
 mod simple;
 
