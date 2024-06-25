@@ -1,9 +1,9 @@
 use std::marker::PhantomData;
 
-use crate::{Powerline, Style};
 use crate::colors::Color;
 use crate::modules::Module;
 use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
 
 #[derive(Copy, Clone)]
 pub struct Spacer<S: SpacerScheme> {

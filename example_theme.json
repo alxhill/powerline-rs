@@ -10,7 +10,7 @@
     },
     "cwd": {
       "path_fg": "black",
-      "bg_colors": ["burnt_orange", "blue"]
+      "bg_colors": ["red", "orange", "yellow", "green", "blue", "nice_purple"]
     }
   }
 }

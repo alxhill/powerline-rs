@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
-use crate::{Powerline, Style, utils};
 use crate::colors::Color;
 use crate::themes::DefaultColors;
+use crate::{utils, Powerline, Style};
 
 use super::Module;
 
