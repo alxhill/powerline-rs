@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
+use crate::{Powerline, Style};
 use crate::colors::Color;
 use crate::themes::DefaultColors;
-use crate::{Powerline, Style};
 
 use super::Module;
 
@@ -12,9 +12,6 @@ pub struct Cmd<S: CmdScheme> {
 }
 
 pub trait CmdScheme: DefaultColors {
-    const CMD_ROOT_SYMBOL: &'static str = "#";
-    const CMD_USER_SYMBOL: &'static str = "$";
-
     fn cmd_passed_fg() -> Color {
         Self::default_fg()
     }
@@ -52,9 +49,9 @@ impl<S: CmdScheme> Cmd<S> {
 impl<S: CmdScheme> Module for Cmd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         let user_symbol = if users::get_current_uid() == 0 {
-            S::CMD_ROOT_SYMBOL
+            S::cmd_root_symbol()
         } else {
-            S::CMD_USER_SYMBOL
+            S::cmd_user_symbol()
         };
         let (symbol, fg, bg) = match self.status.as_ref() {
             "0" => (user_symbol, S::cmd_passed_fg(), S::cmd_passed_bg()),

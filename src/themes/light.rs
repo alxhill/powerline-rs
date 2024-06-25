@@ -1,5 +1,5 @@
-use crate::colors::Color;
 use crate::colors::{dark_grey, light_grey};
+use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -27,10 +27,7 @@ impl CwdScheme for LightTheme {
     }
 }
 
-impl LastCmdDurationScheme for LightTheme {
-    const TIME_BG: Color = Color(0);
-    const TIME_FG: Color = Color(0);
-}
+impl LastCmdDurationScheme for LightTheme {}
 
 impl ExitCodeScheme for LightTheme {
     const EXIT_CODE_BG: Color = Color(0);
@@ -54,12 +51,7 @@ impl GitScheme for LightTheme {
     const GIT_REPO_DIRTY_FG: Color = Color(0);
 }
 
-impl PythonEnvScheme for LightTheme {
-    const PYVENV_FG: Color = Color(0);
-    const PYVENV_BG: Color = Color(0);
-    const PYVER_FG: Color = Color(0);
-    const PYVER_BG: Color = Color(0);
-}
+impl PythonEnvScheme for LightTheme {}
 
 impl ReadOnlyScheme for LightTheme {
     const READONLY_FG: Color = Color(0);
@@ -79,11 +71,7 @@ impl UserScheme for LightTheme {
     const USERNAME_FG: Color = Color(0);
 }
 
-impl CargoScheme for LightTheme {
-    fn cargo_bg() -> Color {
-        dark_grey()
-    }
-}
+impl CargoScheme for LightTheme {}
 
 impl TimeScheme for LightTheme {
     const TIME_BG: Color = Color(0);

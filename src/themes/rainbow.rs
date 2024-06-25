@@ -1,5 +1,5 @@
-use crate::colors::Color;
 use crate::colors::*;
+use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -53,8 +53,6 @@ impl ExitCodeScheme for RainbowTheme {
 }
 
 impl CmdScheme for RainbowTheme {
-    const CMD_USER_SYMBOL: &'static str = "\u{f105}";
-
     fn cmd_passed_fg() -> Color {
         green()
     }
@@ -69,6 +67,10 @@ impl CmdScheme for RainbowTheme {
 
     fn cmd_failed_fg() -> Color {
         white()
+    }
+
+    fn cmd_user_symbol() -> &'static str {
+        "\u{f105}"
     }
 }
 
@@ -105,16 +107,35 @@ impl ReadOnlyScheme for RainbowTheme {
 }
 
 impl PythonEnvScheme for RainbowTheme {
-    const PYVENV_FG: Color = dark_grey();
-    const PYVENV_BG: Color = light_green();
-    const PYVER_FG: Color = dark_grey();
-    const PYVER_BG: Color = mid_green();
+    fn pyenv_fg() -> Color {
+        dark_grey()
+    }
+
+    fn pyenv_bg() -> Color {
+        light_green()
+    }
+
+    fn pyver_fg() -> Color {
+        dark_grey()
+    }
+
+    fn pyver_bg() -> Color {
+        mid_green()
+    }
 }
 
 impl SpacerScheme for RainbowTheme {}
 
 impl LastCmdDurationScheme for RainbowTheme {
-    const TIME_BG: Color = black();
-    const TIME_FG: Color = green();
-    const TIME_ICON: &'static str = "";
+    fn time_bg() -> Color {
+        black()
+    }
+
+    fn time_fg() -> Color {
+        green()
+    }
+
+    fn time_icon() -> &'static str {
+        ""
+    }
 }

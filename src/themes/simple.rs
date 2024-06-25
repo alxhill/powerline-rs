@@ -1,5 +1,5 @@
 use crate::colors;
-use crate::colors::{black, dark_grey, light_grey, Color};
+use crate::colors::{black, Color, dark_grey, light_grey};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -27,17 +27,9 @@ impl CargoScheme for SimpleTheme {
     }
 }
 
-impl LastCmdDurationScheme for SimpleTheme {
-    const TIME_BG: Color = Color(0);
-    const TIME_FG: Color = Color(0);
-}
+impl LastCmdDurationScheme for SimpleTheme {}
 
-impl PythonEnvScheme for SimpleTheme {
-    const PYVENV_FG: Color = Color(0);
-    const PYVENV_BG: Color = Color(0);
-    const PYVER_FG: Color = Color(0);
-    const PYVER_BG: Color = Color(0);
-}
+impl PythonEnvScheme for SimpleTheme {}
 
 impl SpacerScheme for SimpleTheme {}
 

@@ -5,8 +5,8 @@ use std::sync::OnceLock;
 
 use serde::Deserialize;
 
-use crate::colors::{black, dark_grey, white};
 use crate::colors::Color;
+use crate::colors::dark_grey;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
@@ -18,7 +18,7 @@ pub struct CustomTheme;
 
 static THEME: OnceLock<CustomThemeImpl> = OnceLock::new();
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 #[serde(untagged)]
 enum ColorsJson {
     Named(String),
@@ -41,10 +41,10 @@ impl From<&ColorsJson> for Color {
 struct DefaultColorsJson {
     fg: ColorsJson,
     bg: ColorsJson,
-    secondary_fg: Option<ColorsJson>,
-    secondary_bg: Option<ColorsJson>,
-    alert_fg: Option<ColorsJson>,
-    alert_bg: Option<ColorsJson>,
+    // secondary_fg: Option<ColorsJson>,
+    // secondary_bg: Option<ColorsJson>,
+    // alert_fg: Option<ColorsJson>,
+    // alert_bg: Option<ColorsJson>,
 }
 
 #[derive(Deserialize)]
@@ -86,27 +86,39 @@ impl CustomTheme {
 
 impl DefaultColors for CustomTheme {
     fn default_bg() -> Color {
-        black()
+        let theme = THEME.get().expect("custom theme not set");
+        (&theme.defaults.bg).into()
     }
 
     fn default_fg() -> Color {
-        white()
+        let theme = THEME.get().expect("custom theme not set");
+        (&theme.defaults.fg).into()
     }
 }
 
 impl CompleteTheme for CustomTheme {}
 
-impl CargoScheme for CustomTheme {
-    fn cargo_fg() -> Color {
-        Self::get_color("cargo", "fg").unwrap_or_else(Self::default_fg)
-    }
-
-    fn cargo_bg() -> Color {
-        Self::get_color("cargo", "bg").unwrap_or_else(Self::default_bg)
-    }
+macro_rules! color_from_json {
+    ($function:ident, $module:ident, $property:ident, $default:ident) => {
+        fn $function() -> Color {
+            Self::get_color(stringify!($module), stringify!($property))
+                .unwrap_or_else(Self::$default)
+        }
+    };
 }
 
-impl CmdScheme for CustomTheme {}
+impl CargoScheme for CustomTheme {
+    color_from_json!(cargo_fg, cargo, fg, default_fg);
+    color_from_json!(cargo_bg, cargo, bg, default_bg);
+}
+
+impl CmdScheme for CustomTheme {
+    color_from_json!(cmd_passed_fg, cmd, passed_fg, default_fg);
+    color_from_json!(cmd_passed_bg, cmd, passed_bg, default_bg);
+
+    color_from_json!(cmd_failed_bg, cmd, failed_fg, default_fg);
+    color_from_json!(cmd_failed_fg, cmd, failed_bg, default_bg);
+}
 
 impl CwdScheme for CustomTheme {
     fn path_bg_colors() -> Vec<Color> {
@@ -115,8 +127,8 @@ impl CwdScheme for CustomTheme {
 }
 
 impl LastCmdDurationScheme for CustomTheme {
-    const TIME_BG: Color = Color(0);
-    const TIME_FG: Color = Color(0);
+    color_from_json!(time_bg, time, bg, default_bg);
+    color_from_json!(time_fg, time, fg, default_fg);
 }
 
 impl ExitCodeScheme for CustomTheme {
@@ -142,10 +154,11 @@ impl GitScheme for CustomTheme {
 }
 
 impl PythonEnvScheme for CustomTheme {
-    const PYVENV_FG: Color = Color(0);
-    const PYVENV_BG: Color = Color(0);
-    const PYVER_FG: Color = Color(0);
-    const PYVER_BG: Color = Color(0);
+    color_from_json!(pyenv_fg, py, venv_fg, default_fg);
+    color_from_json!(pyenv_bg, py, venv_bg, default_bg);
+
+    color_from_json!(pyver_fg, py, ver_fg, default_fg);
+    color_from_json!(pyver_bg, py, ver_bg, default_bg);
 }
 
 impl ReadOnlyScheme for CustomTheme {
