@@ -55,17 +55,6 @@ struct CustomThemeImpl {
 }
 
 impl CustomThemeImpl {
-    fn get_color(&self, module: &str, color: &str) -> Option<Color> {
-        self.modules
-            .get(module)
-            .and_then(|module| module.get(color))
-            .map(|value| {
-                serde_json::from_value::<ColorsJson>(value.to_owned())
-                    .expect("property was not a color")
-            })
-            .map(|col_json| (&col_json).into())
-    }
-
     fn get_property(&self, module: &str, property: &str) -> Option<&Value> {
         self.modules
             .get(module)
@@ -100,10 +89,16 @@ impl CustomTheme {
 
     pub fn get_color(module: &str, color: &str) -> Option<Color> {
         let theme = THEME.get().expect("custom theme not set");
-        theme.get_color(module, color)
+        theme
+            .get_property(module, color)
+            .map(|value| {
+                serde_json::from_value::<ColorsJson>(value.to_owned())
+                    .expect("property was not a color")
+            })
+            .map(|col_json| (&col_json).into())
     }
 
-    pub fn get_color_list(module: &str, property: &str) -> Option<Vec<Color>> {
+    pub fn get_colors(module: &str, property: &str) -> Option<Vec<Color>> {
         let theme = THEME.get().expect("custom theme not set");
         let value = theme.get_property(module, property);
 
@@ -121,8 +116,12 @@ impl CustomTheme {
         })
     }
 
-    pub fn get_str(module: &str, property: &str) -> String {
-        todo!()
+    pub fn get_str(module: &str, property: &str) -> Option<String> {
+        let theme = THEME.get().expect("custom theme not set");
+        theme
+            .get_property(module, property)
+            .and_then(|value| value.as_str())
+            .map(|s| s.to_string())
     }
 }
 
@@ -165,7 +164,7 @@ impl CmdScheme for CustomTheme {
 impl CwdScheme for CustomTheme {
     color_from_json!(path_fg, cwd, path_fg, default_fg);
     fn path_bg_colors() -> Vec<Color> {
-        Self::get_color_list("cwd", "bg_colors").unwrap_or(vec![Self::default_bg()])
+        Self::get_colors("cwd", "bg_colors").unwrap_or(vec![Self::default_bg()])
     }
 }
 
