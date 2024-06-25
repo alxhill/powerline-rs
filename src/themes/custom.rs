@@ -132,26 +132,12 @@ impl LastCmdDurationScheme for CustomTheme {
 }
 
 impl ExitCodeScheme for CustomTheme {
-    const EXIT_CODE_BG: Color = Color(0);
-    const EXIT_CODE_FG: Color = Color(0);
+    color_from_json!(exit_code_bg, exit_code, bg, default_bg);
+    color_from_json!(exit_code_fg, exit_code, fg, default_fg);
 }
 
-impl GitScheme for CustomTheme {
-    const GIT_REMOTE_BG: Color = Color(0);
-    const GIT_REMOTE_FG: Color = Color(0);
-    const GIT_STAGED_BG: Color = Color(0);
-    const GIT_STAGED_FG: Color = Color(0);
-    const GIT_NOTSTAGED_BG: Color = Color(0);
-    const GIT_NOTSTAGED_FG: Color = Color(0);
-    const GIT_UNTRACKED_BG: Color = Color(0);
-    const GIT_UNTRACKED_FG: Color = Color(0);
-    const GIT_CONFLICTED_BG: Color = Color(0);
-    const GIT_CONFLICTED_FG: Color = Color(0);
-    const GIT_REPO_CLEAN_BG: Color = Color(0);
-    const GIT_REPO_CLEAN_FG: Color = Color(0);
-    const GIT_REPO_DIRTY_BG: Color = Color(0);
-    const GIT_REPO_DIRTY_FG: Color = Color(0);
-}
+// todo
+impl GitScheme for CustomTheme {}
 
 impl PythonEnvScheme for CustomTheme {
     color_from_json!(pyenv_fg, py, venv_fg, default_fg);
@@ -162,24 +148,17 @@ impl PythonEnvScheme for CustomTheme {
 }
 
 impl ReadOnlyScheme for CustomTheme {
-    const READONLY_FG: Color = Color(0);
-    const READONLY_BG: Color = Color(0);
+    color_from_json!(readonly_fg, readonly, fg, default_fg);
+    color_from_json!(readonly_bg, readonly, bg, default_bg);
 }
 
-impl SpacerScheme for CustomTheme {}
-
-impl HostScheme for CustomTheme {
-    const HOSTNAME_FG: Color = Color(0);
-    const HOSTNAME_BG: Color = Color(0);
+impl SpacerScheme for CustomTheme {
+    color_from_json!(color_fg, spacer, fg, default_fg);
+    color_from_json!(color_bg, spacer, bg, default_bg);
 }
 
-impl UserScheme for CustomTheme {
-    const USERNAME_ROOT_BG: Color = Color(0);
-    const USERNAME_BG: Color = Color(0);
-    const USERNAME_FG: Color = Color(0);
-}
+impl HostScheme for CustomTheme {}
 
-impl TimeScheme for CustomTheme {
-    const TIME_BG: Color = Color(0);
-    const TIME_FG: Color = Color(0);
-}
+impl UserScheme for CustomTheme {}
+
+impl TimeScheme for CustomTheme {}

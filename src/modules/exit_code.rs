@@ -1,17 +1,23 @@
 use std::env;
 use std::marker::PhantomData;
 
-use super::Module;
 use crate::colors::Color;
+use crate::themes::DefaultColors;
 use crate::{Powerline, Style};
+
+use super::Module;
 
 pub struct ExitCode<S: ExitCodeScheme> {
     scheme: PhantomData<S>,
 }
 
-pub trait ExitCodeScheme {
-    const EXIT_CODE_BG: Color;
-    const EXIT_CODE_FG: Color;
+pub trait ExitCodeScheme: DefaultColors {
+    fn exit_code_bg() -> Color {
+        Self::default_bg()
+    }
+    fn exit_code_fg() -> Color {
+        Self::default_fg()
+    }
 }
 
 impl<S: ExitCodeScheme> Default for ExitCode<S> {
@@ -32,7 +38,10 @@ impl<S: ExitCodeScheme> Module for ExitCode<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         if let Some(exit_code) = env::args().nth(1).as_deref() {
             if exit_code != "0" {
-                powerline.add_segment(exit_code, Style::simple(S::EXIT_CODE_FG, S::EXIT_CODE_BG))
+                powerline.add_segment(
+                    exit_code,
+                    Style::simple(S::exit_code_fg(), S::exit_code_bg()),
+                )
             }
         }
     }

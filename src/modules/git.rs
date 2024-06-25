@@ -4,41 +4,70 @@ use std::fmt::Write;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
-use super::Module;
+#[cfg(feature = "libgit")]
+use libgit as internal;
+#[cfg(not(feature = "libgit"))]
+use process as internal;
+
+use crate::colors::Color;
+use crate::themes::DefaultColors;
 use crate::{Powerline, Style};
+
+use super::Module;
 
 #[cfg(not(feature = "libgit"))]
 mod process;
 
-#[cfg(not(feature = "libgit"))]
-use process as internal;
-
 #[cfg(feature = "libgit")]
 mod libgit;
-
-use crate::colors::Color;
-#[cfg(feature = "libgit")]
-use libgit as internal;
 
 pub struct Git<S> {
     scheme: PhantomData<S>,
 }
 
-pub trait GitScheme {
-    const GIT_REMOTE_BG: Color;
-    const GIT_REMOTE_FG: Color;
-    const GIT_STAGED_BG: Color;
-    const GIT_STAGED_FG: Color;
-    const GIT_NOTSTAGED_BG: Color;
-    const GIT_NOTSTAGED_FG: Color;
-    const GIT_UNTRACKED_BG: Color;
-    const GIT_UNTRACKED_FG: Color;
-    const GIT_CONFLICTED_BG: Color;
-    const GIT_CONFLICTED_FG: Color;
-    const GIT_REPO_CLEAN_BG: Color;
-    const GIT_REPO_CLEAN_FG: Color;
-    const GIT_REPO_DIRTY_BG: Color;
-    const GIT_REPO_DIRTY_FG: Color;
+pub trait GitScheme: DefaultColors {
+    fn git_remote_bg() -> Color {
+        Self::default_bg()
+    }
+    fn git_remote_fg() -> Color {
+        Self::default_fg()
+    }
+    fn git_staged_bg() -> Color {
+        Self::default_bg()
+    }
+    fn git_staged_fg() -> Color {
+        Self::default_fg()
+    }
+    fn git_notstaged_bg() -> Color {
+        Self::default_bg()
+    }
+    fn git_notstaged_fg() -> Color {
+        Self::default_fg()
+    }
+    fn git_untracked_bg() -> Color {
+        Self::default_bg()
+    }
+    fn git_untracked_fg() -> Color {
+        Self::default_fg()
+    }
+    fn git_conflicted_bg() -> Color {
+        Self::default_bg()
+    }
+    fn git_conflicted_fg() -> Color {
+        Self::default_fg()
+    }
+    fn git_repo_clean_bg() -> Color {
+        Self::default_bg()
+    }
+    fn git_repo_clean_fg() -> Color {
+        Self::default_fg()
+    }
+    fn git_repo_dirty_bg() -> Color {
+        Self::default_bg()
+    }
+    fn git_repo_dirty_fg() -> Color {
+        Self::default_fg()
+    }
 
     const NOT_STAGED_SYMBOL: &'static str = PENCIL;
     const STAGED_SYMBOL: &'static str = TICK;
@@ -114,9 +143,9 @@ impl<S: GitScheme> Module for Git<S> {
         let stats = internal::run_git(&git_dir);
 
         let (branch_fg, branch_bg) = if stats.is_dirty() {
-            (S::GIT_REPO_DIRTY_FG, S::GIT_REPO_DIRTY_BG)
+            (S::git_repo_dirty_fg(), S::git_repo_dirty_bg())
         } else {
-            (S::GIT_REPO_CLEAN_FG, S::GIT_REPO_CLEAN_BG)
+            (S::git_repo_clean_fg(), S::git_repo_clean_bg())
         };
 
         powerline.add_segment(
@@ -135,29 +164,29 @@ impl<S: GitScheme> Module for Git<S> {
             powerline,
             stats.non_staged,
             S::NOT_STAGED_SYMBOL,
-            S::GIT_NOTSTAGED_FG,
-            S::GIT_NOTSTAGED_BG,
+            S::git_notstaged_fg(),
+            S::git_notstaged_bg(),
         );
         add_elem(
             powerline,
             stats.untracked,
             S::UNTRACKED_SYMBOL,
-            S::GIT_UNTRACKED_FG,
-            S::GIT_UNTRACKED_BG,
+            S::git_untracked_fg(),
+            S::git_untracked_bg(),
         );
         add_elem(
             powerline,
             stats.staged,
             S::STAGED_SYMBOL,
-            S::GIT_STAGED_FG,
-            S::GIT_STAGED_BG,
+            S::git_staged_fg(),
+            S::git_staged_bg(),
         );
         add_elem(
             powerline,
             stats.conflicted,
             S::CONFLICTED_SYMBOL,
-            S::GIT_CONFLICTED_FG,
-            S::GIT_CONFLICTED_BG,
+            S::git_conflicted_fg(),
+            S::git_conflicted_bg(),
         );
 
         if stats.remote {
@@ -175,7 +204,10 @@ impl<S: GitScheme> Module for Git<S> {
                 let _ = write!(remote, "{}{}", stats.behind, DOWN_ARROW);
             }
 
-            powerline.add_segment(remote, Style::simple(S::GIT_REMOTE_FG, S::GIT_REMOTE_BG));
+            powerline.add_segment(
+                remote,
+                Style::simple(S::git_remote_fg(), S::git_remote_bg()),
+            );
         }
     }
 }

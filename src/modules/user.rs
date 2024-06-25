@@ -1,18 +1,26 @@
 use std::marker::PhantomData;
 
-use super::Module;
+use crate::{Powerline, Style, utils};
 use crate::colors::Color;
-use crate::{utils, Powerline, Style};
+use crate::themes::DefaultColors;
+
+use super::Module;
 
 pub struct User<S: UserScheme> {
     show_on_local: bool,
     scheme: PhantomData<S>,
 }
 
-pub trait UserScheme {
-    const USERNAME_ROOT_BG: Color;
-    const USERNAME_BG: Color;
-    const USERNAME_FG: Color;
+pub trait UserScheme: DefaultColors {
+    fn username_root_bg() -> Color {
+        Self::default_bg()
+    }
+    fn username_bg() -> Color {
+        Self::default_bg()
+    }
+    fn username_fg() -> Color {
+        Self::default_fg()
+    }
 }
 
 impl<S: UserScheme> Default for User<S> {
@@ -42,14 +50,14 @@ impl<S: UserScheme> Module for User<S> {
         if self.show_on_local || utils::is_remote_shell() {
             let user = users::get_user_by_uid(users::get_current_uid()).unwrap();
             let bg = if user.uid() == 0 {
-                S::USERNAME_ROOT_BG
+                S::username_root_bg()
             } else {
-                S::USERNAME_BG
+                S::username_bg()
             };
 
             powerline.add_segment(
                 user.name().to_str().unwrap(),
-                Style::simple(S::USERNAME_FG, bg),
+                Style::simple(S::username_fg(), bg),
             );
         }
     }
