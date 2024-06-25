@@ -31,9 +31,7 @@ seems to fix some character alignment issues.
 Clone the repo and install for your desired SHELL:
 
 ```bash
-git clone https://github.com/alxhill/powerline-rs
-cd powerline-rs
-cargo install --path .
+cargo install --git https://github.com/alxhill/powerline-rs.git
 ```
 
 You can also install (or create your own) compiled command by adding `--example {name}` to cargo command and
