@@ -1,9 +1,11 @@
 use std::marker::PhantomData;
 use std::{env, path};
 
+use crate::colors::Color;
+use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
+
 use super::Module;
-use crate::colors::white;
-use crate::{Color, Powerline, Style};
 
 pub struct Cwd<S: CwdScheme> {
     max_length: usize,
@@ -12,8 +14,10 @@ pub struct Cwd<S: CwdScheme> {
     scheme: PhantomData<S>,
 }
 
-pub trait CwdScheme {
-    const PATH_FG: Color = white();
+pub trait CwdScheme: DefaultColors {
+    fn path_fg() -> Color {
+        Self::default_fg()
+    }
 
     fn path_bg_colors() -> Vec<Color>;
 }
@@ -32,7 +36,7 @@ impl<S: CwdScheme> Cwd<S> {
 macro_rules! rainbow_segment {
     ($powerline:ident, $iter_var:ident, $value:expr) => {
         let r_col = S::path_bg_colors()[$iter_var % S::path_bg_colors().len()];
-        $powerline.add_short_segment(format!(" {}", $value), Style::simple(S::PATH_FG, r_col));
+        $powerline.add_short_segment(format!(" {}", $value), Style::simple(S::path_fg(), r_col));
         $iter_var = $iter_var.wrapping_add(1);
     };
 }

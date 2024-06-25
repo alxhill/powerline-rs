@@ -1,15 +1,25 @@
 use std::ffi::CString;
 use std::marker::PhantomData;
 
+use crate::colors::Color;
+use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
+
 use super::Module;
-use crate::{Color, Powerline, Style};
 
 pub struct ReadOnly<S>(PhantomData<S>);
 
-pub trait ReadOnlyScheme {
-    const READONLY_FG: Color;
-    const READONLY_BG: Color;
-    const READONLY_SYMBOL: &'static str = "";
+pub trait ReadOnlyScheme: DefaultColors {
+    fn readonly_fg() -> Color {
+        Self::default_fg()
+    }
+    fn readonly_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn readonly_symbol() -> &'static str {
+        ""
+    }
 }
 
 impl<S: ReadOnlyScheme> Default for ReadOnly<S> {
@@ -33,8 +43,8 @@ impl<S: ReadOnlyScheme> Module for ReadOnly<S> {
 
         if readonly {
             powerline.add_segment(
-                S::READONLY_SYMBOL,
-                Style::simple(S::READONLY_FG, S::READONLY_BG),
+                S::readonly_symbol(),
+                Style::simple(S::readonly_fg(), S::readonly_bg()),
             );
         }
     }

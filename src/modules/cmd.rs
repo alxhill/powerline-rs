@@ -1,20 +1,41 @@
 use std::marker::PhantomData;
 
+use crate::{Powerline, Style};
+use crate::colors::Color;
+use crate::themes::DefaultColors;
+
 use super::Module;
-use crate::{Color, Powerline, Style};
 
 pub struct Cmd<S: CmdScheme> {
     status: String,
     scheme: PhantomData<S>,
 }
 
-pub trait CmdScheme {
-    const CMD_PASSED_FG: Color;
-    const CMD_PASSED_BG: Color;
-    const CMD_FAILED_BG: Color;
-    const CMD_FAILED_FG: Color;
-    const CMD_ROOT_SYMBOL: &'static str = "#";
-    const CMD_USER_SYMBOL: &'static str = "$";
+pub trait CmdScheme: DefaultColors {
+    const DEFAULT_USER_SYMBOL: &'static str = "$";
+    fn cmd_passed_fg() -> Color {
+        Self::default_fg()
+    }
+
+    fn cmd_passed_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn cmd_failed_bg() -> Color {
+        Self::default_bg()
+    }
+
+    fn cmd_failed_fg() -> Color {
+        Self::default_fg()
+    }
+
+    fn cmd_root_symbol() -> &'static str {
+        "#"
+    }
+
+    fn cmd_user_symbol() -> &'static str {
+        Self::DEFAULT_USER_SYMBOL
+    }
 }
 
 impl<S: CmdScheme> Cmd<S> {
@@ -29,13 +50,13 @@ impl<S: CmdScheme> Cmd<S> {
 impl<S: CmdScheme> Module for Cmd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         let user_symbol = if users::get_current_uid() == 0 {
-            S::CMD_ROOT_SYMBOL
+            S::cmd_root_symbol()
         } else {
-            S::CMD_USER_SYMBOL
+            S::cmd_user_symbol()
         };
         let (symbol, fg, bg) = match self.status.as_ref() {
-            "0" => (user_symbol, S::CMD_PASSED_FG, S::CMD_PASSED_BG),
-            non_zero_code => (non_zero_code, S::CMD_FAILED_FG, S::CMD_FAILED_BG),
+            "0" => (user_symbol, S::cmd_passed_fg(), S::cmd_passed_bg()),
+            non_zero_code => (non_zero_code, S::cmd_failed_fg(), S::cmd_failed_bg()),
         };
 
         powerline.add_short_segment(symbol, Style::simple(fg, bg));

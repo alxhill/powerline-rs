@@ -2,17 +2,24 @@ use std::marker::PhantomData;
 
 use chrono::Local;
 
+use crate::colors::Color;
+use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
+
 use super::Module;
-use crate::{Color, Powerline, Style};
 
 pub struct Time<S: TimeScheme> {
     time_format: String,
     scheme: PhantomData<S>,
 }
 
-pub trait TimeScheme {
-    const TIME_BG: Color;
-    const TIME_FG: Color;
+pub trait TimeScheme: DefaultColors {
+    fn time_bg() -> Color {
+        Self::default_bg()
+    }
+    fn time_fg() -> Color {
+        Self::default_fg()
+    }
 }
 
 impl<S: TimeScheme> Default for Time<S> {
@@ -40,6 +47,6 @@ impl<S: TimeScheme> Time<S> {
 impl<S: TimeScheme> Module for Time<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         let now = Local::now().format(&self.time_format).to_string();
-        powerline.add_segment(now, Style::simple(S::TIME_FG, S::TIME_BG));
+        powerline.add_segment(now, Style::simple(S::time_fg(), S::time_bg()));
     }
 }

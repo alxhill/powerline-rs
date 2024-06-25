@@ -1,93 +1,198 @@
 use crate::colors::*;
+use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
     LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
 };
-use crate::themes::CompleteTheme;
-use crate::Color;
+use crate::themes::{CompleteTheme, DefaultColors};
 
 #[derive(Copy, Clone)]
 pub struct RainbowTheme;
 
+impl DefaultColors for RainbowTheme {
+    fn default_bg() -> Color {
+        blue()
+    }
+
+    fn default_fg() -> Color {
+        white()
+    }
+}
+
 impl CompleteTheme for RainbowTheme {}
 
 impl TimeScheme for RainbowTheme {
-    const TIME_BG: Color = dark_grey();
-    const TIME_FG: Color = mid_grey();
+    fn time_bg() -> Color {
+        dark_grey()
+    }
+    fn time_fg() -> Color {
+        mid_grey()
+    }
 }
 
 impl CargoScheme for RainbowTheme {
-    const CARGO_FG: Color = dark_grey();
-    const CARGO_BG: Color = burnt_orange();
+    fn cargo_fg() -> Color {
+        dark_grey()
+    }
+
+    fn cargo_bg() -> Color {
+        burnt_orange()
+    }
 }
 
 impl UserScheme for RainbowTheme {
-    const USERNAME_ROOT_BG: Color = red();
-    const USERNAME_BG: Color = black();
-    const USERNAME_FG: Color = green();
+    fn username_root_bg() -> Color {
+        red()
+    }
+    fn username_bg() -> Color {
+        black()
+    }
+    fn username_fg() -> Color {
+        green()
+    }
 }
 
 impl HostScheme for RainbowTheme {
-    const HOSTNAME_FG: Color = grey();
-    const HOSTNAME_BG: Color = dark_grey();
+    fn hostname_fg() -> Color {
+        grey()
+    }
+    fn hostname_bg() -> Color {
+        dark_grey()
+    }
 }
 
 impl ExitCodeScheme for RainbowTheme {
-    const EXIT_CODE_BG: Color = red();
-    const EXIT_CODE_FG: Color = white();
+    fn exit_code_bg() -> Color {
+        red()
+    }
+    fn exit_code_fg() -> Color {
+        white()
+    }
 }
 
 impl CmdScheme for RainbowTheme {
-    const CMD_PASSED_FG: Color = green();
-    const CMD_PASSED_BG: Color = black();
-    const CMD_FAILED_BG: Color = warning_red();
-    const CMD_FAILED_FG: Color = white();
-    const CMD_USER_SYMBOL: &'static str = "\u{f105}";
+    fn cmd_passed_fg() -> Color {
+        green()
+    }
+
+    fn cmd_passed_bg() -> Color {
+        black()
+    }
+
+    fn cmd_failed_bg() -> Color {
+        warning_red()
+    }
+
+    fn cmd_failed_fg() -> Color {
+        white()
+    }
+
+    fn cmd_user_symbol() -> &'static str {
+        "\u{f105}"
+    }
 }
 
 impl CwdScheme for RainbowTheme {
+    fn path_fg() -> Color {
+        white()
+    }
+
     fn path_bg_colors() -> Vec<Color> {
-        vec![red(), orange(), yellow(), green(), blue(), nice_puple()]
+        vec![red(), orange(), yellow(), green(), blue(), nice_purple()]
     }
 }
 
 impl GitScheme for RainbowTheme {
-    const GIT_REMOTE_BG: Color = mid_grey();
-    const GIT_REMOTE_FG: Color = light_grey();
-    const GIT_STAGED_BG: Color = forest_green();
-    const GIT_STAGED_FG: Color = white();
-    const GIT_NOTSTAGED_BG: Color = mid_red();
-    const GIT_NOTSTAGED_FG: Color = white();
-    const GIT_UNTRACKED_BG: Color = warning_red();
-    const GIT_UNTRACKED_FG: Color = white();
-    const GIT_CONFLICTED_BG: Color = light_red();
-    const GIT_CONFLICTED_FG: Color = white();
-    const GIT_REPO_CLEAN_BG: Color = blue();
-    const GIT_REPO_CLEAN_FG: Color = white();
-    const GIT_REPO_DIRTY_BG: Color = bright_orange();
-    const GIT_REPO_DIRTY_FG: Color = white();
+    fn git_remote_bg() -> Color {
+        mid_grey()
+    }
+    fn git_remote_fg() -> Color {
+        light_grey()
+    }
+    fn git_staged_bg() -> Color {
+        forest_green()
+    }
+    fn git_staged_fg() -> Color {
+        white()
+    }
+    fn git_notstaged_bg() -> Color {
+        mid_red()
+    }
+    fn git_notstaged_fg() -> Color {
+        white()
+    }
+    fn git_untracked_bg() -> Color {
+        warning_red()
+    }
+    fn git_untracked_fg() -> Color {
+        white()
+    }
+    fn git_conflicted_bg() -> Color {
+        light_red()
+    }
+    fn git_conflicted_fg() -> Color {
+        white()
+    }
+    fn git_repo_clean_bg() -> Color {
+        blue()
+    }
+    fn git_repo_clean_fg() -> Color {
+        white()
+    }
+    fn git_repo_dirty_bg() -> Color {
+        bright_orange()
+    }
+    fn git_repo_dirty_fg() -> Color {
+        white()
+    }
     const NOT_STAGED_SYMBOL: &'static str = "\u{eae9}"; // pencil
     const STAGED_SYMBOL: &'static str = "+";
     const UNTRACKED_SYMBOL: &'static str = "?";
 }
 
 impl ReadOnlyScheme for RainbowTheme {
-    const READONLY_FG: Color = Color(254);
-    const READONLY_BG: Color = Color(124);
-    const READONLY_SYMBOL: &'static str = "\u{f0221}";
+    fn readonly_fg() -> Color {
+        Color(254)
+    }
+    fn readonly_bg() -> Color {
+        Color(124)
+    }
+
+    fn readonly_symbol() -> &'static str {
+        "\u{f0221}"
+    }
 }
 
 impl PythonEnvScheme for RainbowTheme {
-    const PYVENV_FG: Color = dark_grey();
-    const PYVENV_BG: Color = light_green();
-    const PYVER_FG: Color = dark_grey();
-    const PYVER_BG: Color = mid_green();
+    fn pyenv_fg() -> Color {
+        dark_grey()
+    }
+
+    fn pyenv_bg() -> Color {
+        light_green()
+    }
+
+    fn pyver_fg() -> Color {
+        dark_grey()
+    }
+
+    fn pyver_bg() -> Color {
+        mid_green()
+    }
 }
 
 impl SpacerScheme for RainbowTheme {}
 
 impl LastCmdDurationScheme for RainbowTheme {
-    const TIME_BG: Color = black();
-    const TIME_FG: Color = green();
-    const TIME_ICON: &'static str = "";
+    fn time_bg() -> Color {
+        black()
+    }
+
+    fn time_fg() -> Color {
+        green()
+    }
+
+    fn time_icon() -> &'static str {
+        ""
+    }
 }

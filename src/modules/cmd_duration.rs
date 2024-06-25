@@ -1,7 +1,10 @@
-use crate::modules::Module;
-use crate::{Color, Powerline, Style};
 use std::marker::PhantomData;
 use std::time::Duration;
+
+use crate::{Powerline, Style};
+use crate::colors::Color;
+use crate::modules::Module;
+use crate::themes::DefaultColors;
 
 pub struct LastCmdDuration<S> {
     min_display_time: Duration,
@@ -9,10 +12,18 @@ pub struct LastCmdDuration<S> {
     scheme: PhantomData<S>,
 }
 
-pub trait LastCmdDurationScheme {
-    const TIME_BG: Color;
-    const TIME_FG: Color;
-    const TIME_ICON: &'static str = "\u{f1acc}"; // time with !
+pub trait LastCmdDurationScheme: DefaultColors {
+    const DEFAULT_TIME_ICON: &'static str = "\u{f1acc}";
+    fn time_bg() -> Color {
+        Self::default_bg()
+    }
+    fn time_fg() -> Color {
+        Self::default_fg()
+    }
+
+    fn time_icon() -> &'static str {
+        Self::DEFAULT_TIME_ICON // clock with ! after
+    }
 }
 
 impl<S: LastCmdDurationScheme> LastCmdDuration<S> {
@@ -30,8 +41,8 @@ impl<S: LastCmdDurationScheme> Module for LastCmdDuration<S> {
         if let Some(cmd_dur) = self.cmd_duration {
             if cmd_dur > self.min_display_time {
                 powerline.add_short_segment(
-                    format!(" {}{}", nice_duration(cmd_dur), S::TIME_ICON),
-                    Style::simple(S::TIME_FG, S::TIME_BG),
+                    format!(" {}{}", nice_duration(cmd_dur), S::time_icon()),
+                    Style::simple(S::time_fg(), S::time_bg()),
                 );
             }
         }

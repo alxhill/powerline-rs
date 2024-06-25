@@ -5,18 +5,29 @@ use std::marker::PhantomData;
 use std::path::Path;
 use std::process::Command;
 
+use crate::colors::Color;
+use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
+
 use super::Module;
-use crate::{Color, Powerline, Style};
 
 pub struct PythonEnv<S: PythonEnvScheme> {
     scheme: PhantomData<S>,
 }
 
-pub trait PythonEnvScheme {
-    const PYVENV_FG: Color;
-    const PYVENV_BG: Color;
-    const PYVER_FG: Color;
-    const PYVER_BG: Color;
+pub trait PythonEnvScheme: DefaultColors {
+    fn pyenv_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pyenv_bg() -> Color {
+        Self::default_bg()
+    }
+    fn pyver_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pyver_bg() -> Color {
+        Self::default_bg()
+    }
 }
 
 impl<S: PythonEnvScheme> Default for PythonEnv<S> {
@@ -70,11 +81,11 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
 
             powerline.add_short_segment(
                 format!("{} {} ", pylogo, venv_name),
-                Style::simple(S::PYVENV_FG, S::PYVENV_BG),
+                Style::simple(S::pyenv_fg(), S::pyenv_bg()),
             );
             powerline.add_segment(
                 py_ver_str.trim().to_string(),
-                Style::simple(S::PYVER_FG, S::PYVER_BG),
+                Style::simple(S::pyver_fg(), S::pyver_bg()),
             );
         } else if let Ok(cwd) = env::current_dir() {
             let py_ver = File::open(cwd.join(".python-version"))
@@ -84,13 +95,13 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
             if cwd.join(".python-version").exists() || cwd.join("pyproject.toml").exists() {
                 powerline.add_short_segment(
                     format!("{} ", pylogo),
-                    Style::simple(S::PYVENV_FG, S::PYVENV_BG),
+                    Style::simple(S::pyenv_fg(), S::pyenv_bg()),
                 );
 
                 if let Some(py_ver) = py_ver {
                     powerline.add_segment(
                         py_ver.trim().to_string(),
-                        Style::simple(S::PYVER_FG, S::PYVER_BG),
+                        Style::simple(S::pyver_fg(), S::pyenv_bg()),
                     );
                 }
             }

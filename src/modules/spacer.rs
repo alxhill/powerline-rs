@@ -1,6 +1,9 @@
-use crate::modules::Module;
-use crate::{colors, Color, Powerline, Style};
 use std::marker::PhantomData;
+
+use crate::colors::Color;
+use crate::modules::Module;
+use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
 
 #[derive(Copy, Clone)]
 pub struct Spacer<S: SpacerScheme> {
@@ -8,8 +11,13 @@ pub struct Spacer<S: SpacerScheme> {
     large: bool,
 }
 
-pub trait SpacerScheme {
-    const BG_COLOR: Color = colors::black();
+pub trait SpacerScheme: DefaultColors {
+    fn color_fg() -> Color {
+        Self::default_fg()
+    }
+    fn color_bg() -> Color {
+        Self::default_bg()
+    }
 }
 
 impl<S: SpacerScheme> Spacer<S> {
@@ -31,9 +39,9 @@ impl<S: SpacerScheme> Spacer<S> {
 impl<S: SpacerScheme> Module for Spacer<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
         if self.large {
-            powerline.add_segment("", Style::simple(colors::light_grey(), S::BG_COLOR));
+            powerline.add_segment("", Style::simple(S::color_fg(), S::color_bg()));
         } else {
-            powerline.add_short_segment("", Style::simple(colors::light_grey(), S::BG_COLOR));
+            powerline.add_short_segment("", Style::simple(S::color_fg(), S::color_bg()));
         }
     }
 }

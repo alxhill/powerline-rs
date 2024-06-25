@@ -1,0 +1,59 @@
+{
+  "defaults": {
+    "fg": "white",
+    "bg": "black"
+  },
+  "modules": {
+    "cargo": {
+      "bg": "burnt_orange",
+      "fg": "black"
+    },
+    "cwd": {
+      "path_fg": "white",
+      "bg_colors": ["red", "orange", "yellow", "green", "blue", "nice_purple"]
+    },
+    "git": {
+      "remote_bg": "mid_grey",
+      "remote_fg": "light_grey",
+      "staged_bg": "forest_green",
+      "notstaged_bg": "mid_red",
+      "untracked_bg": "warning_red",
+      "conflicted_bg": "light_red",
+      "clean_bg": "blue",
+      "dirty_bg": "bright_orange"
+    },
+    "readonly": {
+      "fg": 254,
+      "bg": 124
+    },
+    "py": {
+      "env_fg": "dark_grey",
+      "env_bg": "light_green",
+      "version_bg": "mid_green",
+      "version_fg": "dark_grey"
+    },
+    "time": {
+      "bg": "dark_grey",
+      "fg": "mid_grey"
+    },
+    "cmd": {
+      "passed_fg": "green",
+      "failed_bg": "warning_red",
+      "failed_fg": "white",
+      "user_symbol": "\uf105"
+    },
+    "username": {
+      "bg": "black",
+      "fg": "green"
+    },
+    "host": {
+      "bg": "black",
+      "fg": "green"
+    },
+    "last_cmd_duration": {
+      "bg": "black",
+      "fg": "green",
+      "time_icon": ""
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "theme": "rainbow",
+  "theme": "example_theme.json",
   "rows": [
     {
       "left": [
@@ -19,7 +19,11 @@
         {
           "separator": "round"
         },
+        "cargo",
         "python_env",
+	{
+	  "time": {}
+	},
         {
           "padding": 0
         }
@@ -29,9 +33,11 @@
       "left": [
         {
           "last_cmd_duration": {
-            "min_run_time": "0ms"
+            "min_run_time": 0
           }
         },
+	"user",
+	"host",
         "cmd"
       ]
     }

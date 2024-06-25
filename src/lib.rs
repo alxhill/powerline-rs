@@ -8,4 +8,4 @@ pub mod themes;
 pub(crate) mod utils;
 
 pub use crate::powerline::{Powerline, Style};
-pub use crate::terminal::Color;
+pub use colors::Color;

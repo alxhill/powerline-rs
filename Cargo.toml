@@ -27,3 +27,7 @@ debug = false
 strip = "debuginfo"
 codegen-units = 1
 panic = "abort"
+
+[profile.release.build-override]
+codegen-units = 1
+opt-level = 3
