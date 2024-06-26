@@ -9,9 +9,9 @@ use libgit as internal;
 #[cfg(not(feature = "libgit"))]
 use process as internal;
 
+use crate::{Powerline, Style};
 use crate::colors::Color;
 use crate::themes::DefaultColors;
-use crate::{Powerline, Style};
 
 use super::Module;
 
@@ -70,8 +70,8 @@ pub trait GitScheme: DefaultColors {
     }
 
     const NOT_STAGED_SYMBOL: &'static str = PENCIL;
-    const STAGED_SYMBOL: &'static str = TICK;
-    const UNTRACKED_SYMBOL: &'static str = QUESTION_MARK;
+    const STAGED_SYMBOL: &'static str = "+";
+    const UNTRACKED_SYMBOL: &'static str = "?";
     const CONFLICTED_SYMBOL: &'static str = FANCY_STAR;
 }
 
@@ -125,9 +125,8 @@ fn find_git_dir() -> Option<PathBuf> {
 
 const UP_ARROW: &str = "\u{f062}";
 const DOWN_ARROW: &str = "\u{f063}";
-const TICK: &str = "\u{2714}";
-const PENCIL: &str = "\u{270E}";
-const QUESTION_MARK: &str = "\u{2753}";
+const PENCIL: &str = "\u{eae9}";
+const QUESTION_MARK: &str = "?";
 const FANCY_STAR: &str = "\u{273C}";
 
 const GITHUB_LOGO: &str = "\u{e709}";

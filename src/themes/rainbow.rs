@@ -145,9 +145,6 @@ impl GitScheme for RainbowTheme {
     fn git_repo_dirty_fg() -> Color {
         white()
     }
-    const NOT_STAGED_SYMBOL: &'static str = "\u{eae9}"; // pencil
-    const STAGED_SYMBOL: &'static str = "+";
-    const UNTRACKED_SYMBOL: &'static str = "?";
 }
 
 impl ReadOnlyScheme for RainbowTheme {
