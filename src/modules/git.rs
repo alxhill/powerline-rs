@@ -126,7 +126,6 @@ fn find_git_dir() -> Option<PathBuf> {
 const UP_ARROW: &str = "\u{f062}";
 const DOWN_ARROW: &str = "\u{f063}";
 const PENCIL: &str = "\u{eae9}";
-const QUESTION_MARK: &str = "?";
 const FANCY_STAR: &str = "\u{273C}";
 
 const GITHUB_LOGO: &str = "\u{e709}";
