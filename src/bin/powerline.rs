@@ -46,6 +46,7 @@ function _update_ps1() {
         fi
     fi
     PS1="$(powerline show -s $? -c $COLUMNS zsh $_elapsed)"
+    RPS1="$(powerline show-right -s $? -c $COLUMNS zsh $_elapsed)"
     unset __pl_timer _elapsed _now
 }
 
