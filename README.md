@@ -210,11 +210,12 @@ fn main() {
 
 TODO:
 
-- Add a `powerline install` command to auto-modify shell config
-- Change git icon/name based on branch vs commit vs merging
-- Add java / gradle / jenv / sdkman support
-- Better multiline prompts (e.g lines between)
-- Native "right prompt" support on final line (zsh + fish only I guess)
-- Improve spacing / centering support
-- Calculate column width more accurately
-- Improve display when there aren't enough columns for the whole prompt (e.g truncate paths, show from left not right)
+- [] Add a `powerline install` command to auto-modify shell config
+- [] Change git icon/name based on branch vs commit vs merging
+- [] Add java / gradle / jenv / sdkman support
+- [] Better multiline prompts (e.g lines between)
+- [x] Native "right prompt" support on final line (zsh + fish only I guess)
+- [] Improve spacing / centering support
+- [] Calculate column width more accurately
+- [] Improve display when there aren't enough columns for the whole prompt (e.g truncate paths, show from left not
+  right)
