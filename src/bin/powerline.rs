@@ -1,5 +1,6 @@
 extern crate powerline_rs;
 
+use std::{env, io};
 use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File};
@@ -7,15 +8,14 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
-use std::{env, io};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
 use powerline_rs::config::{Config, TerminalRuntimeMetadata};
+use powerline_rs::Powerline;
 use powerline_rs::terminal::{Shell, SHELL};
 use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
-use powerline_rs::Powerline;
 
 const FISH_CONF: &str = r#"
 function __pl_cache_duration --on-event fish_postexec
@@ -24,7 +24,10 @@ end
 
 function fish_prompt
   powerline show -s $status -c $COLUMNS fish $__pl_duration
-  set -gx __pl_duration 0
+end
+
+function fish_right_prompt
+  powerline show-right -s $status -c $COLUMNS fish $__pl_duration
 end
 "#;
 
@@ -66,6 +69,7 @@ enum PowerlineArgs {
     #[command(subcommand)]
     Init(ShellSubcommand),
     Show(ShowArgs),
+    ShowRight(ShowArgs),
     Config,
 }
 
@@ -116,7 +120,8 @@ fn main() {
 
     match args {
         PowerlineArgs::Init(shell) => print_shell_conf(shell),
-        PowerlineArgs::Show(args) => show(args),
+        PowerlineArgs::Show(args) => show(args, false),
+        PowerlineArgs::ShowRight(args) => show(args, true),
         PowerlineArgs::Config => open_config(),
     }
 }
@@ -140,7 +145,7 @@ fn print_shell_conf(shell: ShellSubcommand) {
     }
 }
 
-fn show(args: ShowArgs) {
+fn show(args: ShowArgs, right_only: bool) {
     match load_config(args.config.clone()) {
         Ok((conf, conf_root)) => {
             match args.shell {
@@ -150,22 +155,10 @@ fn show(args: ShowArgs) {
             }
             .expect("failed to set shell");
 
-            for prompt in conf.rows {
-                let powerline = match conf.theme.as_str() {
-                    "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt, &args),
-                    "simple" => Powerline::from_conf::<SimpleTheme>(&prompt, &args),
-                    theme_path => {
-                        let path = match theme_path.as_bytes() {
-                            [b'/', ..] => PathBuf::from(theme_path),
-                            _ => conf_root.join(theme_path),
-                        };
-
-                        CustomTheme::load(path);
-                        Powerline::from_conf::<CustomTheme>(&prompt, &args)
-                    }
-                };
-
-                println!("{}", powerline.render(args.columns));
+            if right_only {
+                show_right(&args, conf, conf_root);
+            } else {
+                show_normal(&args, conf, conf_root);
             }
         }
         Err(e) => {
@@ -174,6 +167,59 @@ fn show(args: ShowArgs) {
                 eprintln!("source:\n\t{}", source);
             }
         }
+    }
+}
+
+fn show_right(args: &ShowArgs, conf: Config, conf_root: PathBuf) {
+    if let Some(prompt) = conf.rows.last() {
+        // todo: refactor to avoid repeating the theme loading code
+        let powerline = match conf.theme.as_str() {
+            "rainbow" => Powerline::from_conf::<RainbowTheme>(prompt, args),
+            "simple" => Powerline::from_conf::<SimpleTheme>(prompt, args),
+            theme_path => {
+                let path = match theme_path.as_bytes() {
+                    [b'/', ..] => PathBuf::from(theme_path),
+                    _ => conf_root.join(theme_path),
+                };
+
+                CustomTheme::load(path);
+                Powerline::from_conf::<CustomTheme>(prompt, args)
+            }
+        };
+
+        powerline.print_right();
+    }
+}
+
+fn show_normal(args: &ShowArgs, conf: Config, conf_root: PathBuf) {
+    let mut powerlines = conf
+        .rows
+        .into_iter()
+        .map(|prompt| match conf.theme.as_str() {
+            "rainbow" => Powerline::from_conf::<RainbowTheme>(&prompt, args),
+            "simple" => Powerline::from_conf::<SimpleTheme>(&prompt, args),
+            theme_path => {
+                let path = match theme_path.as_bytes() {
+                    [b'/', ..] => PathBuf::from(theme_path),
+                    _ => conf_root.join(theme_path),
+                };
+
+                CustomTheme::load(path);
+                Powerline::from_conf::<CustomTheme>(&prompt, args)
+            }
+        })
+        .collect::<Vec<Powerline>>();
+
+    if let Some((last, all_bar_last)) = powerlines.split_last_mut() {
+        for powerline in all_bar_last {
+            powerline.print_left();
+            powerline.print_padding(args.columns);
+            powerline.print_right();
+            println!();
+        }
+        // the shell handles printing the final right prompt
+        last.print_left();
+        println!();
     }
 }
 

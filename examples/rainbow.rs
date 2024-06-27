@@ -19,7 +19,7 @@ fn main() {
     let columns = str::parse::<usize>(columns).unwrap_or(0);
     let duration = str::parse::<u64>(duration).map(Duration::from_millis).ok();
 
-    let top_prompt = powerline_rs::Powerline::builder()
+    powerline_rs::Powerline::builder()
         .set_shell(Shell::Bare) // override this to whatever shell you use
         .change_separator(Separator::Chevron)
         .add_module(Spacer::<RainbowTheme>::small())
@@ -33,7 +33,7 @@ fn main() {
         .add_padding(0)
         .render(columns);
 
-    let mini_prompt = powerline_rs::Powerline::builder()
+    powerline_rs::Powerline::builder()
         .set_shell(Shell::Bare) // override this to whatever shell you use
         .add_module(LastCmdDuration::<RainbowTheme>::new(
             duration,
@@ -41,7 +41,4 @@ fn main() {
         ))
         .add_module(Cmd::<RainbowTheme>::new(status))
         .render(columns);
-
-    println!("{}", top_prompt);
-    println!("{} ", mini_prompt);
 }

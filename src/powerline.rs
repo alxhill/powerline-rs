@@ -1,10 +1,10 @@
-use crate::colors::Color;
-use crate::config;
-use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use std::fmt;
 use std::fmt::{Display, Write};
 use std::time::Duration;
 
+use crate::colors::Color;
+use crate::config;
+use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use crate::modules::{
     Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, PythonEnv, ReadOnly, Spacer, Time, User,
 };
@@ -80,7 +80,7 @@ pub trait PowerlineRightBuilder {
     fn change_separator(self, separator: Separator) -> Self;
     fn add_padding(self, padding: usize) -> Self;
 
-    fn render(self, columns: usize) -> String;
+    fn render(self, columns: usize);
 }
 
 impl PowerlineShellBuilder for PowerlineBuilder {
@@ -106,8 +106,11 @@ impl PowerlineRightBuilder for PowerlineBuilder {
         self
     }
 
-    fn render(self, columns: usize) -> String {
-        self.powerline.render(columns)
+    fn render(mut self, columns: usize) {
+        self.powerline.print_left();
+        self.powerline.print_padding(columns);
+        self.powerline.print_right();
+        println!();
     }
 }
 
@@ -359,16 +362,15 @@ impl Powerline {
         self.last_padding = true;
     }
 
-    pub fn render(mut self, total_columns: usize) -> String {
-        let mut output = String::with_capacity(512);
-
-        // don't print any padding if there's no right prompt
+    pub fn print_left(&mut self) {
         if let Direction::Left = self.direction {
-            // to_right closes out the buffer
             self.close_left_buffer();
-            return self.left_buffer;
         }
 
+        print!("{}{}", self.left_buffer, Reset);
+    }
+
+    pub fn print_padding(&self, total_columns: usize) {
         // careful not to underflow
         let padding = total_columns
             .checked_sub(self.left_columns)
@@ -378,13 +380,17 @@ impl Powerline {
 
         let padding = vec![" "; padding].join("");
 
-        let _ = write!(
-            output,
-            "{}{}{}{}",
-            self.left_buffer, padding, self.right_buffer, Reset
-        );
+        // the last right buffer is handled by the shell
+        print!("{}", padding);
+    }
 
-        output
+    pub fn print_right(&self) {
+        // no right buffer
+        if let Direction::Left = self.direction {
+            return;
+        }
+
+        print!("{}{}", self.right_buffer, Reset);
     }
 
     fn close_left_buffer(&mut self) {

@@ -9,9 +9,9 @@ use libgit as internal;
 #[cfg(not(feature = "libgit"))]
 use process as internal;
 
-use crate::{Powerline, Style};
 use crate::colors::Color;
 use crate::themes::DefaultColors;
+use crate::{Powerline, Style};
 
 use super::Module;
 
