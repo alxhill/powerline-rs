@@ -143,6 +143,10 @@ There are also three ways to modify the layout:
 
 Usage examples of most of these can be found in the config file shown above.
 
+### Themes
+
+TODO: document theme json format
+
 ## Custom program
 
 You can also create a separate rust program to fully customize the appearance. This allows creating a new theme too.
@@ -179,24 +183,38 @@ use powerline::{modules::*, terminal::Color};
 struct Theme;
 
 impl CmdScheme for Theme {
-    const CMD_FAILED_BG: Color = Color(161);
-    const CMD_FAILED_FG: Color = Color(15);
-    const CMD_PASSED_BG: Color = Color(236);
-    const CMD_PASSED_FG: Color = Color(15);
+    fn cmd_passed_fg() -> Color {
+        Color(15)
+    }
+
+    fn cmd_passed_bg() -> Color {
+        Color(236)
+    }
+
+    fn cmd_failed_bg() -> Color {
+        Color(161)
+    }
+
+    fn cmd_failed_fg() -> Color {
+        Color(15)
+    }
 }
+
 
 fn main() {
     let mut prompt = powerline::Powerline::new();
-    prompt.add_module(Cmd::<SimpleTheme>::new());
+    prompt.add_module(Cmd::<Theme>::new());
 
     ...
 ```
 
 TODO:
 
+- Add a `powerline install` command to auto-modify shell config
 - Change git icon/name based on branch vs commit vs merging
 - Add java / gradle / jenv / sdkman support
 - Better multiline prompts (e.g lines between)
+- Native "right prompt" support on final line (zsh + fish only I guess)
 - Improve spacing / centering support
 - Calculate column width more accurately
-- Improve display when there aren't enough columns to show the whole prompt
+- Improve display when there aren't enough columns for the whole prompt (e.g truncate paths, show from left not right)
