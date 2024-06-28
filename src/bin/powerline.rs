@@ -3,7 +3,7 @@ extern crate powerline_rs;
 use std::{env, io};
 use std::env::VarError;
 use std::error::Error;
-use std::fs::{create_dir_all, File};
+use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
@@ -18,6 +18,8 @@ use powerline_rs::terminal::{Shell, SHELL};
 use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
 
 const FISH_CONF: &str = r#"
+set -gx POWERLINE_RS 1
+
 function __pl_cache_duration --on-event fish_postexec
   set -gx __pl_duration $CMD_DURATION
 end
@@ -31,7 +33,14 @@ function fish_right_prompt
 end
 "#;
 
+const FISH_INSTALL: &str = r#"
+# automatically added by powerline-rs
+powerline init fish | source
+"#;
+
 const ZSH_CONF: &str = r#"
+export POWERLINE_RS=1
+
 function preexec() {
     if command -v gdate >/dev/null 2>&1; then
         __pl_timer=$(($(gdate +%s%0N)/1000000))
@@ -53,8 +62,15 @@ function _update_ps1() {
 precmd_functions=(_update_ps1)
 "#;
 
+const ZSH_INSTALL: &str = r#"
+# automatically added by powerline-rs
+source <(powerline init zsh)
+"#;
+
 // note: does not support showing last cmd duration
 const BASH_CONF: &str = r#"
+export POWERLINE_RS=1
+
 function _update_ps1() {
     PS1="$(powerline show -s $? -c $COLUMNS bash)"
 }
@@ -64,6 +80,11 @@ if [ "$TERM" != "linux" ]; then
 fi
 "#;
 
+const BASH_INSTALL: &str = r#"
+# automatically added by powerline-rs
+source <(powerline init bash)
+"#;
+
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 enum PowerlineArgs {
@@ -71,10 +92,12 @@ enum PowerlineArgs {
     Init(ShellSubcommand),
     Show(ShowArgs),
     ShowRight(ShowArgs),
+    #[command(subcommand)]
+    Install(ShellSubcommand),
     Config,
 }
 
-#[derive(Debug, Subcommand)]
+#[derive(Debug, Clone, Subcommand)]
 enum ShellSubcommand {
     Bash,
     Zsh,
@@ -123,8 +146,41 @@ fn main() {
         PowerlineArgs::Init(shell) => print_shell_conf(shell),
         PowerlineArgs::Show(args) => show(args, false),
         PowerlineArgs::ShowRight(args) => show(args, true),
+        PowerlineArgs::Install(shell) => install(shell),
         PowerlineArgs::Config => open_config(),
     }
+}
+
+fn install(shell: ShellSubcommand) {
+    if env::var("POWERLINE_RS").is_ok() {
+        println!("powerline already installed in current shell");
+        return;
+    }
+
+    let home_dir = PathBuf::from(env::var("HOME").unwrap());
+
+    println!("Installing powerline for {:?} shell", shell);
+
+    match shell {
+        ShellSubcommand::Fish => {
+            append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL);
+            println!("Done, please restart your shell for changes to take effect");
+        }
+        ShellSubcommand::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
+        ShellSubcommand::Bash => append_conf(home_dir.join("~/.bashrc"), BASH_INSTALL),
+    }
+    println!("Done, please restart your shell for changes to take effect");
+}
+
+fn append_conf(conf_path: PathBuf, conf_contents: &str) {
+    let mut conf = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .open(conf_path)
+        .expect("could not open shell config file");
+
+    conf.write_all(conf_contents.as_bytes())
+        .expect("failed to append to config");
 }
 
 fn open_config() {

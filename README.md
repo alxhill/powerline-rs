@@ -28,14 +28,15 @@ seems to fix some character alignment issues.
 
 ![iTerm2 Profile configuration](iterm_config.png)
 
-Clone the repo and install for your desired SHELL:
+To install the package, just run the following:
 
 ```bash
 cargo install --git https://github.com/alxhill/powerline-rs.git
+powerline install
 ```
 
-You can also install (or create your own) compiled command by adding `--example {name}` to cargo command and
-modifying your SHELL config to call the custom binary.
+Then reload your shell's config. Powerline will automatically modify the config file for the currently running
+shell (supporting zsh, fish, and bash only),
 
 Make sure cargo's bin directory is in your `$PATH`.
 
