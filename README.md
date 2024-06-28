@@ -32,31 +32,13 @@ To install the package, just run the following:
 
 ```bash
 cargo install --git https://github.com/alxhill/powerline-rs.git
-powerline install
+powerline install <shell name>
 ```
 
-Then reload your shell's config. Powerline will automatically modify the config file for the currently running
-shell (supporting zsh, fish, and bash only),
+Then reload your shell's config. Powerline will modify the default config file for the shell you choose - currently,
+`fish`, `zsh`, and `bash` are supported.
 
-Make sure cargo's bin directory is in your `$PATH`.
-
-### bash
-
-```bash
-source <(powerline init bash)
-```
-
-### zsh
-
-```zsh
-source <(powerline init zsh)
-```
-
-### fish
-
-```bash
-powerline init fish | source
-```
+Cargo's bin directory is in your `$PATH` for the install command to work.
 
 ## Customization
 
