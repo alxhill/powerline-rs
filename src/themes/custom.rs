@@ -42,10 +42,6 @@ impl From<&ColorsJson> for Color {
 struct DefaultColorsJson {
     fg: ColorsJson,
     bg: ColorsJson,
-    // secondary_fg: Option<ColorsJson>,
-    // secondary_bg: Option<ColorsJson>,
-    // alert_fg: Option<ColorsJson>,
-    // alert_bg: Option<ColorsJson>,
 }
 
 #[derive(Deserialize)]

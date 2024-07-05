@@ -159,16 +159,18 @@ fn install(shell: ShellSubcommand) {
 
     let home_dir = PathBuf::from(env::var("HOME").unwrap());
 
+    assert!(home_dir.is_dir(), "home directory does not exist");
+
     println!("Installing powerline for {:?} shell", shell);
 
     match shell {
         ShellSubcommand::Fish => {
-            append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL);
-            println!("Done, please restart your shell for changes to take effect");
+            append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL)
         }
         ShellSubcommand::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
         ShellSubcommand::Bash => append_conf(home_dir.join("~/.bashrc"), BASH_INSTALL),
     }
+
     println!("Done, please restart your shell for changes to take effect");
 }
 
@@ -176,8 +178,14 @@ fn append_conf(conf_path: PathBuf, conf_contents: &str) {
     let mut conf = OpenOptions::new()
         .write(true)
         .append(true)
-        .open(conf_path)
-        .expect("could not open shell config file");
+        .open(&conf_path)
+        .expect(
+            format!(
+                "could not open shell config file: {}",
+                (&conf_path).to_str().unwrap_or("")
+            )
+            .as_str(),
+        );
 
     conf.write_all(conf_contents.as_bytes())
         .expect("failed to append to config");

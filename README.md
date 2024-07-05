@@ -36,9 +36,9 @@ powerline install <shell name>
 ```
 
 Then reload your shell's config. Powerline will modify the default config file for the shell you choose - currently,
-`fish`, `zsh`, and `bash` are supported.
+`fish`, `zsh`, and `bash`.
 
-Cargo's bin directory is in your `$PATH` for the install command to work.
+Cargo's bin directory must be in your `$PATH` for the `powerline` command to be available.
 
 ## Customization
 
