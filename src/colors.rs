@@ -6,18 +6,12 @@ use std::sync::OnceLock;
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Color(pub u8);
 
-macro_rules! term_color {
-    ($name:ident, $code:expr) => {
-        pub const fn $name() -> Color {
-            Color($code)
-        }
-    };
-}
-
 macro_rules! define_colors {
     ($($name:ident => $code:expr),* $(,)?) => {
         $(
-            term_color!($name, $code);
+        pub const fn $name() -> Color {
+            Color($code)
+        }
         )*
         fn color_map() -> &'static HashMap<&'static str, Color> {
             static COLOR_MAP: OnceLock<HashMap<&'static str, Color>> = OnceLock::new();
@@ -71,7 +65,7 @@ define_colors! {
     bright_orange => 202,
     dark_yellow => 136,
     dark_blue => 19,
-    nice_purple => 55,
+    nice_purple => 93,
     burnt_orange => 214
 }
 
