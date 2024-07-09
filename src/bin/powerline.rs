@@ -92,8 +92,7 @@ enum PowerlineArgs {
     Init(ShellSubcommand),
     Show(ShowArgs),
     ShowRight(ShowArgs),
-    #[command(subcommand)]
-    Install(ShellSubcommand),
+    Install(InstallArgs),
     Config,
 }
 
@@ -125,6 +124,14 @@ struct ShowArgs {
     config: Option<PathBuf>,
 }
 
+#[derive(Debug, Args)]
+struct InstallArgs {
+    #[arg(value_enum)]
+    shell: ShellArg,
+    #[arg(long, action)]
+    force: bool
+}
+
 impl TerminalRuntimeMetadata for &ShowArgs {
     fn total_columns(&self) -> usize {
         self.columns
@@ -146,16 +153,18 @@ fn main() {
         PowerlineArgs::Init(shell) => print_shell_conf(shell),
         PowerlineArgs::Show(args) => show(args, false),
         PowerlineArgs::ShowRight(args) => show(args, true),
-        PowerlineArgs::Install(shell) => install(shell),
+        PowerlineArgs::Install(args) => install(args),
         PowerlineArgs::Config => open_config(),
     }
 }
 
-fn install(shell: ShellSubcommand) {
-    if env::var("POWERLINE_RS").is_ok() {
+fn install(args: InstallArgs) {
+    if env::var("POWERLINE_RS").is_ok() && !args.force {
         println!("powerline already installed in current shell");
         return;
     }
+
+    let shell = args.shell;
 
     let home_dir = PathBuf::from(env::var("HOME").unwrap());
 
@@ -164,11 +173,11 @@ fn install(shell: ShellSubcommand) {
     println!("Installing powerline for {:?} shell", shell);
 
     match shell {
-        ShellSubcommand::Fish => {
+        ShellArg::Fish => {
             append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL)
         }
-        ShellSubcommand::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
-        ShellSubcommand::Bash => append_conf(home_dir.join("~/.bashrc"), BASH_INSTALL),
+        ShellArg::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
+        ShellArg::Bash => append_conf(home_dir.join("~/.bashrc"), BASH_INSTALL),
     }
 
     println!("Done, please restart your shell for changes to take effect");
