@@ -371,6 +371,11 @@ impl Powerline {
     }
 
     pub fn print_padding(&self, total_columns: usize) {
+        // no padding if there's no right buffer
+        if self.direction == Direction::Left || self.right_buffer.is_empty() {
+            return;
+        }
+
         // careful not to underflow
         let padding = total_columns
             .checked_sub(self.left_columns)
@@ -380,13 +385,12 @@ impl Powerline {
 
         let padding = vec![" "; padding].join("");
 
-        // the last right buffer is handled by the shell
         print!("{}", padding);
     }
 
     pub fn print_right(&self) {
         // no right buffer
-        if let Direction::Left = self.direction {
+        if self.direction == Direction::Left {
             return;
         }
 
