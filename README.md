@@ -193,6 +193,8 @@ fn main() {
 
 ## TODO
 
+- [ ] Support NVM enviroments
+- [ ] Support SDKMAN / Java enviroments
 - [ ] Switch to cleaner/JSON-first theme structure
 - [ ] Add a `powerline install` command to auto-modify shell config
 - [ ] Change git icon/name based on branch vs commit vs merging
