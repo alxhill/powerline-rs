@@ -22,7 +22,7 @@ pub trait SdkmanScheme: DefaultColors {
     }
 
     fn icon() -> &'static str {
-        "\u{e738}"
+        "\u{f0176}"
     }
 }
 
@@ -66,7 +66,7 @@ impl<S: SdkmanScheme> Module for SdkmanJava<S> {
                     };
 
                     powerline.add_segment(
-                        format!("{} {}{}", version, S::icon(), icon_for_distro(distribution)),
+                        format!("{} {} {}", S::icon(), version, distro_name(distribution)),
                         Style::simple(S::sdkman_fg(), S::sdkman_bg()),
                     );
                 }
@@ -75,13 +75,12 @@ impl<S: SdkmanScheme> Module for SdkmanJava<S> {
     }
 }
 
-fn icon_for_distro(distribution: &str) -> &'static str {
+fn distro_name(distribution: &str) -> &'static str {
     match distribution {
-        "amzn" => "\u{f270}",
-        "graal" | "graalce" => "\u{eae8}",
-        "oracle" => "\u{ee1c}",
-        "open" => "\u{edf5}",
-        "zulu" => "\u{f0b07}",
+        "amzn" => "corretto",
+        "graal" | "graalce" => "GraalVM",
+        "open" => "OpenJDK",
+        "zulu" => "Zulu",
         _ => distribution.to_string().leak()
     }
 }
