@@ -6,7 +6,8 @@ use crate::colors::Color;
 use crate::config;
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use crate::modules::{
-    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, PythonEnv, ReadOnly, Spacer, Time, User,
+    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, Nvm, PythonEnv, ReadOnly, Spacer, Time,
+    User,
 };
 use crate::terminal::*;
 use crate::themes::CompleteTheme;
@@ -323,6 +324,7 @@ impl Powerline {
                     *wanted_seg_num,
                     *resolve_symlinks,
                 )),
+                LineSegment::Nvm => self.add_module(Nvm::<T>::new()),
             };
         }
     }

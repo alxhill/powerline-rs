@@ -10,6 +10,7 @@ mod user;
 
 mod cargo;
 mod cmd_duration;
+mod nvm;
 mod python_env;
 mod spacer;
 mod time;
@@ -21,6 +22,7 @@ pub use cwd::{Cwd, CwdScheme};
 pub use exit_code::{ExitCode, ExitCodeScheme};
 pub use git::{Git, GitScheme};
 pub use host::{Host, HostScheme};
+pub use nvm::{Nvm, NvmScheme};
 pub use python_env::{PythonEnv, PythonEnvScheme};
 pub use readonly::{ReadOnly, ReadOnlyScheme};
 pub use spacer::{Spacer, SpacerScheme};

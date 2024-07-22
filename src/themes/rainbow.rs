@@ -2,7 +2,8 @@ use crate::colors::Color;
 use crate::colors::*;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme,
+    UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -20,6 +21,16 @@ impl DefaultColors for RainbowTheme {
 }
 
 impl CompleteTheme for RainbowTheme {}
+
+impl NvmScheme for RainbowTheme {
+    fn nvm_bg() -> Color {
+        forest_green()
+    }
+
+    fn nvm_fg() -> Color {
+        light_grey()
+    }
+}
 
 impl TimeScheme for RainbowTheme {
     fn time_bg() -> Color {

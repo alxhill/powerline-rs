@@ -1,6 +1,5 @@
 extern crate powerline_rs;
 
-use std::{env, io};
 use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File, OpenOptions};
@@ -8,14 +7,15 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::Duration;
+use std::{env, io};
 
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
 use powerline_rs::config::{Config, TerminalRuntimeMetadata};
-use powerline_rs::Powerline;
 use powerline_rs::terminal::{Shell, SHELL};
 use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
+use powerline_rs::Powerline;
 
 const FISH_CONF: &str = r#"
 set -gx POWERLINE_RS 1
@@ -129,7 +129,7 @@ struct InstallArgs {
     #[arg(value_enum)]
     shell: ShellArg,
     #[arg(long, action)]
-    force: bool
+    force: bool,
 }
 
 impl TerminalRuntimeMetadata for &ShowArgs {
@@ -173,9 +173,7 @@ fn install(args: InstallArgs) {
     println!("Installing powerline for {:?} shell", shell);
 
     match shell {
-        ShellArg::Fish => {
-            append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL)
-        }
+        ShellArg::Fish => append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL),
         ShellArg::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
         ShellArg::Bash => append_conf(home_dir.join("~/.bashrc"), BASH_INSTALL),
     }

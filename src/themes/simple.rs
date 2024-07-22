@@ -1,7 +1,8 @@
 use crate::colors::{black, dark_grey, grey, light_grey, Color};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme,
+    UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -19,6 +20,8 @@ impl DefaultColors for SimpleTheme {
 }
 
 impl CompleteTheme for SimpleTheme {}
+
+impl NvmScheme for SimpleTheme {}
 
 impl CargoScheme for SimpleTheme {
     fn cargo_bg() -> Color {

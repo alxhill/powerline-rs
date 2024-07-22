@@ -60,7 +60,6 @@ define_colors! {
     warning_red => 160,
     burgundy => 52,
 
-    dark_red => 52,
     orange => 130,
     bright_orange => 202,
     dark_yellow => 136,

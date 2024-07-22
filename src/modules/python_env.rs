@@ -47,6 +47,7 @@ impl<S: PythonEnvScheme> PythonEnv<S> {
 const PYTHON_VERSION_CMD: &str =
     r#"from sys import version_info as v; print(f"{v.major}.{v.minor}.{v.micro}")"#;
 const PYTHON_LOGO: &str = "\u{e73c}";
+const SNAKE_ICON: &str = "\u{f150e}";
 
 impl<S: PythonEnvScheme> Module for PythonEnv<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
@@ -56,7 +57,7 @@ impl<S: PythonEnvScheme> Module for PythonEnv<S> {
 
         let pylogo = if let Ok(cwd) = env::current_dir() {
             if cwd.join("pyproject.toml").exists() {
-                format!("{} {}", PYTHON_LOGO, '\u{f150e}') // snake
+                format!("{} {}", PYTHON_LOGO, SNAKE_ICON)
             } else {
                 PYTHON_LOGO.to_string()
             }

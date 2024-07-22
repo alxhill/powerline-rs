@@ -36,6 +36,7 @@ pub enum LineSegment {
     ReadOnly,
     Git,
     PythonEnv,
+    Nvm,
     Cargo,
     Host,
     Time {
