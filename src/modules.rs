@@ -14,6 +14,7 @@ mod nvm;
 mod python_env;
 mod spacer;
 mod time;
+mod sdkman_java;
 
 pub use cargo::{Cargo, CargoScheme};
 pub use cmd::{Cmd, CmdScheme};
