@@ -5,10 +5,7 @@ use std::time::Duration;
 use crate::colors::Color;
 use crate::config;
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
-use crate::modules::{
-    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, Nvm, PythonEnv, ReadOnly, Spacer, Time,
-    User,
-};
+use crate::modules::{Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, Nvm, PythonEnv, ReadOnly, SdkmanJava, Spacer, Time, User};
 use crate::terminal::*;
 use crate::themes::CompleteTheme;
 
@@ -325,6 +322,7 @@ impl Powerline {
                     *resolve_symlinks,
                 )),
                 LineSegment::Nvm => self.add_module(Nvm::<T>::new()),
+                LineSegment::Sdkman => self.add_module(SdkmanJava::<T>::new())
             };
         }
     }

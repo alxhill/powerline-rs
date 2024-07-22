@@ -10,8 +10,8 @@ use serde_json::Value;
 use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SpacerScheme, TimeScheme,
-    UserScheme,
+    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme, SpacerScheme,
+    TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -143,6 +143,11 @@ macro_rules! color_from_json {
                 .unwrap_or_else(Self::$default)
         }
     };
+}
+
+impl SdkmanScheme for CustomTheme {
+    color_from_json!(sdkman_fg, sdkman, fg, default_fg);
+    color_from_json!(sdkman_bg, sdkman, bg, default_bg);
 }
 
 impl NvmScheme for CustomTheme {

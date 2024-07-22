@@ -37,6 +37,7 @@ pub enum LineSegment {
     Git,
     PythonEnv,
     Nvm,
+    Sdkman,
     Cargo,
     Host,
     Time {

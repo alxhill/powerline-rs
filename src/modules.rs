@@ -12,9 +12,9 @@ mod cargo;
 mod cmd_duration;
 mod nvm;
 mod python_env;
+mod sdkman_java;
 mod spacer;
 mod time;
-mod sdkman_java;
 
 pub use cargo::{Cargo, CargoScheme};
 pub use cmd::{Cmd, CmdScheme};
@@ -26,6 +26,7 @@ pub use host::{Host, HostScheme};
 pub use nvm::{Nvm, NvmScheme};
 pub use python_env::{PythonEnv, PythonEnvScheme};
 pub use readonly::{ReadOnly, ReadOnlyScheme};
+pub use sdkman_java::{SdkmanJava, SdkmanScheme};
 pub use spacer::{Spacer, SpacerScheme};
 pub use time::{Time, TimeScheme};
 pub use user::{User, UserScheme};
