@@ -50,10 +50,7 @@ impl<S: SdkmanScheme> Module for SdkmanJava<S> {
             let maybe_java_version = sdkmanrc.lines()
                 .filter(|line| !line.starts_with("#"))
                 .filter_map(|line| {
-                    if line.starts_with("java=") {
-                        return Some(line.trim_start_matches("java=").to_string())
-                    }
-                    None
+                    line.strip_prefix("java=")
                 })
                 .next();
 
