@@ -57,13 +57,13 @@ impl<S: NvmScheme> Module for Nvm<S> {
             // todo: handle the case where active version != .nvmrc
             (Some(version), _) => {
                 powerline.add_segment(
-                    format!("{} {}", S::icon().to_string(), version),
+                    format!("{} {}", S::icon(), version),
                     Style::simple(S::nvm_fg(), S::nvm_bg()),
                 );
             }
             (None, Some(nvmrc)) => {
                 powerline.add_segment(
-                    format!("{} {}", S::icon().to_string(), nvmrc),
+                    format!("{} {}", S::icon(), nvmrc),
                     Style::simple(S::nvm_fg(), S::nvm_inactive_bg()),
                 );
             }
