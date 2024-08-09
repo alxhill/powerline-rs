@@ -3,6 +3,7 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 
 pub trait TerminalRuntimeMetadata {
+    fn shell_name(&self) -> String;
     fn total_columns(&self) -> usize;
     fn last_command_duration(&self) -> Option<Duration>;
     fn last_command_status(&self) -> &str;
@@ -40,6 +41,7 @@ pub enum LineSegment {
     Sdkman,
     Cargo,
     Host,
+    Shell,
     Time {
         format: Option<String>,
     },

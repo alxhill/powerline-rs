@@ -1,8 +1,8 @@
 use crate::colors::{black, dark_grey, grey, light_grey, Color};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme, SpacerScheme,
-    TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme, ShellScheme,
+    SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -20,6 +20,8 @@ impl DefaultColors for SimpleTheme {
 }
 
 impl CompleteTheme for SimpleTheme {}
+
+impl ShellScheme for SimpleTheme {}
 
 impl SdkmanScheme for SimpleTheme {}
 

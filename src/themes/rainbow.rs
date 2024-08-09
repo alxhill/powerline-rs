@@ -2,8 +2,8 @@ use crate::colors::Color;
 use crate::colors::*;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme, SpacerScheme,
-    TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme, ShellScheme,
+    SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -73,6 +73,8 @@ impl HostScheme for RainbowTheme {
         dark_grey()
     }
 }
+
+impl ShellScheme for RainbowTheme {}
 
 impl ExitCodeScheme for RainbowTheme {
     fn exit_code_bg() -> Color {

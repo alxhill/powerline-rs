@@ -13,6 +13,7 @@ mod cmd_duration;
 mod nvm;
 mod python_env;
 mod sdkman_java;
+mod shell_name;
 mod spacer;
 mod time;
 
@@ -27,6 +28,7 @@ pub use nvm::{Nvm, NvmScheme};
 pub use python_env::{PythonEnv, PythonEnvScheme};
 pub use readonly::{ReadOnly, ReadOnlyScheme};
 pub use sdkman_java::{SdkmanJava, SdkmanScheme};
+pub use shell_name::{ShellName, ShellScheme};
 pub use spacer::{Spacer, SpacerScheme};
 pub use time::{Time, TimeScheme};
 pub use user::{User, UserScheme};

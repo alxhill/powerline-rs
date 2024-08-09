@@ -133,6 +133,14 @@ struct InstallArgs {
 }
 
 impl TerminalRuntimeMetadata for &ShowArgs {
+    fn shell_name(&self) -> String {
+        match self.shell {
+            ShellArg::Bash => "bash".to_string(),
+            ShellArg::Zsh => "zsh".to_string(),
+            ShellArg::Fish => "fish".to_string(),
+        }
+    }
+
     fn total_columns(&self) -> usize {
         self.columns
     }
@@ -183,11 +191,14 @@ fn install(args: InstallArgs) {
 
 fn append_conf(conf_path: PathBuf, conf_contents: &str) {
     let mut conf = OpenOptions::new()
-        
         .append(true)
         .open(&conf_path)
-        .unwrap_or_else(|_| panic!("could not open shell config file: {}",
-                conf_path.to_str().unwrap_or("")));
+        .unwrap_or_else(|_| {
+            panic!(
+                "could not open shell config file: {}",
+                conf_path.to_str().unwrap_or("")
+            )
+        });
 
     conf.write_all(conf_contents.as_bytes())
         .expect("failed to append to config");
