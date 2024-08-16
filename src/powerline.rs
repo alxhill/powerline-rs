@@ -60,6 +60,7 @@ impl From<&SeparatorStyle> for Separator {
         match style {
             SeparatorStyle::Chevron => Separator::Chevron,
             SeparatorStyle::Round => Separator::Round,
+            SeparatorStyle::AngleLine => Separator::AngleLine,
         }
     }
 }

@@ -58,6 +58,7 @@ pub enum LineSegment {
 pub enum SeparatorStyle {
     Chevron,
     Round,
+    AngleLine,
 }
 
 impl Default for Config {
