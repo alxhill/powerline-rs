@@ -260,8 +260,15 @@ fn show_right(args: &ShowArgs, conf: Config, conf_root: PathBuf) {
                     _ => conf_root.join(theme_path),
                 };
 
-                CustomTheme::load(path);
-                Powerline::from_conf::<CustomTheme>(prompt, args)
+                if CustomTheme::load(path.clone()) {
+                    Powerline::from_conf::<CustomTheme>(&prompt, args)
+                } else {
+                    eprintln!(
+                        "Powerline could not load custom theme {}, falling back to default",
+                        path.display()
+                    );
+                    Powerline::from_conf::<RainbowTheme>(&prompt, args)
+                }
             }
         };
 
@@ -282,8 +289,15 @@ fn show_normal(args: &ShowArgs, conf: Config, conf_root: PathBuf) {
                     _ => conf_root.join(theme_path),
                 };
 
-                CustomTheme::load(path);
-                Powerline::from_conf::<CustomTheme>(&prompt, args)
+                if CustomTheme::load(path.clone()) {
+                    Powerline::from_conf::<CustomTheme>(&prompt, args)
+                } else {
+                    eprintln!(
+                        "Powerline could not load custom theme {}, falling back to default",
+                        path.display()
+                    );
+                    Powerline::from_conf::<RainbowTheme>(&prompt, args)
+                }
             }
         })
         .collect::<Vec<Powerline>>();

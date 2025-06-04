@@ -60,18 +60,22 @@ impl CustomThemeImpl {
 }
 
 impl CustomTheme {
-    pub fn load(path: PathBuf) {
-        match serde_json::from_reader(File::open(path).unwrap()) {
-            Ok(theme) => {
-                let _ = THEME.set(theme);
-            }
-            Err(e) => {
-                eprintln!("Failed to read theme.json: {}", e);
-                if let Some(source) = e.source() {
-                    eprintln!("{}", source);
+    pub fn load(path: PathBuf) -> bool {
+        if let Ok(file) = File::open(path) {
+            match serde_json::from_reader(file) {
+                Ok(theme) => {
+                    let _ = THEME.set(theme);
+                    return true;
+                }
+                Err(e) => {
+                    eprintln!("Failed to read theme.json: {}", e);
+                    if let Some(source) = e.source() {
+                        eprintln!("{}", source);
+                    }
                 }
             }
         }
+        return false;
 
         // todo: figure out why this is being set twice...
         // match THEME.set(theme) {
