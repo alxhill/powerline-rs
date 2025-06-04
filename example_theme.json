@@ -1,26 +1,39 @@
 {
   "defaults": {
-    "fg": "white",
+    "fg": "green",
     "bg": "black"
   },
   "modules": {
     "cargo": {
-      "bg": "burnt_orange",
-      "fg": "black"
+      "fg": "black",
+      "bg": "burnt_orange"
     },
     "cwd": {
       "path_fg": "white",
-      "bg_colors": ["red", "orange", "yellow", "green", "blue", "nice_purple"]
+      "bg_colors": [
+        "red",
+        "orange",
+        "yellow",
+        "green",
+        "blue",
+        "nice_purple"
+      ]
     },
     "git": {
       "remote_bg": "mid_grey",
       "remote_fg": "light_grey",
       "staged_bg": "forest_green",
+      "staged_fg": "white",
       "notstaged_bg": "mid_red",
+      "notstaged_fg": "white",
       "untracked_bg": "warning_red",
+      "untracked_fg": "white",
       "conflicted_bg": "light_red",
+      "conflicted_fg": "white",
       "clean_bg": "blue",
-      "dirty_bg": "bright_orange"
+      "clean_fg": "white",
+      "dirty_bg": "bright_orange",
+      "dirty_fg": "white"
     },
     "readonly": {
       "fg": 254,
@@ -42,18 +55,19 @@
       "failed_fg": "white",
       "user_symbol": "\uf105"
     },
-    "username": {
-      "bg": "black",
-      "fg": "green"
-    },
-    "host": {
-      "bg": "black",
-      "fg": "green"
-    },
     "last_cmd_duration": {
       "bg": "black",
       "fg": "green",
       "time_icon": ""
+    },
+    "nvm": {
+      "bg": "forest_green",
+      "inactive_bg": "burgundy",
+      "fg": "white"
+    },
+    "sdkman": {
+      "bg": "white",
+      "fg": 160
     }
   }
 }

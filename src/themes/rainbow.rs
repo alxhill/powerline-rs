@@ -12,25 +12,37 @@ pub struct RainbowTheme;
 
 impl DefaultColors for RainbowTheme {
     fn default_bg() -> Color {
-        blue()
+        black()
     }
 
     fn default_fg() -> Color {
-        white()
+        green()
     }
 }
 
 impl CompleteTheme for RainbowTheme {}
 
-impl SdkmanScheme for RainbowTheme {}
+impl SdkmanScheme for RainbowTheme {
+    fn sdkman_fg() -> Color {
+        Color(160)
+    }
+
+    fn sdkman_bg() -> Color {
+        white()
+    }
+}
 
 impl NvmScheme for RainbowTheme {
     fn nvm_fg() -> Color {
-        light_grey()
+        white()
     }
 
     fn nvm_bg() -> Color {
         forest_green()
+    }
+
+    fn nvm_inactive_bg() -> Color {
+        burgundy()
     }
 }
 
@@ -45,7 +57,7 @@ impl TimeScheme for RainbowTheme {
 
 impl CargoScheme for RainbowTheme {
     fn cargo_fg() -> Color {
-        dark_grey()
+        black()
     }
 
     fn cargo_bg() -> Color {
