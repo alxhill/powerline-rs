@@ -183,7 +183,7 @@ fn install(args: InstallArgs) {
     match shell {
         ShellArg::Fish => append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL),
         ShellArg::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
-        ShellArg::Bash => append_conf(home_dir.join("~/.bashrc"), BASH_INSTALL),
+        ShellArg::Bash => append_conf(home_dir.join(".bashrc"), BASH_INSTALL),
     }
 
     println!("Done, please restart your shell for changes to take effect");
