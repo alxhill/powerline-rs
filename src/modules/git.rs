@@ -106,15 +106,24 @@ impl GitStats {
     }
 }
 
-fn find_git_dir() -> Option<PathBuf> {
+/// Returns the git directory and whether it's a worktree
+fn find_git_dir() -> Option<(PathBuf, bool)> {
     let mut git_dir = env::current_dir().unwrap();
     loop {
-        git_dir.push(".git/");
+        git_dir.push(".git");
 
-        if git_dir.exists() {
+        // Check if .git is a directory (normal repo)
+        if git_dir.is_dir() {
             git_dir.pop();
-            return Some(git_dir);
+            return Some((git_dir, false));
         }
+
+        // Check if .git is a file (worktree - contains "gitdir: <path>")
+        if git_dir.is_file() {
+            git_dir.pop();
+            return Some((git_dir, true));
+        }
+
         git_dir.pop();
 
         if !git_dir.pop() {
@@ -130,11 +139,12 @@ const FANCY_STAR: &str = "\u{273C}";
 
 const GITHUB_LOGO: &str = "\u{e709}";
 const GIT_ICON: &str = "\u{e0a0}";
+const WORKTREE_ICON: &str = "\u{f1bb}";
 
 impl<S: GitScheme> Module for Git<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        let git_dir = match find_git_dir() {
-            Some(dir) => dir,
+        let (git_dir, is_worktree) = match find_git_dir() {
+            Some(result) => result,
             _ => return,
         };
 
@@ -146,8 +156,9 @@ impl<S: GitScheme> Module for Git<S> {
             (S::git_repo_clean_fg(), S::git_repo_clean_bg())
         };
 
+        let icon = if is_worktree { WORKTREE_ICON } else { GIT_ICON };
         powerline.add_segment(
-            format!("{} {}", GIT_ICON, stats.branch_name),
+            format!("{} {}", icon, stats.branch_name),
             Style::simple(branch_fg, branch_bg),
         );
 
