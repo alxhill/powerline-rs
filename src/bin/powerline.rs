@@ -261,13 +261,13 @@ fn show_right(args: &ShowArgs, conf: Config, conf_root: PathBuf) {
                 };
 
                 if CustomTheme::load(path.clone()) {
-                    Powerline::from_conf::<CustomTheme>(&prompt, args)
+                    Powerline::from_conf::<CustomTheme>(prompt, args)
                 } else {
                     eprintln!(
                         "Powerline could not load custom theme {}, falling back to default",
                         path.display()
                     );
-                    Powerline::from_conf::<RainbowTheme>(&prompt, args)
+                    Powerline::from_conf::<RainbowTheme>(prompt, args)
                 }
             }
         };

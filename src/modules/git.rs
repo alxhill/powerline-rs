@@ -108,7 +108,7 @@ impl GitStats {
 
 /// Returns the git directory and whether it's a worktree
 fn find_git_dir() -> Option<(PathBuf, bool)> {
-    let mut git_dir = env::current_dir().unwrap();
+    let mut git_dir = env::current_dir().ok()?;
     loop {
         git_dir.push(".git");
 

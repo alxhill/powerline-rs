@@ -75,7 +75,7 @@ impl CustomTheme {
                 }
             }
         }
-        return false;
+        false
 
         // todo: figure out why this is being set twice...
         // match THEME.set(theme) {
