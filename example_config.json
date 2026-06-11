@@ -3,42 +3,52 @@
   "rows": [
     {
       "left": [
-        "small_spacer",
+        {
+          "padding": 2
+        },
+        {
+          "separator": "round"
+        },
+        "read_only",
         {
           "cwd": {
             "max_length": 60,
-            "wanted_seg_num": 4,
+            "wanted_seg_num": 5,
             "resolve_symlinks": false
           }
         },
-        "read_only",
-        "small_spacer",
-        "git"
+        {
+          "padding": 2
+        },
+        "git",
+        "pr"
+      ],
+      "right": []
+    },
+    {
+      "left": [
+        "shell",
+        {
+          "last_cmd_duration": {
+            "min_run_time": 50
+          }
+        },
+        "cmd",
+        {
+          "padding": 1
+        }
       ],
       "right": [
         {
           "separator": "round"
         },
-        "cargo",
+        "nvm",
+        "sdkman",
         "python_env",
-	{
-	  "time": {}
-	},
+        "cargo",
         {
           "padding": 0
         }
-      ]
-    },
-    {
-      "left": [
-        {
-          "last_cmd_duration": {
-            "min_run_time": 0
-          }
-        },
-	"user",
-	"host",
-        "cmd"
       ]
     }
   ]

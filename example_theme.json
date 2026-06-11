@@ -10,14 +10,7 @@
     },
     "cwd": {
       "path_fg": "white",
-      "bg_colors": [
-        "red",
-        "orange",
-        "yellow",
-        "green",
-        "blue",
-        "nice_purple"
-      ]
+      "bg_colors": ["red", "orange", "yellow", "green", "blue", "nice_purple"]
     },
     "git": {
       "remote_bg": "mid_grey",
@@ -43,8 +36,7 @@
       "merged_bg": "nice_purple",
       "merged_fg": "white",
       "closed_bg": "mid_red",
-      "closed_fg": "white",
-      "icon": ""
+      "closed_fg": "white"
     },
     "readonly": {
       "fg": 254,
