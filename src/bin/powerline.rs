@@ -13,6 +13,7 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
 use powerline_rs::config::{Config, TerminalRuntimeMetadata};
+use powerline_rs::modules::refresh_pr;
 use powerline_rs::terminal::{Shell, SHELL};
 use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
 use powerline_rs::Powerline;
@@ -94,6 +95,10 @@ enum PowerlineArgs {
     ShowRight(ShowArgs),
     Install(InstallArgs),
     Config,
+    /// Internal: refresh the cached PR lookup for a branch. Spawned in the
+    /// background by the `pr` module - not intended to be called by hand.
+    #[command(hide = true)]
+    RefreshPr(RefreshPrArgs),
 }
 
 #[derive(Debug, Clone, Subcommand)]
@@ -122,6 +127,16 @@ struct ShowArgs {
     status: String,
     #[arg(long)]
     config: Option<PathBuf>,
+}
+
+#[derive(Debug, Args)]
+struct RefreshPrArgs {
+    #[arg(long)]
+    branch: String,
+    #[arg(long)]
+    repo_dir: PathBuf,
+    #[arg(long)]
+    cache: PathBuf,
 }
 
 #[derive(Debug, Args)]
@@ -163,6 +178,7 @@ fn main() {
         PowerlineArgs::ShowRight(args) => show(args, true),
         PowerlineArgs::Install(args) => install(args),
         PowerlineArgs::Config => open_config(),
+        PowerlineArgs::RefreshPr(args) => refresh_pr(&args.branch, &args.repo_dir, &args.cache),
     }
 }
 

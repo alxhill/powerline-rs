@@ -2,8 +2,8 @@ use crate::colors::Color;
 use crate::colors::*;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme, ShellScheme,
-    SpacerScheme, TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PrScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme,
+    ShellScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -171,6 +171,15 @@ impl GitScheme for RainbowTheme {
     }
     fn git_repo_dirty_fg() -> Color {
         white()
+    }
+}
+
+impl PrScheme for RainbowTheme {
+    fn pr_fg() -> Color {
+        white()
+    }
+    fn pr_bg() -> Color {
+        nice_purple()
     }
 }
 

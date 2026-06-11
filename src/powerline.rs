@@ -6,7 +6,7 @@ use crate::colors::Color;
 use crate::config;
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use crate::modules::{
-    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, Nvm, PythonEnv, ReadOnly, SdkmanJava,
+    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, Nvm, Pr, PythonEnv, ReadOnly, SdkmanJava,
     ShellName, Spacer, Time, User,
 };
 use crate::terminal::*;
@@ -182,7 +182,13 @@ impl Powerline {
     }
 
     #[inline(always)]
-    fn write_segment<D: Display>(&mut self, seg: D, style: Style, spaces: bool) -> fmt::Result {
+    fn write_segment<D: Display>(
+        &mut self,
+        seg: D,
+        style: Style,
+        spaces: bool,
+        visible_width: Option<usize>,
+    ) -> fmt::Result {
         // write the last style's separator on the new style's background
         if self.last_padding {
             write!(
@@ -220,8 +226,11 @@ impl Powerline {
         };
 
         // attempt to account for symbols in the segment by assuming all chars
-        // printed are of length 1
-        self.left_columns += self.left_buffer[orig_len..].chars().count();
+        // printed are of length 1. When the segment carries invisible escapes
+        // (e.g. a hyperlink) the caller passes the real visible width instead.
+        self.left_columns += visible_width
+            .map(|width| width + if spaces { 2 } else { 0 })
+            .unwrap_or_else(|| self.left_buffer[orig_len..].chars().count());
 
         self.last_style = Some(style);
         Ok(())
@@ -232,6 +241,7 @@ impl Powerline {
         seg: D,
         style: Style,
         spaces: bool,
+        visible_width: Option<usize>,
     ) -> fmt::Result {
         // write the separator directly onto the current background
         write!(
@@ -255,8 +265,12 @@ impl Powerline {
         };
 
         // attempt to account for symbols in the segment by assuming all chars
-        // printed are of length 1 (so multi-byte chars don't over-inflate the size)
-        self.right_columns += self.right_buffer[orig_len..].chars().count();
+        // printed are of length 1 (so multi-byte chars don't over-inflate the
+        // size). When the segment carries invisible escapes (e.g. a hyperlink)
+        // the caller passes the real visible width instead.
+        self.right_columns += visible_width
+            .map(|width| width + if spaces { 2 } else { 0 })
+            .unwrap_or_else(|| self.right_buffer[orig_len..].chars().count());
 
         self.last_style_right = Some(style);
         Ok(())
@@ -264,15 +278,27 @@ impl Powerline {
 
     pub fn add_segment<D: Display>(&mut self, seg: D, style: Style) {
         let _ = match self.direction {
-            Direction::Left => self.write_segment(seg, style, true),
-            Direction::Right => self.write_segment_right(seg, style, true),
+            Direction::Left => self.write_segment(seg, style, true, None),
+            Direction::Right => self.write_segment_right(seg, style, true, None),
         };
     }
 
     pub fn add_short_segment<D: Display>(&mut self, seg: D, style: Style) {
         let _ = match self.direction {
-            Direction::Left => self.write_segment(seg, style, false),
-            Direction::Right => self.write_segment_right(seg, style, false),
+            Direction::Left => self.write_segment(seg, style, false, None),
+            Direction::Right => self.write_segment_right(seg, style, false, None),
+        };
+    }
+
+    /// Adds a segment whose text is an OSC 8 terminal hyperlink. The escape
+    /// sequences are invisible, so the segment's visible width is computed from
+    /// `label` alone to keep column accounting (and right-prompt padding) correct.
+    pub fn add_hyperlink_segment(&mut self, label: &str, url: &str, style: Style) {
+        let visible_width = label.chars().count();
+        let seg = format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, label);
+        let _ = match self.direction {
+            Direction::Left => self.write_segment(seg, style, true, Some(visible_width)),
+            Direction::Right => self.write_segment_right(seg, style, true, Some(visible_width)),
         };
     }
 
@@ -301,6 +327,7 @@ impl Powerline {
                 }
                 LineSegment::Cargo => self.add_module(Cargo::<T>::new()),
                 LineSegment::Git => self.add_module(Git::<T>::new()),
+                LineSegment::Pr => self.add_module(Pr::<T>::new()),
                 LineSegment::Separator(style) => self.set_separator(style.into()),
                 LineSegment::ReadOnly => self.add_module(ReadOnly::<T>::new()),
                 LineSegment::Host => self.add_module(Host::<T>::new()),

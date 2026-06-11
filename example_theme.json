@@ -35,6 +35,11 @@
       "dirty_bg": "bright_orange",
       "dirty_fg": "white"
     },
+    "pr": {
+      "bg": "nice_purple",
+      "fg": "white",
+      "icon": ""
+    },
     "readonly": {
       "fg": 254,
       "bg": 124

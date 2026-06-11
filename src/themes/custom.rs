@@ -10,8 +10,8 @@ use serde_json::Value;
 use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme, ShellScheme,
-    SpacerScheme, TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PrScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme,
+    ShellScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -217,6 +217,17 @@ impl GitScheme for CustomTheme {
     color_from_json!(git_repo_clean_fg, git, clean_fg, default_fg);
     color_from_json!(git_repo_dirty_bg, git, dirty_bg, default_bg);
     color_from_json!(git_repo_dirty_fg, git, dirty_fg, default_fg);
+}
+
+impl PrScheme for CustomTheme {
+    color_from_json!(pr_bg, pr, bg, default_bg);
+    color_from_json!(pr_fg, pr, fg, default_fg);
+
+    fn pr_icon() -> &'static str {
+        Self::get_str("pr", "icon")
+            .map(|str| str.leak() as &'static str)
+            .unwrap_or("\u{ea64}")
+    }
 }
 
 impl PythonEnvScheme for CustomTheme {
