@@ -220,8 +220,14 @@ impl GitScheme for CustomTheme {
 }
 
 impl PrScheme for CustomTheme {
-    color_from_json!(pr_bg, pr, bg, default_bg);
-    color_from_json!(pr_fg, pr, fg, default_fg);
+    color_from_json!(pr_draft_bg, pr, draft_bg, default_bg);
+    color_from_json!(pr_draft_fg, pr, draft_fg, default_fg);
+    color_from_json!(pr_open_bg, pr, open_bg, default_bg);
+    color_from_json!(pr_open_fg, pr, open_fg, default_fg);
+    color_from_json!(pr_merged_bg, pr, merged_bg, default_bg);
+    color_from_json!(pr_merged_fg, pr, merged_fg, default_fg);
+    color_from_json!(pr_closed_bg, pr, closed_bg, default_bg);
+    color_from_json!(pr_closed_fg, pr, closed_fg, default_fg);
 
     fn pr_icon() -> &'static str {
         Self::get_str("pr", "icon")

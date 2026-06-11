@@ -31,10 +31,28 @@ pub struct Pr<S> {
 }
 
 pub trait PrScheme: DefaultColors {
-    fn pr_fg() -> Color {
+    fn pr_draft_fg() -> Color {
         Self::default_fg()
     }
-    fn pr_bg() -> Color {
+    fn pr_draft_bg() -> Color {
+        Self::default_bg()
+    }
+    fn pr_open_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pr_open_bg() -> Color {
+        Self::default_bg()
+    }
+    fn pr_merged_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pr_merged_bg() -> Color {
+        Self::default_bg()
+    }
+    fn pr_closed_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pr_closed_bg() -> Color {
         Self::default_bg()
     }
     fn pr_icon() -> &'static str {
@@ -56,10 +74,32 @@ impl<S: PrScheme> Pr<S> {
     }
 }
 
+#[derive(Serialize, Deserialize, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+enum PrState {
+    Draft,
+    Open,
+    Merged,
+    Closed,
+}
+
+impl PrState {
+    /// Picks the (fg, bg) colors for this state from the active scheme.
+    fn style<S: PrScheme>(self) -> (Color, Color) {
+        match self {
+            PrState::Draft => (S::pr_draft_fg(), S::pr_draft_bg()),
+            PrState::Open => (S::pr_open_fg(), S::pr_open_bg()),
+            PrState::Merged => (S::pr_merged_fg(), S::pr_merged_bg()),
+            PrState::Closed => (S::pr_closed_fg(), S::pr_closed_bg()),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 struct PrInfo {
     number: u64,
     url: String,
+    state: PrState,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -97,7 +137,8 @@ impl<S: PrScheme> Module for Pr<S> {
         // Render whatever we have right now (possibly slightly stale).
         if let Some(PrCache { pr: Some(pr), .. }) = cache {
             let label = format!("{} #{}", S::pr_icon(), pr.number);
-            powerline.add_hyperlink_segment(&label, &pr.url, Style::simple(S::pr_fg(), S::pr_bg()));
+            let (fg, bg) = pr.state.style::<S>();
+            powerline.add_hyperlink_segment(&label, &pr.url, Style::simple(fg, bg));
         }
     }
 }
@@ -214,7 +255,7 @@ pub fn refresh_pr(branch: &str, repo_dir: &Path, cache_path: &Path) {
 fn fetch_pr(branch: &str, repo_dir: &Path) -> Option<PrInfo> {
     let output = Command::new("gh")
         .current_dir(repo_dir)
-        .args(["pr", "view", branch, "--json", "number,url"])
+        .args(["pr", "view", branch, "--json", "number,url,state,isDraft"])
         .output()
         .ok()?;
 
@@ -223,7 +264,34 @@ fn fetch_pr(branch: &str, repo_dir: &Path) -> Option<PrInfo> {
         return None;
     }
 
-    serde_json::from_slice(&output.stdout).ok()
+    let gh: GhPr = serde_json::from_slice(&output.stdout).ok()?;
+
+    // A draft PR is reported as OPEN with `isDraft: true`, so check that first.
+    let state = if gh.is_draft {
+        PrState::Draft
+    } else {
+        match gh.state.as_str() {
+            "MERGED" => PrState::Merged,
+            "CLOSED" => PrState::Closed,
+            _ => PrState::Open,
+        }
+    };
+
+    Some(PrInfo {
+        number: gh.number,
+        url: gh.url,
+        state,
+    })
+}
+
+/// Shape of the `gh pr view --json ...` response we care about.
+#[derive(Deserialize)]
+struct GhPr {
+    number: u64,
+    url: String,
+    state: String,
+    #[serde(rename = "isDraft")]
+    is_draft: bool,
 }
 
 fn write_cache(path: &Path, cache: &PrCache) {

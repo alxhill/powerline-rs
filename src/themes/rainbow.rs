@@ -175,11 +175,29 @@ impl GitScheme for RainbowTheme {
 }
 
 impl PrScheme for RainbowTheme {
-    fn pr_fg() -> Color {
+    fn pr_draft_fg() -> Color {
         white()
     }
-    fn pr_bg() -> Color {
+    fn pr_draft_bg() -> Color {
+        mid_grey()
+    }
+    fn pr_open_fg() -> Color {
+        white()
+    }
+    fn pr_open_bg() -> Color {
+        forest_green()
+    }
+    fn pr_merged_fg() -> Color {
+        white()
+    }
+    fn pr_merged_bg() -> Color {
         nice_purple()
+    }
+    fn pr_closed_fg() -> Color {
+        white()
+    }
+    fn pr_closed_bg() -> Color {
+        mid_red()
     }
 }
 

@@ -112,10 +112,28 @@ impl TimeScheme for SimpleTheme {
 }
 
 impl PrScheme for SimpleTheme {
-    fn pr_bg() -> Color {
+    fn pr_draft_bg() -> Color {
+        Color(240)
+    }
+    fn pr_draft_fg() -> Color {
+        Color(15)
+    }
+    fn pr_open_bg() -> Color {
+        Color(28)
+    }
+    fn pr_open_fg() -> Color {
+        Color(15)
+    }
+    fn pr_merged_bg() -> Color {
         Color(54)
     }
-    fn pr_fg() -> Color {
+    fn pr_merged_fg() -> Color {
+        Color(15)
+    }
+    fn pr_closed_bg() -> Color {
+        Color(124)
+    }
+    fn pr_closed_fg() -> Color {
         Color(15)
     }
 }
