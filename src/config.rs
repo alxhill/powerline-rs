@@ -36,6 +36,7 @@ pub enum LineSegment {
     },
     ReadOnly,
     Git,
+    Pr,
     PythonEnv,
     Nvm,
     Sdkman,

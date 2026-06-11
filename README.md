@@ -114,6 +114,10 @@ Inside the `left` and `right` arrays, you can add the following sections to for 
 * **cargo** - show a crab icon if a `Cargo.toml` file is present in the current dir
 * **git** - show the current git branch and status of the repo (modified, staged, and untracked files, plus git remote
   ahead/behind stats)
+* **pr** - show a clickable link to the GitHub PR for the current branch (via the [`gh`](https://cli.github.com)
+  CLI), if one exists. The segment colour reflects the PR state (draft, open, merged, closed). The lookup runs in the
+  background and is cached, so it never blocks the prompt - the link appears on a subsequent prompt once the result is
+  ready. Skipped entirely on `develop`, `main`, and `master`.
 
 There are also three ways to modify the layout:
 

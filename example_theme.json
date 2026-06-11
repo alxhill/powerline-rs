@@ -35,6 +35,17 @@
       "dirty_bg": "bright_orange",
       "dirty_fg": "white"
     },
+    "pr": {
+      "draft_bg": "mid_grey",
+      "draft_fg": "white",
+      "open_bg": "forest_green",
+      "open_fg": "white",
+      "merged_bg": "nice_purple",
+      "merged_fg": "white",
+      "closed_bg": "mid_red",
+      "closed_fg": "white",
+      "icon": ""
+    },
     "readonly": {
       "fg": 254,
       "bg": 124
