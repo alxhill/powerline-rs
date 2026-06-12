@@ -2,8 +2,8 @@ use crate::colors::Color;
 use crate::colors::*;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PrScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme,
-    ShellScheme, SpacerScheme, TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PrScheme, PrStatusScheme, PythonEnvScheme, ReadOnlyScheme,
+    SdkmanScheme, ShellScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -198,6 +198,18 @@ impl PrScheme for RainbowTheme {
     }
     fn pr_closed_bg() -> Color {
         mid_red()
+    }
+}
+
+impl PrStatusScheme for RainbowTheme {
+    fn pr_status_success_fg() -> Color {
+        light_green()
+    }
+    fn pr_status_failure_fg() -> Color {
+        warning_red()
+    }
+    fn pr_status_pending_fg() -> Color {
+        dark_yellow()
     }
 }
 

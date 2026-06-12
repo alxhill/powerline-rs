@@ -6,6 +6,7 @@ mod exit_code;
 mod git;
 mod host;
 mod pr;
+mod pr_status;
 mod readonly;
 mod user;
 
@@ -27,6 +28,7 @@ pub use git::{Git, GitScheme};
 pub use host::{Host, HostScheme};
 pub use nvm::{Nvm, NvmScheme};
 pub use pr::{refresh_pr, Pr, PrScheme};
+pub use pr_status::{refresh_pr_status, PrStatus, PrStatusScheme};
 pub use python_env::{PythonEnv, PythonEnvScheme};
 pub use readonly::{ReadOnly, ReadOnlyScheme};
 pub use sdkman_java::{SdkmanJava, SdkmanScheme};
