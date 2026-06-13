@@ -6,8 +6,8 @@ use crate::colors::Color;
 use crate::config;
 use crate::config::{LineSegment, SeparatorStyle, TerminalRuntimeMetadata};
 use crate::modules::{
-    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, Nvm, Pr, PrStatus, PythonEnv, ReadOnly,
-    SdkmanJava, ShellName, Spacer, Time, User,
+    Cargo, Cmd, Cwd, Git, Host, LastCmdDuration, Module, Nvm, Pr, PythonEnv, ReadOnly, SdkmanJava,
+    ShellName, Spacer, Time, User,
 };
 use crate::terminal::*;
 use crate::themes::CompleteTheme;
@@ -327,8 +327,7 @@ impl Powerline {
                 }
                 LineSegment::Cargo => self.add_module(Cargo::<T>::new()),
                 LineSegment::Git => self.add_module(Git::<T>::new()),
-                LineSegment::Pr => self.add_module(Pr::<T>::new()),
-                LineSegment::PrStatus => self.add_module(PrStatus::<T>::new()),
+                LineSegment::Pr { status } => self.add_module(Pr::<T>::new(*status)),
                 LineSegment::Separator(style) => self.set_separator(style.into()),
                 LineSegment::ReadOnly => self.add_module(ReadOnly::<T>::new()),
                 LineSegment::Host => self.add_module(Host::<T>::new()),

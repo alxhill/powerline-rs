@@ -27,6 +27,8 @@ const REFRESH_DEBOUNCE: Duration = Duration::from_secs(20);
 const SKIP_BRANCHES: &[&str] = &["develop", "main", "master", "HEAD"];
 
 pub struct Pr<S> {
+    /// Whether to append the CI check-status dot after the PR number.
+    show_status: bool,
     scheme: PhantomData<S>,
 }
 
@@ -58,17 +60,40 @@ pub trait PrScheme: DefaultColors {
     fn pr_icon() -> &'static str {
         "\u{ea64}" // nf-cod-git_pull_request
     }
+
+    fn pr_status_success_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pr_status_success_bg() -> Color {
+        Self::default_bg()
+    }
+    fn pr_status_failure_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pr_status_failure_bg() -> Color {
+        Self::default_bg()
+    }
+    fn pr_status_pending_fg() -> Color {
+        Self::default_fg()
+    }
+    fn pr_status_pending_bg() -> Color {
+        Self::default_bg()
+    }
+    fn pr_status_icon() -> &'static str {
+        "\u{25cf}" // ● black circle
+    }
 }
 
 impl<S: PrScheme> Default for Pr<S> {
     fn default() -> Self {
-        Self::new()
+        Self::new(true)
     }
 }
 
 impl<S: PrScheme> Pr<S> {
-    pub fn new() -> Pr<S> {
+    pub fn new(show_status: bool) -> Pr<S> {
         Pr {
+            show_status,
             scheme: PhantomData,
         }
     }
@@ -95,11 +120,37 @@ impl PrState {
     }
 }
 
+/// Aggregate state of the PR's checks, collapsed from the individual check runs
+/// and status contexts reported by GitHub.
+#[derive(Serialize, Deserialize, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+enum CheckStatus {
+    Success,
+    Failure,
+    Pending,
+}
+
+impl CheckStatus {
+    /// Picks the (fg, bg) colors for this status from the active scheme.
+    fn style<S: PrScheme>(self) -> (Color, Color) {
+        match self {
+            CheckStatus::Success => (S::pr_status_success_fg(), S::pr_status_success_bg()),
+            CheckStatus::Failure => (S::pr_status_failure_fg(), S::pr_status_failure_bg()),
+            CheckStatus::Pending => (S::pr_status_pending_fg(), S::pr_status_pending_bg()),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 struct PrInfo {
     number: u64,
     url: String,
     state: PrState,
+    /// Aggregate CI status. `None` means there are no meaningful checks, so the
+    /// dot is hidden rather than shown misleadingly. Defaulted for forward
+    /// compatibility with caches written before this field existed.
+    #[serde(default)]
+    checks: Option<CheckStatus>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -139,6 +190,14 @@ impl<S: PrScheme> Module for Pr<S> {
             let label = format!("{} #{}", S::pr_icon(), pr.number);
             let (fg, bg) = pr.state.style::<S>();
             powerline.add_hyperlink_segment(&label, &pr.url, Style::simple(fg, bg));
+
+            // A coloured dot for the CI status, when enabled and meaningful.
+            if self.show_status {
+                if let Some(status) = pr.checks {
+                    let (fg, bg) = status.style::<S>();
+                    powerline.add_segment(S::pr_status_icon(), Style::simple(fg, bg));
+                }
+            }
         }
     }
 }
@@ -241,6 +300,8 @@ fn spawn_refresh(branch: &str, repo_root: &Path, cache_path: &Path) {
 
 /// Performs the blocking `gh` lookup and writes the cache. Invoked by the
 /// hidden `refresh-pr` subcommand from the detached process spawned above.
+/// Always fetches the check status too - rendering it is a display-time choice,
+/// so the cache stays the same regardless of config.
 pub fn refresh_pr(branch: &str, repo_dir: &Path, cache_path: &Path) {
     let cache = PrCache {
         branch: branch.to_string(),
@@ -255,7 +316,13 @@ pub fn refresh_pr(branch: &str, repo_dir: &Path, cache_path: &Path) {
 fn fetch_pr(branch: &str, repo_dir: &Path) -> Option<PrInfo> {
     let output = Command::new("gh")
         .current_dir(repo_dir)
-        .args(["pr", "view", branch, "--json", "number,url,state,isDraft"])
+        .args([
+            "pr",
+            "view",
+            branch,
+            "--json",
+            "number,url,state,isDraft,statusCheckRollup",
+        ])
         .output()
         .ok()?;
 
@@ -281,7 +348,79 @@ fn fetch_pr(branch: &str, repo_dir: &Path) -> Option<PrInfo> {
         number: gh.number,
         url: gh.url,
         state,
+        checks: aggregate(&gh.status_check_rollup),
     })
+}
+
+/// Collapses individual checks into a single status. Failure beats pending,
+/// which beats success. Returns `None` when there are no meaningful checks, so
+/// the dot renders nothing rather than misleading the reader.
+fn aggregate(checks: &[CheckItem]) -> Option<CheckStatus> {
+    let mut any_pending = false;
+    let mut any_success = false;
+
+    for check in checks {
+        match check.outcome() {
+            CheckOutcome::Failure => return Some(CheckStatus::Failure),
+            CheckOutcome::Pending => any_pending = true,
+            CheckOutcome::Success => any_success = true,
+            CheckOutcome::Neutral => {}
+        }
+    }
+
+    if any_pending {
+        Some(CheckStatus::Pending)
+    } else if any_success {
+        Some(CheckStatus::Success)
+    } else {
+        None
+    }
+}
+
+enum CheckOutcome {
+    Success,
+    Failure,
+    Pending,
+    Neutral,
+}
+
+/// A single entry in GitHub's `statusCheckRollup`. Check runs report
+/// `status`/`conclusion`; legacy status contexts report `state`.
+#[derive(Deserialize)]
+struct CheckItem {
+    #[serde(default)]
+    status: Option<String>,
+    #[serde(default)]
+    conclusion: Option<String>,
+    #[serde(default)]
+    state: Option<String>,
+}
+
+impl CheckItem {
+    fn outcome(&self) -> CheckOutcome {
+        // Legacy commit-status contexts carry a `state` instead of a status/
+        // conclusion pair.
+        if let Some(state) = &self.state {
+            return match state.as_str() {
+                "SUCCESS" => CheckOutcome::Success,
+                "PENDING" | "EXPECTED" => CheckOutcome::Pending,
+                _ => CheckOutcome::Failure, // FAILURE, ERROR
+            };
+        }
+
+        match self.status.as_deref() {
+            Some("COMPLETED") => match self.conclusion.as_deref() {
+                Some("SUCCESS") => CheckOutcome::Success,
+                // Skipped / neutral checks shouldn't tip the dot either way.
+                Some("SKIPPED") | Some("NEUTRAL") => CheckOutcome::Neutral,
+                // FAILURE, TIMED_OUT, CANCELLED, ACTION_REQUIRED, STARTUP_FAILURE
+                _ => CheckOutcome::Failure,
+            },
+            // QUEUED, IN_PROGRESS, WAITING, PENDING, REQUESTED, ...
+            Some(_) => CheckOutcome::Pending,
+            None => CheckOutcome::Neutral,
+        }
+    }
 }
 
 /// Shape of the `gh pr view --json ...` response we care about.
@@ -292,6 +431,8 @@ struct GhPr {
     state: String,
     #[serde(rename = "isDraft")]
     is_draft: bool,
+    #[serde(rename = "statusCheckRollup", default)]
+    status_check_rollup: Vec<CheckItem>,
 }
 
 fn write_cache(path: &Path, cache: &PrCache) {

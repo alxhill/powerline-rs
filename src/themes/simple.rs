@@ -1,8 +1,8 @@
 use crate::colors::{black, dark_grey, grey, light_grey, Color};
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PrScheme, PrStatusScheme, PythonEnvScheme, ReadOnlyScheme,
-    SdkmanScheme, ShellScheme, SpacerScheme, TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PrScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme,
+    ShellScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -136,9 +136,7 @@ impl PrScheme for SimpleTheme {
     fn pr_closed_fg() -> Color {
         Color(15)
     }
-}
 
-impl PrStatusScheme for SimpleTheme {
     fn pr_status_success_fg() -> Color {
         Color(40)
     }

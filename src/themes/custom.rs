@@ -10,8 +10,8 @@ use serde_json::Value;
 use crate::colors::Color;
 use crate::modules::{
     CargoScheme, CmdScheme, CwdScheme, ExitCodeScheme, GitScheme, HostScheme,
-    LastCmdDurationScheme, NvmScheme, PrScheme, PrStatusScheme, PythonEnvScheme, ReadOnlyScheme,
-    SdkmanScheme, ShellScheme, SpacerScheme, TimeScheme, UserScheme,
+    LastCmdDurationScheme, NvmScheme, PrScheme, PythonEnvScheme, ReadOnlyScheme, SdkmanScheme,
+    ShellScheme, SpacerScheme, TimeScheme, UserScheme,
 };
 use crate::themes::{CompleteTheme, DefaultColors};
 
@@ -229,23 +229,21 @@ impl PrScheme for CustomTheme {
     color_from_json!(pr_closed_bg, pr, closed_bg, default_bg);
     color_from_json!(pr_closed_fg, pr, closed_fg, default_fg);
 
+    color_from_json!(pr_status_success_bg, pr, status_success_bg, default_bg);
+    color_from_json!(pr_status_success_fg, pr, status_success_fg, default_fg);
+    color_from_json!(pr_status_failure_bg, pr, status_failure_bg, default_bg);
+    color_from_json!(pr_status_failure_fg, pr, status_failure_fg, default_fg);
+    color_from_json!(pr_status_pending_bg, pr, status_pending_bg, default_bg);
+    color_from_json!(pr_status_pending_fg, pr, status_pending_fg, default_fg);
+
     fn pr_icon() -> &'static str {
         Self::get_str("pr", "icon")
             .map(|str| str.leak() as &'static str)
             .unwrap_or("\u{ea64}")
     }
-}
-
-impl PrStatusScheme for CustomTheme {
-    color_from_json!(pr_status_success_bg, pr_status, success_bg, default_bg);
-    color_from_json!(pr_status_success_fg, pr_status, success_fg, default_fg);
-    color_from_json!(pr_status_failure_bg, pr_status, failure_bg, default_bg);
-    color_from_json!(pr_status_failure_fg, pr_status, failure_fg, default_fg);
-    color_from_json!(pr_status_pending_bg, pr_status, pending_bg, default_bg);
-    color_from_json!(pr_status_pending_fg, pr_status, pending_fg, default_fg);
 
     fn pr_status_icon() -> &'static str {
-        Self::get_str("pr_status", "icon")
+        Self::get_str("pr", "status_icon")
             .map(|str| str.leak() as &'static str)
             .unwrap_or("\u{25cf}")
     }

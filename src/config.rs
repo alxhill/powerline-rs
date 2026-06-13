@@ -36,8 +36,12 @@ pub enum LineSegment {
     },
     ReadOnly,
     Git,
-    Pr,
-    PrStatus,
+    Pr {
+        /// Append a coloured dot reflecting the PR's CI check status. On by
+        /// default; set to `false` to show just the PR number.
+        #[serde(default = "default_true")]
+        status: bool,
+    },
     PythonEnv,
     Nvm,
     Sdkman,
@@ -53,6 +57,10 @@ pub enum LineSegment {
         min_run_time: u64, // milliseconds
     },
     Padding(usize),
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, Serialize, Deserialize)]
