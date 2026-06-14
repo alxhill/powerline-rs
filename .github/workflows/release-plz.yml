@@ -1,0 +1,63 @@
+name: Release-plz
+
+on:
+  push:
+    branches:
+      - main
+
+# Avoid two release-plz runs racing on overlapping git history.
+concurrency:
+  group: release-plz-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Publish any unreleased versions to crates.io and create the GitHub release.
+  # Uses crates.io Trusted Publishing (OIDC) via `id-token: write` - no
+  # CARGO_REGISTRY_TOKEN secret is needed. release-plz performs the OIDC token
+  # exchange itself. Note: the very first publish of a crate must be done
+  # manually; trusted publishing only works once the crate exists on crates.io.
+  release-plz-release:
+    name: Release-plz release
+    runs-on: ubuntu-latest
+    # Runs in the `cargo` deployment environment - the crates.io trusted
+    # publisher is scoped to this environment name, so the OIDC token is only
+    # accepted for jobs that declare it.
+    environment: cargo
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Run release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Open/update the "release" PR that bumps the version and updates the
+  # changelog based on the conventional commits merged since the last release.
+  release-plz-pr:
+    name: Release-plz PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Run release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
