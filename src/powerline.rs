@@ -290,12 +290,31 @@ impl Powerline {
         };
     }
 
-    /// Adds a segment whose text is an OSC 8 terminal hyperlink. The escape
-    /// sequences are invisible, so the segment's visible width is computed from
-    /// `label` alone to keep column accounting (and right-prompt padding) correct.
-    pub fn add_hyperlink_segment(&mut self, label: &str, url: &str, style: Style) {
-        let visible_width = label.chars().count();
-        let seg = format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, label);
+    /// Adds a segment whose text is an OSC 8 terminal hyperlink, optionally
+    /// followed by a coloured marker glyph (e.g. the PR status dot) that shares
+    /// this segment's background instead of getting one of its own. The OSC and
+    /// colour escapes are invisible, so the visible width is computed from
+    /// `label` and the marker glyph alone to keep column accounting (and
+    /// right-prompt padding) correct.
+    pub fn add_hyperlink_segment(
+        &mut self,
+        label: &str,
+        url: &str,
+        style: Style,
+        marker: Option<(&str, Color)>,
+    ) {
+        let mut visible_width = label.chars().count();
+        let link = format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, label);
+        let seg = match marker {
+            Some((glyph, color)) => {
+                // separating space + the glyph itself
+                visible_width += 1 + glyph.chars().count();
+                // Colour the glyph, then restore the segment's foreground so the
+                // terminal state matches what the renderer records for it.
+                format!("{} {}{}{}", link, FgColor::from(color), glyph, style.fg)
+            }
+            None => link,
+        };
         let _ = match self.direction {
             Direction::Left => self.write_segment(seg, style, true, Some(visible_width)),
             Direction::Right => self.write_segment_right(seg, style, true, Some(visible_width)),

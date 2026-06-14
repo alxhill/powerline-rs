@@ -229,11 +229,8 @@ impl PrScheme for CustomTheme {
     color_from_json!(pr_closed_bg, pr, closed_bg, default_bg);
     color_from_json!(pr_closed_fg, pr, closed_fg, default_fg);
 
-    color_from_json!(pr_status_success_bg, pr, status_success_bg, default_bg);
     color_from_json!(pr_status_success_fg, pr, status_success_fg, default_fg);
-    color_from_json!(pr_status_failure_bg, pr, status_failure_bg, default_bg);
     color_from_json!(pr_status_failure_fg, pr, status_failure_fg, default_fg);
-    color_from_json!(pr_status_pending_bg, pr, status_pending_bg, default_bg);
     color_from_json!(pr_status_pending_fg, pr, status_pending_fg, default_fg);
 
     fn pr_icon() -> &'static str {

@@ -64,20 +64,11 @@ pub trait PrScheme: DefaultColors {
     fn pr_status_success_fg() -> Color {
         Self::default_fg()
     }
-    fn pr_status_success_bg() -> Color {
-        Self::default_bg()
-    }
     fn pr_status_failure_fg() -> Color {
         Self::default_fg()
     }
-    fn pr_status_failure_bg() -> Color {
-        Self::default_bg()
-    }
     fn pr_status_pending_fg() -> Color {
         Self::default_fg()
-    }
-    fn pr_status_pending_bg() -> Color {
-        Self::default_bg()
     }
     fn pr_status_icon() -> &'static str {
         "\u{25cf}" // ● black circle
@@ -131,12 +122,13 @@ enum CheckStatus {
 }
 
 impl CheckStatus {
-    /// Picks the (fg, bg) colors for this status from the active scheme.
-    fn style<S: PrScheme>(self) -> (Color, Color) {
+    /// Picks the dot's foreground colour from the active scheme. The dot shares
+    /// the PR segment's background, so there's no background to choose here.
+    fn fg<S: PrScheme>(self) -> Color {
         match self {
-            CheckStatus::Success => (S::pr_status_success_fg(), S::pr_status_success_bg()),
-            CheckStatus::Failure => (S::pr_status_failure_fg(), S::pr_status_failure_bg()),
-            CheckStatus::Pending => (S::pr_status_pending_fg(), S::pr_status_pending_bg()),
+            CheckStatus::Success => S::pr_status_success_fg(),
+            CheckStatus::Failure => S::pr_status_failure_fg(),
+            CheckStatus::Pending => S::pr_status_pending_fg(),
         }
     }
 }
@@ -189,15 +181,18 @@ impl<S: PrScheme> Module for Pr<S> {
         if let Some(PrCache { pr: Some(pr), .. }) = cache {
             let label = format!("{} #{}", S::pr_icon(), pr.number);
             let (fg, bg) = pr.state.style::<S>();
-            powerline.add_hyperlink_segment(&label, &pr.url, Style::simple(fg, bg));
 
-            // A coloured dot for the CI status, when enabled and meaningful.
-            if self.show_status {
-                if let Some(status) = pr.checks {
-                    let (fg, bg) = status.style::<S>();
-                    powerline.add_segment(S::pr_status_icon(), Style::simple(fg, bg));
-                }
-            }
+            // The CI status, when enabled and meaningful, renders as a coloured
+            // dot tucked into the same segment right after the PR number.
+            let marker = self
+                .show_status
+                .then(|| {
+                    pr.checks
+                        .map(|status| (S::pr_status_icon(), status.fg::<S>()))
+                })
+                .flatten();
+
+            powerline.add_hyperlink_segment(&label, &pr.url, Style::simple(fg, bg), marker);
         }
     }
 }
