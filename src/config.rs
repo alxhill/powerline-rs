@@ -106,3 +106,28 @@ impl Default for Config {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The binary writes `Config::default()` to disk with `to_string_pretty`
+    /// and then reads it back with `from_reader`. This guards that round-trip:
+    /// the serialized default config must always deserialize into an equivalent
+    /// `Config`, so a fresh install never ends up with an unparsable config.
+    #[test]
+    fn default_config_round_trips() {
+        let default = Config::default();
+
+        let json = serde_json::to_string_pretty(&default)
+            .expect("default config should serialize to JSON");
+
+        let parsed: Config =
+            serde_json::from_str(&json).expect("serialized default config should parse back");
+
+        // Compare via the canonical JSON form to confirm the round-trip is lossless.
+        let reserialized = serde_json::to_string_pretty(&parsed)
+            .expect("reparsed config should serialize to JSON");
+        assert_eq!(json, reserialized);
+    }
+}
