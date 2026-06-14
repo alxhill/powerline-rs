@@ -2,7 +2,13 @@
 
 _Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and adjusted for personal taste_
 
+powerline-rs supports git and github natively, and detects rust, python, node and java environments.
+
 ![Shell with pyenv showing](with_pyenv.png)
+
+It integrates with the `gh` shell command to provide PR and CI status check display as well.
+
+![Shell with PR link and status check](with_status.png)
 
 powerline-rs is a pure-rust version of [powerline-SHELL](https://github.com/b-ryan/powerline-shell). It's heavily
 inspired
