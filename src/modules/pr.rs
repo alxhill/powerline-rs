@@ -100,6 +100,12 @@ enum PrState {
 }
 
 impl PrState {
+    /// Whether the PR is still in progress (open or draft, but not merged or
+    /// closed). Only these PRs show the CI status indicator.
+    fn is_open(self) -> bool {
+        matches!(self, PrState::Open | PrState::Draft)
+    }
+
     /// Picks the (fg, bg) colors for this state from the active scheme.
     fn style<S: PrScheme>(self) -> (Color, Color) {
         match self {
@@ -183,9 +189,10 @@ impl<S: PrScheme> Module for Pr<S> {
             let (fg, bg) = pr.state.style::<S>();
 
             // The CI status, when enabled and meaningful, renders as a coloured
-            // dot tucked into the same segment right after the PR number.
-            let marker = self
-                .show_status
+            // dot tucked into the same segment right after the PR number. It's
+            // only shown while a PR is still in progress - the checks are stale
+            // or irrelevant once a PR is merged or closed.
+            let marker = (self.show_status && pr.state.is_open())
                 .then(|| {
                     pr.checks
                         .map(|status| (S::pr_status_icon(), status.fg::<S>()))
