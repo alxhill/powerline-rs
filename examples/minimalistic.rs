@@ -1,10 +1,10 @@
-use powerline_rs::modules::*;
-use powerline_rs::powerline::{PowerlineRightBuilder, PowerlineShellBuilder};
-use powerline_rs::terminal::Shell;
-use powerline_rs::themes::SimpleTheme;
+use superline::modules::*;
+use superline::powerline::{PowerlineRightBuilder, PowerlineShellBuilder};
+use superline::terminal::Shell;
+use superline::themes::SimpleTheme;
 
 fn main() {
-    powerline_rs::Powerline::builder()
+    superline::Powerline::builder()
         .set_shell(Shell::Bare) // override this to whatever shell you use
         .add_module(Cwd::<SimpleTheme>::new(45, 4, false))
         .add_module(Git::<SimpleTheme>::new())

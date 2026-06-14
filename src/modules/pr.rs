@@ -231,7 +231,7 @@ fn cache_path_for(repo_root: &Path, branch: &str) -> Option<PathBuf> {
     branch.hash(&mut hasher);
 
     Some(
-        base.join("powerline-rs")
+        base.join("superline")
             .join(format!("pr-{:016x}.json", hasher.finish())),
     )
 }
