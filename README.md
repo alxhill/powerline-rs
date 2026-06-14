@@ -1,5 +1,7 @@
 # superline
 
+[![crates.io](https://img.shields.io/crates/v/superline.svg)](https://crates.io/crates/superline)
+
 _Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and adjusted for personal taste_
 
 superline supports git and github natively, and detects rust, python, node and java environments.
@@ -37,7 +39,7 @@ seems to fix some character alignment issues.
 To install the package, just run the following:
 
 ```bash
-cargo install --git https://github.com/alxhill/superline.git
+cargo install superline
 superline install <shell name>
 ```
 
