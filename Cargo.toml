@@ -1,5 +1,5 @@
 [package]
-name = "powerline_rs"
+name = "superline"
 version = "0.5.0"
 authors = ["alxhill <me@alxhill.com>", "cirho <me@cirho.com>"]
 edition = "2021"

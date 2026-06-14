@@ -1,4 +1,4 @@
-extern crate powerline_rs;
+extern crate superline;
 
 use std::env::VarError;
 use std::error::Error;
@@ -12,35 +12,35 @@ use std::{env, io};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use thiserror::Error;
 
-use powerline_rs::config::{Config, TerminalRuntimeMetadata};
-use powerline_rs::modules::refresh_pr;
-use powerline_rs::terminal::{Shell, SHELL};
-use powerline_rs::themes::{CustomTheme, RainbowTheme, SimpleTheme};
-use powerline_rs::Powerline;
+use superline::config::{Config, TerminalRuntimeMetadata};
+use superline::modules::refresh_pr;
+use superline::terminal::{Shell, SHELL};
+use superline::themes::{CustomTheme, RainbowTheme, SimpleTheme};
+use superline::Powerline;
 
 const FISH_CONF: &str = r#"
-set -gx POWERLINE_RS 1
+set -gx SUPERLINE 1
 
 function __pl_cache_duration --on-event fish_postexec
   set -gx __pl_duration $CMD_DURATION
 end
 
 function fish_prompt
-  powerline show -s $status -c $COLUMNS fish $__pl_duration
+  superline show -s $status -c $COLUMNS fish $__pl_duration
 end
 
 function fish_right_prompt
-  powerline show-right -s $status -c $COLUMNS fish $__pl_duration
+  superline show-right -s $status -c $COLUMNS fish $__pl_duration
 end
 "#;
 
 const FISH_INSTALL: &str = r#"
-# automatically added by powerline-rs
-powerline init fish | source
+# automatically added by superline
+superline init fish | source
 "#;
 
 const ZSH_CONF: &str = r#"
-export POWERLINE_RS=1
+export SUPERLINE=1
 
 function preexec() {
     if command -v gdate >/dev/null 2>&1; then
@@ -55,8 +55,8 @@ function _update_ps1() {
             _elapsed=$(($_now-$__pl_timer))
         fi
     fi
-    PS1="$(powerline show -s $? -c $COLUMNS zsh $_elapsed)"
-    RPS1="$(powerline show-right -s $? -c $COLUMNS zsh $_elapsed)"
+    PS1="$(superline show -s $? -c $COLUMNS zsh $_elapsed)"
+    RPS1="$(superline show-right -s $? -c $COLUMNS zsh $_elapsed)"
     unset __pl_timer _elapsed _now
 }
 
@@ -64,16 +64,16 @@ precmd_functions=(_update_ps1)
 "#;
 
 const ZSH_INSTALL: &str = r#"
-# automatically added by powerline-rs
-source <(powerline init zsh)
+# automatically added by superline
+source <(superline init zsh)
 "#;
 
 // note: does not support showing last cmd duration
 const BASH_CONF: &str = r#"
-export POWERLINE_RS=1
+export SUPERLINE=1
 
 function _update_ps1() {
-    PS1="$(powerline show -s $? -c $COLUMNS bash)"
+    PS1="$(superline show -s $? -c $COLUMNS bash)"
 }
 
 if [ "$TERM" != "linux" ]; then
@@ -82,8 +82,8 @@ fi
 "#;
 
 const BASH_INSTALL: &str = r#"
-# automatically added by powerline-rs
-source <(powerline init bash)
+# automatically added by superline
+source <(superline init bash)
 "#;
 
 #[derive(Debug, Parser)]
@@ -183,7 +183,7 @@ fn main() {
 }
 
 fn install(args: InstallArgs) {
-    if env::var("POWERLINE_RS").is_ok() && !args.force {
+    if env::var("SUPERLINE").is_ok() && !args.force {
         println!("powerline already installed in current shell");
         return;
     }
@@ -350,7 +350,7 @@ fn load_config(conf_file: Option<PathBuf>) -> Result<(Config, PathBuf), Powerlin
 
 fn get_or_create_conf_file() -> Result<PathBuf, PowerlineError> {
     let home_dir = PathBuf::from(env::var("HOME")?);
-    let config_dir = home_dir.join(".config/powerline-rs");
+    let config_dir = home_dir.join(".config/superline");
     if !config_dir.exists() {
         create_dir_all(&config_dir)?;
     }
