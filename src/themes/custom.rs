@@ -229,10 +229,20 @@ impl PrScheme for CustomTheme {
     color_from_json!(pr_closed_bg, pr, closed_bg, default_bg);
     color_from_json!(pr_closed_fg, pr, closed_fg, default_fg);
 
+    color_from_json!(pr_status_success_fg, pr, status_success_fg, default_fg);
+    color_from_json!(pr_status_failure_fg, pr, status_failure_fg, default_fg);
+    color_from_json!(pr_status_pending_fg, pr, status_pending_fg, default_fg);
+
     fn pr_icon() -> &'static str {
         Self::get_str("pr", "icon")
             .map(|str| str.leak() as &'static str)
             .unwrap_or("\u{ea64}")
+    }
+
+    fn pr_status_icon() -> &'static str {
+        Self::get_str("pr", "status_icon")
+            .map(|str| str.leak() as &'static str)
+            .unwrap_or("\u{25cf}")
     }
 }
 

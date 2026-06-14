@@ -71,7 +71,8 @@ The example_config.json shows most of the options available:
         },
         "read_only",
         "small_spacer",
-        "git"
+        "git",
+        { "pr": { "status": true } }
       ],
       "right": [
         {
@@ -115,9 +116,12 @@ Inside the `left` and `right` arrays, you can add the following sections to for 
 * **git** - show the current git branch and status of the repo (modified, staged, and untracked files, plus git remote
   ahead/behind stats)
 * **pr** - show a clickable link to the GitHub PR for the current branch (via the [`gh`](https://cli.github.com)
-  CLI), if one exists. The segment colour reflects the PR state (draft, open, merged, closed). The lookup runs in the
-  background and is cached, so it never blocks the prompt - the link appears on a subsequent prompt once the result is
-  ready. Skipped entirely on `develop`, `main`, and `master`.
+  CLI), if one exists. The segment colour reflects the PR state (draft, open, merged, closed). When the `status` option
+  is enabled (the default), a coloured dot is appended after the PR number reflecting the CI check status - green for
+  success, red for failure, yellow for pending. The lookup runs in the background and is cached, so it never blocks the
+  prompt - the link appears on a subsequent prompt once the result is ready. Skipped entirely on `develop`, `main`, and
+  `master`. Unlike most segments, `pr` is written as an object so its options can be set:
+  `{ "pr": { "status": false } }` shows just the PR number with no check dot.
 
 There are also three ways to modify the layout:
 

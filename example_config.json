@@ -21,7 +21,7 @@
           "padding": 2
         },
         "git",
-        "pr"
+        { "pr": { "status": true } }
       ],
       "right": []
     },

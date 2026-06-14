@@ -136,6 +136,16 @@ impl PrScheme for SimpleTheme {
     fn pr_closed_fg() -> Color {
         Color(15)
     }
+
+    fn pr_status_success_fg() -> Color {
+        Color(40)
+    }
+    fn pr_status_failure_fg() -> Color {
+        Color(161)
+    }
+    fn pr_status_pending_fg() -> Color {
+        Color(178)
+    }
 }
 
 impl GitScheme for SimpleTheme {

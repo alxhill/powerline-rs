@@ -36,7 +36,10 @@
       "merged_bg": "nice_purple",
       "merged_fg": "white",
       "closed_bg": "mid_red",
-      "closed_fg": "white"
+      "closed_fg": "white",
+      "status_success_fg": "light_green",
+      "status_failure_fg": "warning_red",
+      "status_pending_fg": "dark_yellow"
     },
     "readonly": {
       "fg": 254,
