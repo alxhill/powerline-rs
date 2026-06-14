@@ -4,6 +4,9 @@ version = "0.5.0"
 authors = ["alxhill <me@alxhill.com>", "cirho <me@cirho.com>"]
 edition = "2021"
 description = "Configurable Powerline implementation in pure Rust."
+license = "MIT"
+repository = "https://github.com/alxhill/powerline-rs"
+readme = "README.md"
 
 [dependencies]
 users = "0.11"
