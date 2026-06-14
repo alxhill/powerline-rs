@@ -19,6 +19,10 @@ jobs:
   release-plz-release:
     name: Release-plz release
     runs-on: ubuntu-latest
+    # Runs in the `cargo` deployment environment - the crates.io trusted
+    # publisher is scoped to this environment name, so the OIDC token is only
+    # accepted for jobs that declare it.
+    environment: cargo
     permissions:
       contents: write
       id-token: write
