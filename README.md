@@ -1,8 +1,10 @@
-# powerline-rs
+# superline
+
+[![crates.io](https://img.shields.io/crates/v/superline.svg)](https://crates.io/crates/superline)
 
 _Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and adjusted for personal taste_
 
-powerline-rs supports git and github natively, and detects rust, python, node and java environments.
+superline supports git and github natively, and detects rust, python, node and java environments.
 
 ![Shell with pyenv showing](with_pyenv.png)
 
@@ -10,7 +12,7 @@ It integrates with the `gh` shell command to provide PR and CI status check disp
 
 ![Shell with PR link and status check](with_status.png)
 
-powerline-rs is a pure-rust version of [powerline-SHELL](https://github.com/b-ryan/powerline-shell). It's heavily
+superline is a pure-rust version of [powerline-SHELL](https://github.com/b-ryan/powerline-shell). It's heavily
 inspired
 by it, but focuses on minimalizing time of execution and supporting a limited subset of features.
 
@@ -25,7 +27,7 @@ by it, but focuses on minimalizing time of execution and supporting a limited su
 
 ## Installation
 
-powerline-rs relies on [Nerd Font](https://www.nerdfonts.com/) unicode characters - configure your terminal to use a
+superline relies on [Nerd Font](https://www.nerdfonts.com/) unicode characters - configure your terminal to use a
 Nerd Font, otherwise most segments will not render correctly. Meslo LG S is recommended and can be
 downloaded in patched form [here](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/Meslo.zip).
 
@@ -37,18 +39,18 @@ seems to fix some character alignment issues.
 To install the package, just run the following:
 
 ```bash
-cargo install --git https://github.com/alxhill/powerline-rs.git
-powerline install <shell name>
+cargo install superline
+superline install <shell name>
 ```
 
-Then reload your shell's config. Powerline will modify the default config file for the shell you choose - currently,
+Then reload your shell's config. Superline will modify the default config file for the shell you choose - currently,
 `fish`, `zsh`, and `bash`.
 
-Cargo's bin directory must be in your `$PATH` for the `powerline` command to be available.
+Cargo's bin directory must be in your `$PATH` for the `superline` command to be available.
 
 ## Customization
 
-Powerline will create a default config file at `$HOME/.config/powerline-rs/config.json`. You can edit it to make
+Superline will create a default config file at `$HOME/.config/superline/config.json`. You can edit it to make
 changes, which will be reflected immediately.
 
 ### Config file
@@ -149,10 +151,10 @@ TODO: document theme json format
 You can also create a separate rust program to fully customize the appearance. This allows creating a new theme too.
 
 ```rust
-use powerline::{modules::*, theme::SimpleTheme};
+use superline::{modules::*, theme::SimpleTheme};
 
 fn main() {
-    let mut prompt = powerline::Powerline::new();
+    let mut prompt = superline::Powerline::new();
 
     prompt.add_module(User::<SimpleTheme>::new());
     prompt.add_module(Host::<SimpleTheme>::new());
@@ -175,7 +177,7 @@ files  [here](https://git-scm.com/docs/git-update-index).
 ### Custom theme
 
 ```rust
-use powerline::{modules::*, terminal::Color};
+use superline::{modules::*, terminal::Color};
 
 struct Theme;
 
@@ -199,7 +201,7 @@ impl CmdScheme for Theme {
 
 
 fn main() {
-    let mut prompt = powerline::Powerline::new();
+    let mut prompt = superline::Powerline::new();
     prompt.add_module(Cmd::<Theme>::new());
 
     ...
@@ -210,7 +212,7 @@ fn main() {
 - [ ] Support NVM enviroments
 - [ ] Support SDKMAN / Java enviroments
 - [ ] Switch to cleaner/JSON-first theme structure
-- [ ] Add a `powerline install` command to auto-modify shell config
+- [ ] Add a `superline install` command to auto-modify shell config
 - [ ] Change git icon/name based on branch vs commit vs merging
 - [ ] Add java / gradle / jenv / sdkman support
 - [ ] Better multiline prompts (e.g lines between)
