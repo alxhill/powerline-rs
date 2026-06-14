@@ -5,7 +5,7 @@ authors = ["alxhill <me@alxhill.com>", "cirho <me@cirho.com>"]
 edition = "2021"
 description = "Configurable Powerline implementation in pure Rust."
 license = "MIT"
-repository = "https://github.com/alxhill/powerline-rs"
+repository = "https://github.com/alxhill/superline"
 readme = "README.md"
 
 [dependencies]
