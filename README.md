@@ -209,15 +209,11 @@ fn main() {
 
 ## TODO
 
-- [ ] Support NVM enviroments
-- [ ] Support SDKMAN / Java enviroments
-- [ ] Switch to cleaner/JSON-first theme structure
-- [ ] Add a `superline install` command to auto-modify shell config
-- [ ] Change git icon/name based on branch vs commit vs merging
-- [ ] Add java / gradle / jenv / sdkman support
-- [ ] Better multiline prompts (e.g lines between)
+- [x] Support NVM enviroments
+- [x] Support SDKMAN / Java enviroments
+- [x] Switch to cleaner/JSON-first theme structure
+- [x] Add a `superline install` command to auto-modify shell config
+- [x] Change git icon/name based on branch vs commit vs merging
 - [x] Native "right prompt" support on final line (zsh + fish only)
-- [ ] Improve spacing / centering support
-- [ ] Calculate column width more accurately
 - [ ] Improve display when there aren't enough columns for the whole prompt (e.g truncate paths, show from left not
   right)
