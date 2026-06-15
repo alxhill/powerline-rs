@@ -6,11 +6,11 @@ _Forked from [cirho/powerline-rust](https://github.com/cirho/powerline-rust) and
 
 superline supports git and github natively, and detects rust, python, node and java environments.
 
-![Shell with pyenv showing](with_pyenv.png)
+![Shell with pyenv showing](https://raw.githubusercontent.com/alxhill/superline/main/with_pyenv.png)
 
 It integrates with the `gh` shell command to provide PR and CI status check display as well.
 
-![Shell with PR link and status check](with_status.png)
+![Shell with PR link and status check](https://raw.githubusercontent.com/alxhill/superline/main/with_status.png)
 
 superline is a pure-rust version of [powerline-SHELL](https://github.com/b-ryan/powerline-shell). It's heavily
 inspired
@@ -34,7 +34,7 @@ downloaded in patched form [here](https://github.com/ryanoasis/nerd-fonts/releas
 iTerm2 users are recommended to enable the "Use builtin Powerline glyphs" option even when using a Nerd Font as this
 seems to fix some character alignment issues.
 
-![iTerm2 Profile configuration](iterm_config.png)
+![iTerm2 Profile configuration](https://raw.githubusercontent.com/alxhill/superline/main/iterm_config.png)
 
 To install the package, just run the following:
 
