@@ -11,6 +11,15 @@ readme = "README.md"
 [dependencies]
 hostname = "0.3"
 git2 = { version = "0.18", optional = true, default-features = false }
+# Pure-Rust git backend. `status`/`revision` cover the status walk and the
+# ahead/behind commit counting; `max-performance-safe` keeps the speedups while
+# avoiding any C toolchain (gix decompresses objects with zlib-rs).
+gix = { version = "0.84", optional = true, default-features = false, features = [
+    "sha1",
+    "status",
+    "revision",
+    "max-performance-safe",
+] }
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"
 thiserror = "1.0.61"
@@ -24,9 +33,13 @@ chrono = "0.4.38"
 users = "0.11"
 libc = "0.2"
 
+# Pick at most one git backend. When several are enabled the precedence is
+# `gitoxide` > `libgit` > the `git` CLI fallback (see `src/modules/git.rs`).
+# To use gitoxide on its own: `--no-default-features --features gitoxide`.
 [features]
 default = ["libgit"]
 libgit = ["git2"]
+gitoxide = ["gix"]
 
 [profile.release]
 opt-level = 3

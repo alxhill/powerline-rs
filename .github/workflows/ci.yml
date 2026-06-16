@@ -40,6 +40,13 @@ jobs:
       - name: Test (no default features, git-CLI backend)
         run: cargo test --no-default-features --verbose
 
+      # Guard the pure-Rust gitoxide backend (the `gix` crate, no C toolchain).
+      - name: Clippy (gitoxide backend)
+        run: cargo clippy --no-default-features --features gitoxide --all-targets -- -D warnings
+
+      - name: Test (gitoxide backend)
+        run: cargo test --no-default-features --features gitoxide --verbose
+
   windows:
     name: Build & test (Windows)
     runs-on: windows-latest
@@ -69,3 +76,8 @@ jobs:
 
       - name: Build (no default features, git-CLI backend)
         run: cargo build --no-default-features --verbose
+
+      # gitoxide is pure Rust, so it should build on Windows without the C
+      # toolchain that the default libgit2 backend needs.
+      - name: Build (gitoxide backend)
+        run: cargo build --no-default-features --features gitoxide --verbose
