@@ -47,7 +47,7 @@ Manual:
 - [x] `superline install pwsh` resolves `$PROFILE`, creates the
       `~/.config/powershell` directory and profile file when missing, and
       appends the loader; the resulting profile defines `prompt` and sets
-      `$env:SUPERLINE`.
+      `$env:SUPERLINE_PWSH`.
 - [x] Status: failing native command (`sh -c 'exit 7'`) → `7` in the red
       segment; success → normal segment; failing cmdlet → `1`.
 - [x] Duration arithmetic from `Start/EndExecutionTime` produces correct ms.

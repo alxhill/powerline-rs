@@ -19,7 +19,7 @@ use superline::themes::{CustomTheme, RainbowTheme, SimpleTheme};
 use superline::Powerline;
 
 const FISH_CONF: &str = r#"
-set -gx SUPERLINE 1
+set -gx SUPERLINE_FISH 1
 
 function __pl_cache_duration --on-event fish_postexec
   set -gx __pl_duration $CMD_DURATION
@@ -40,7 +40,7 @@ superline init fish | source
 "#;
 
 const ZSH_CONF: &str = r#"
-export SUPERLINE=1
+export SUPERLINE_ZSH=1
 
 function preexec() {
     if command -v gdate >/dev/null 2>&1; then
@@ -70,7 +70,7 @@ source <(superline init zsh)
 
 // note: does not support showing last cmd duration
 const BASH_CONF: &str = r#"
-export SUPERLINE=1
+export SUPERLINE_BASH=1
 
 function _update_ps1() {
     PS1="$(superline show -s $? -c $COLUMNS bash)"
@@ -91,7 +91,7 @@ source <(superline init bash)
 // special non-printing markers are needed. There is no native right-prompt, so
 // like bash the final row only shows its left side.
 const PWSH_CONF: &str = r#"
-$env:SUPERLINE = 1
+$env:SUPERLINE_PWSH = 1
 
 function global:prompt {
     # Capture command state first: every statement below (even an assignment)
@@ -169,6 +169,24 @@ enum ShellArg {
     Pwsh,
 }
 
+impl ShellArg {
+    fn name(&self) -> &'static str {
+        match self {
+            ShellArg::Bash => "bash",
+            ShellArg::Zsh => "zsh",
+            ShellArg::Fish => "fish",
+            ShellArg::Pwsh => "pwsh",
+        }
+    }
+
+    /// Name of the per-shell marker env var set by that shell's init snippet
+    /// (e.g. `SUPERLINE_BASH`). Each shell uses its own variable so a nested
+    /// shell of a different kind isn't mistaken for an already-configured one.
+    fn marker_env_var(&self) -> String {
+        format!("SUPERLINE_{}", self.name().to_uppercase())
+    }
+}
+
 #[derive(Debug, Args)]
 struct ShowArgs {
     #[arg(value_enum)]
@@ -203,12 +221,7 @@ struct InstallArgs {
 
 impl TerminalRuntimeMetadata for &ShowArgs {
     fn shell_name(&self) -> String {
-        match self.shell {
-            ShellArg::Bash => "bash".to_string(),
-            ShellArg::Zsh => "zsh".to_string(),
-            ShellArg::Fish => "fish".to_string(),
-            ShellArg::Pwsh => "pwsh".to_string(),
-        }
+        self.shell.name().to_string()
     }
 
     fn total_columns(&self) -> usize {
@@ -238,14 +251,20 @@ fn main() {
 }
 
 fn install(args: InstallArgs) {
-    if env::var("SUPERLINE").is_ok() && !args.force {
-        println!("powerline already installed in current shell");
+    let shell = args.shell;
+
+    // Detect prior installation via the shell-specific marker rather than a
+    // single shared one, so superline can still be installed from a nested
+    // shell of a different kind (whose parent only exports its own marker).
+    if env::var(shell.marker_env_var()).is_ok() && !args.force {
+        println!(
+            "powerline already installed in current {} shell",
+            shell.name()
+        );
         return;
     }
 
-    let shell = args.shell;
-
-    println!("Installing powerline for {:?} shell", shell);
+    println!("Installing powerline for {} shell", shell.name());
 
     match shell {
         ShellArg::Fish => append_conf(home_config(".config/fish/config.fish"), FISH_INSTALL),
