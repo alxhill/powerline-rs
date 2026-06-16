@@ -88,6 +88,15 @@ source <(superline init bash)
 const PWSH_CONF: &str = r#"
 $env:SUPERLINE_PWSH = 1
 
+# superline emits UTF-8: powerline separators and Nerd Font icons live in the
+# Unicode private-use area. PowerShell decodes a native command's stdout using
+# [Console]::OutputEncoding, which on Windows defaults to the legacy OEM code
+# page - so the bytes get re-read as that code page and the glyphs turn to
+# mojibake (e.g. the U+E0B0 separator shows as "ee 82 b0" decoded to "εé░").
+# Force UTF-8 so the captured output decodes correctly. Wrapped in try/catch
+# for hosts without a real console (remoting, redirected output, some IDEs).
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
+
 function global:prompt {
     # Capture command state first: every statement below (even an assignment)
     # resets $?, so read it before anything else - including before reading

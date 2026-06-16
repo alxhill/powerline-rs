@@ -111,6 +111,27 @@ fn each_shell_uses_its_own_escape_style() {
     );
 }
 
+/// The pwsh init must force the console to decode superline's UTF-8 output as
+/// UTF-8. Without this, PowerShell decodes a native command's stdout using the
+/// legacy OEM code page on Windows and mangles Nerd Font glyphs into mojibake
+/// (the U+E0B0 separator shows up as `εé░`). This pins the directive so it can't
+/// silently drop out of the generated snippet.
+#[test]
+fn powershell_init_forces_utf8_output_encoding() {
+    let output = Command::new(BIN)
+        .args(["init", "pwsh"])
+        .output()
+        .expect("failed to run `superline init pwsh`");
+    assert!(output.status.success(), "`init pwsh` exited with failure");
+    let init = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        init.contains("[Console]::OutputEncoding")
+            && init.contains("[System.Text.Encoding]::UTF8"),
+        "pwsh init must set [Console]::OutputEncoding to UTF-8 so Nerd Font \
+         glyphs aren't mangled; got:\n{init}",
+    );
+}
+
 /// Returns true when a working `pwsh` is on PATH.
 fn have_pwsh() -> bool {
     Command::new("pwsh")

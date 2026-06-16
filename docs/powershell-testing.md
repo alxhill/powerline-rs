@@ -144,8 +144,11 @@ Checks:
 - [ ] Re-running `superline install pwsh` is idempotent: it detects the existing
       loader in the resolved profile and reports "already installed" instead of
       appending a duplicate block (use `--force` to append anyway).
-- [ ] Output encoding is UTF-8 so Nerd Font glyphs aren't mangled
-      (`$OutputEncoding` / `chcp 65001` for legacy conhost).
+- [ ] Output encoding is UTF-8 so Nerd Font glyphs aren't mangled. The pwsh init
+      now sets `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8` itself
+      (PowerShell decodes a native command's stdout with that encoding, and on
+      Windows it defaults to the legacy OEM code page, which mangles glyphs into
+      mojibake like `εé░`). Legacy conhost may additionally need `chcp 65001`.
 
 ## Windows port — what changed
 

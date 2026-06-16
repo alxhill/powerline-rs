@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- *(shell)* set `[Console]::OutputEncoding` to UTF-8 in the PowerShell init so
+  Nerd Font glyphs and powerline separators aren't mangled into mojibake (e.g.
+  `εé░`) when PowerShell decodes superline's output using the legacy OEM code page.
+
 ## [0.5.3](https://github.com/alxhill/superline/compare/v0.5.2...v0.5.3) - 2026-06-16
 
 ### Added
