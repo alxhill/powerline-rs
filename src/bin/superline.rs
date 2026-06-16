@@ -19,7 +19,7 @@ use superline::themes::{CustomTheme, RainbowTheme, SimpleTheme};
 use superline::Powerline;
 
 const FISH_CONF: &str = r#"
-set -gx SUPERLINE 1
+set -gx SUPERLINE_FISH 1
 
 function __pl_cache_duration --on-event fish_postexec
   set -gx __pl_duration $CMD_DURATION
@@ -40,7 +40,7 @@ superline init fish | source
 "#;
 
 const ZSH_CONF: &str = r#"
-export SUPERLINE=1
+export SUPERLINE_ZSH=1
 
 function preexec() {
     if command -v gdate >/dev/null 2>&1; then
@@ -70,7 +70,7 @@ source <(superline init zsh)
 
 // note: does not support showing last cmd duration
 const BASH_CONF: &str = r#"
-export SUPERLINE=1
+export SUPERLINE_BASH=1
 
 function _update_ps1() {
     PS1="$(superline show -s $? -c $COLUMNS bash)"
@@ -84,6 +84,54 @@ fi
 const BASH_INSTALL: &str = r#"
 # automatically added by superline
 source <(superline init bash)
+"#;
+
+const PWSH_CONF: &str = r#"
+$env:SUPERLINE_PWSH = 1
+
+function global:prompt {
+    # Capture command state first: every statement below (even an assignment)
+    # resets $?, so read it before anything else - including before reading
+    # $LASTEXITCODE, which a plain assignment would otherwise flip back to true.
+    $__pl_ok = $?
+    $__pl_exit = $LASTEXITCODE
+
+    # Mirror the bash/zsh convention: 0 on success, otherwise the native exit
+    # code (falling back to 1 for cmdlet failures that leave $LASTEXITCODE unset).
+    if ($__pl_ok) {
+        $__pl_status = 0
+    } elseif ($__pl_exit) {
+        $__pl_status = $__pl_exit
+    } else {
+        $__pl_status = 1
+    }
+
+    $__pl_cols = 0
+    try { $__pl_cols = $Host.UI.RawUI.WindowSize.Width } catch {}
+    if (-not $__pl_cols -or $__pl_cols -le 0) { $__pl_cols = 80 }
+
+    $__pl_args = @('show', '-s', $__pl_status, '-c', $__pl_cols, 'pwsh')
+
+    # Duration of the last command, in milliseconds, from session history.
+    $__pl_last = Get-History -Count 1
+    if ($__pl_last) {
+        $__pl_ms = [long][math]::Round(($__pl_last.EndExecutionTime - $__pl_last.StartExecutionTime).TotalMilliseconds)
+        if ($__pl_ms -ge 0) { $__pl_args += $__pl_ms }
+    }
+
+    # Join lines with `n (not Out-String, which can wrap/pad to the host width).
+    $__pl_out = (& superline @__pl_args) -join "`n"
+
+    # Restore $LASTEXITCODE so our own commands don't clobber the user's value.
+    $global:LASTEXITCODE = $__pl_exit
+
+    $__pl_out
+}
+"#;
+
+const PWSH_INSTALL: &str = r#"
+# automatically added by superline
+(& superline init pwsh) -join "`n" | Invoke-Expression
 "#;
 
 #[derive(Debug, Parser)]
@@ -106,6 +154,7 @@ enum ShellSubcommand {
     Bash,
     Zsh,
     Fish,
+    Pwsh,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -113,6 +162,24 @@ enum ShellArg {
     Bash,
     Zsh,
     Fish,
+    Pwsh,
+}
+
+impl ShellArg {
+    fn name(&self) -> &'static str {
+        match self {
+            ShellArg::Bash => "bash",
+            ShellArg::Zsh => "zsh",
+            ShellArg::Fish => "fish",
+            ShellArg::Pwsh => "pwsh",
+        }
+    }
+
+    /// Per-shell marker env var exported by that shell's init snippet (e.g.
+    /// `SUPERLINE_BASH`).
+    fn marker_env_var(&self) -> String {
+        format!("SUPERLINE_{}", self.name().to_uppercase())
+    }
 }
 
 #[derive(Debug, Args)]
@@ -149,11 +216,7 @@ struct InstallArgs {
 
 impl TerminalRuntimeMetadata for &ShowArgs {
     fn shell_name(&self) -> String {
-        match self.shell {
-            ShellArg::Bash => "bash".to_string(),
-            ShellArg::Zsh => "zsh".to_string(),
-            ShellArg::Fish => "fish".to_string(),
-        }
+        self.shell.name().to_string()
     }
 
     fn total_columns(&self) -> usize {
@@ -183,30 +246,71 @@ fn main() {
 }
 
 fn install(args: InstallArgs) {
-    if env::var("SUPERLINE").is_ok() && !args.force {
-        println!("powerline already installed in current shell");
+    let shell = args.shell;
+
+    // A nested shell only inherits its parent's marker, so keying detection off
+    // the target shell's own marker lets install still run in nested shells.
+    if env::var(shell.marker_env_var()).is_ok() && !args.force {
+        println!(
+            "superline already installed in current {} shell",
+            shell.name()
+        );
         return;
     }
 
-    let shell = args.shell;
-
-    let home_dir = PathBuf::from(env::var("HOME").unwrap());
-
-    assert!(home_dir.is_dir(), "home directory does not exist");
-
-    println!("Installing powerline for {:?} shell", shell);
+    println!("Installing superline for {} shell", shell.name());
 
     match shell {
-        ShellArg::Fish => append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL),
-        ShellArg::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
-        ShellArg::Bash => append_conf(home_dir.join(".bashrc"), BASH_INSTALL),
+        ShellArg::Fish => append_conf(home_config(".config/fish/config.fish"), FISH_INSTALL),
+        ShellArg::Zsh => append_conf(home_config(".zshrc"), ZSH_INSTALL),
+        ShellArg::Bash => append_conf(home_config(".bashrc"), BASH_INSTALL),
+        ShellArg::Pwsh => append_conf(powershell_profile_path(), PWSH_INSTALL),
     }
 
     println!("Done, please restart your shell for changes to take effect");
 }
 
+/// Resolve a path inside the Unix `$HOME` directory used by the bash/zsh/fish
+/// config files.
+fn home_config(rel: &str) -> PathBuf {
+    let home_dir = PathBuf::from(env::var("HOME").expect("could not read $HOME env var"));
+    assert!(home_dir.is_dir(), "home directory does not exist");
+    home_dir.join(rel)
+}
+
+/// Ask PowerShell itself for the current-user profile path: it varies per
+/// platform and avoids relying on `$HOME`, which Windows does not set.
+fn powershell_profile_path() -> PathBuf {
+    let run = |cmd: &str| {
+        Command::new(cmd)
+            .args(["-NoProfile", "-Command", "$PROFILE.CurrentUserCurrentHost"])
+            .output()
+    };
+
+    let output = run("pwsh").or_else(|_| run("powershell")).expect(
+        "could not run pwsh/powershell to locate the profile - is PowerShell installed and on PATH?",
+    );
+
+    let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    assert!(
+        !path.is_empty(),
+        "PowerShell returned an empty profile path"
+    );
+    PathBuf::from(path)
+}
+
 fn append_conf(conf_path: PathBuf, conf_contents: &str) {
+    if let Some(parent) = conf_path.parent() {
+        create_dir_all(parent).unwrap_or_else(|e| {
+            panic!(
+                "could not create config directory {}: {e}",
+                parent.display()
+            )
+        });
+    }
+
     let mut conf = OpenOptions::new()
+        .create(true)
         .append(true)
         .open(&conf_path)
         .unwrap_or_else(|_| {
@@ -236,6 +340,7 @@ fn print_shell_conf(shell: ShellSubcommand) {
         ShellSubcommand::Bash => println!("{}", BASH_CONF),
         ShellSubcommand::Zsh => println!("{}", ZSH_CONF),
         ShellSubcommand::Fish => println!("{}", FISH_CONF),
+        ShellSubcommand::Pwsh => println!("{}", PWSH_CONF),
     }
 }
 
@@ -246,6 +351,9 @@ fn show(args: ShowArgs, right_only: bool) {
                 ShellArg::Bash => SHELL.set(Shell::Bash),
                 ShellArg::Zsh => SHELL.set(Shell::Zsh),
                 ShellArg::Fish => SHELL.set(Shell::Bare),
+                // PowerShell's PSReadLine handles raw ANSI escapes itself, so it
+                // uses the same bare escapes as fish (no non-printing markers).
+                ShellArg::Pwsh => SHELL.set(Shell::Bare),
             }
             .expect("failed to set shell");
 
@@ -256,7 +364,7 @@ fn show(args: ShowArgs, right_only: bool) {
             }
         }
         Err(e) => {
-            eprintln!("powerline error: {}", e);
+            eprintln!("superline error: {}", e);
             if let Some(source) = e.source() {
                 eprintln!("source:\n\t{}", source);
             }

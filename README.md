@@ -44,9 +44,11 @@ superline install <shell name>
 ```
 
 Then reload your shell's config. Superline will modify the default config file for the shell you choose - currently,
-`fish`, `zsh`, and `bash`.
+`fish`, `zsh`, `bash`, and `pwsh` (PowerShell). For example, `superline install pwsh` appends the loader to your
+PowerShell profile (`$PROFILE`), creating it if necessary. PowerShell is not yet tested on Windows.
 
 Cargo's bin directory must be in your `$PATH` for the `superline` command to be available.
+
 
 ## Customization
 
