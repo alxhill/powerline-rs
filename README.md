@@ -58,8 +58,8 @@ changes, which will be reflected immediately.
 `config.rs` has the full definition of all valid types in the config directory, `example_config.json` shows a complete
 configuration setup.
 
-The only two themes at the moment are "rainbow" and "simple". New themes must be added in code at the moment, and the
-simple theme is not recommended.
+Two themes are built in, "rainbow" and "simple" (the latter is not recommended). You can also point `theme` at a
+custom theme JSON file - see [Themes](#themes) below.
 
 The example_config.json shows most of the options available:
 
@@ -144,7 +144,31 @@ Usage examples of most of these can be found in the config file shown above.
 
 ### Themes
 
-TODO: document theme json format
+`theme` can be `"rainbow"`, `"simple"`, or a path to a theme JSON file. Paths starting with `/` are absolute;
+anything else is resolved relative to the config directory (`$HOME/.config/superline/`). If a custom theme fails to
+load, superline falls back to `rainbow`.
+
+A theme file has two keys: `defaults` and `modules`.
+
+```json
+{
+  "defaults": { "fg": "green", "bg": "black" },
+  "modules": {
+    "cargo": { "fg": "black", "bg": "burnt_orange" },
+    "cwd": { "path_fg": "white", "bg_colors": ["red", "orange", "yellow", "green"] },
+    "readonly": { "fg": 254, "bg": 124 }
+  }
+}
+```
+
+* **defaults** - the `fg`/`bg` used for any colour a module doesn't set.
+* **modules** - per-module overrides, keyed by module name. Most modules accept `fg` and `bg`; some have extra
+  properties (e.g. `git` has `staged_bg`, `pr` has `open_bg`, `cwd` takes a `bg_colors` array). A few accept string
+  properties such as `cmd.user_symbol` or `pr.icon`. Any property you omit falls back to `defaults`.
+
+Colours are either a name (defined in `src/colors.rs`, e.g. `"green"`, `"warning_red"`) or an ANSI 256-colour code
+(`0`–`255`). See [`example_theme.json`](https://github.com/alxhill/superline/blob/main/example_theme.json) for a full
+example covering every module, and `src/themes/custom.rs` for the complete list of module names and properties.
 
 ## Custom program
 
@@ -209,15 +233,11 @@ fn main() {
 
 ## TODO
 
-- [ ] Support NVM enviroments
-- [ ] Support SDKMAN / Java enviroments
-- [ ] Switch to cleaner/JSON-first theme structure
-- [ ] Add a `superline install` command to auto-modify shell config
-- [ ] Change git icon/name based on branch vs commit vs merging
-- [ ] Add java / gradle / jenv / sdkman support
-- [ ] Better multiline prompts (e.g lines between)
+- [x] Support NVM enviroments
+- [x] Support SDKMAN / Java enviroments
+- [x] Switch to cleaner/JSON-first theme structure
+- [x] Add a `superline install` command to auto-modify shell config
+- [x] Change git icon/name based on branch vs commit vs merging
 - [x] Native "right prompt" support on final line (zsh + fish only)
-- [ ] Improve spacing / centering support
-- [ ] Calculate column width more accurately
 - [ ] Improve display when there aren't enough columns for the whole prompt (e.g truncate paths, show from left not
   right)
