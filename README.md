@@ -44,9 +44,24 @@ superline install <shell name>
 ```
 
 Then reload your shell's config. Superline will modify the default config file for the shell you choose - currently,
-`fish`, `zsh`, and `bash`.
+`fish`, `zsh`, `bash`, and `pwsh` (PowerShell). For example, `superline install pwsh` appends the loader to your
+PowerShell profile (`$PROFILE`), creating it if necessary.
 
 Cargo's bin directory must be in your `$PATH` for the `superline` command to be available.
+
+### PowerShell support
+
+`pwsh` is supported wherever PowerShell runs the same way it is for the Unix shells: the prompt shows the cwd, git,
+PR, environment, and command segments, the exit status of the previous command (native exit code or `$?`), the
+terminal width, and the last command's duration (read from session history). PowerShell uses bare ANSI/VT escapes
+that PSReadLine renders directly, so no extra configuration is needed. As with `bash`, there is no native
+right-hand prompt, so the final row only shows its left side (multi-row prompts still render right-aligned
+segments on the non-final rows).
+
+PowerShell Core (`pwsh` 7+) on macOS and Linux is the tested configuration. Running on Windows additionally requires
+the binary itself to be ported off its current Unix-only assumptions (the `users` crate and `$HOME`); see
+[`docs/powershell-testing.md`](docs/powershell-testing.md) for the full cross-platform testing plan and the Windows
+follow-up.
 
 ## Customization
 

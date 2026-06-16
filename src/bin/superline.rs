@@ -86,6 +86,58 @@ const BASH_INSTALL: &str = r#"
 source <(superline init bash)
 "#;
 
+// PowerShell renders the prompt from whatever the `prompt` function returns.
+// PSReadLine understands raw ANSI/VT escapes (the same ones fish uses), so no
+// special non-printing markers are needed. There is no native right-prompt, so
+// like bash the final row only shows its left side.
+const PWSH_CONF: &str = r#"
+$env:SUPERLINE = 1
+
+function global:prompt {
+    # Capture command state first: every statement below (even an assignment)
+    # resets $?, so read it before anything else - including before reading
+    # $LASTEXITCODE, which a plain assignment would otherwise flip back to true.
+    $__pl_ok = $?
+    $__pl_exit = $LASTEXITCODE
+
+    # Mirror the bash/zsh convention: 0 on success, otherwise the native exit
+    # code (falling back to 1 for cmdlet failures that leave $LASTEXITCODE unset).
+    if ($__pl_ok) {
+        $__pl_status = 0
+    } elseif ($__pl_exit) {
+        $__pl_status = $__pl_exit
+    } else {
+        $__pl_status = 1
+    }
+
+    $__pl_cols = 0
+    try { $__pl_cols = $Host.UI.RawUI.WindowSize.Width } catch {}
+    if (-not $__pl_cols -or $__pl_cols -le 0) { $__pl_cols = 80 }
+
+    $__pl_args = @('show', '-s', $__pl_status, '-c', $__pl_cols, 'pwsh')
+
+    # Duration of the last command, in milliseconds, from session history.
+    $__pl_last = Get-History -Count 1
+    if ($__pl_last) {
+        $__pl_ms = [long][math]::Round(($__pl_last.EndExecutionTime - $__pl_last.StartExecutionTime).TotalMilliseconds)
+        if ($__pl_ms -ge 0) { $__pl_args += $__pl_ms }
+    }
+
+    # Join lines with `n (not Out-String, which can wrap/pad to the host width).
+    $__pl_out = (& superline @__pl_args) -join "`n"
+
+    # Restore $LASTEXITCODE so our own commands don't clobber the user's value.
+    $global:LASTEXITCODE = $__pl_exit
+
+    $__pl_out
+}
+"#;
+
+const PWSH_INSTALL: &str = r#"
+# automatically added by superline
+(& superline init pwsh) -join "`n" | Invoke-Expression
+"#;
+
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 enum PowerlineArgs {
@@ -106,6 +158,7 @@ enum ShellSubcommand {
     Bash,
     Zsh,
     Fish,
+    Pwsh,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -113,6 +166,7 @@ enum ShellArg {
     Bash,
     Zsh,
     Fish,
+    Pwsh,
 }
 
 #[derive(Debug, Args)]
@@ -153,6 +207,7 @@ impl TerminalRuntimeMetadata for &ShowArgs {
             ShellArg::Bash => "bash".to_string(),
             ShellArg::Zsh => "zsh".to_string(),
             ShellArg::Fish => "fish".to_string(),
+            ShellArg::Pwsh => "pwsh".to_string(),
         }
     }
 
@@ -190,23 +245,65 @@ fn install(args: InstallArgs) {
 
     let shell = args.shell;
 
-    let home_dir = PathBuf::from(env::var("HOME").unwrap());
-
-    assert!(home_dir.is_dir(), "home directory does not exist");
-
     println!("Installing powerline for {:?} shell", shell);
 
     match shell {
-        ShellArg::Fish => append_conf(home_dir.join(".config/fish/config.fish"), FISH_INSTALL),
-        ShellArg::Zsh => append_conf(home_dir.join(".zshrc"), ZSH_INSTALL),
-        ShellArg::Bash => append_conf(home_dir.join(".bashrc"), BASH_INSTALL),
+        ShellArg::Fish => append_conf(home_config(".config/fish/config.fish"), FISH_INSTALL),
+        ShellArg::Zsh => append_conf(home_config(".zshrc"), ZSH_INSTALL),
+        ShellArg::Bash => append_conf(home_config(".bashrc"), BASH_INSTALL),
+        // PowerShell stores its profile in different places per platform, so ask
+        // PowerShell itself where it lives rather than guessing from $HOME.
+        ShellArg::Pwsh => append_conf(powershell_profile_path(), PWSH_INSTALL),
     }
 
     println!("Done, please restart your shell for changes to take effect");
 }
 
+/// Resolve a path inside the Unix `$HOME` directory used by the bash/zsh/fish
+/// config files.
+fn home_config(rel: &str) -> PathBuf {
+    let home_dir = PathBuf::from(env::var("HOME").expect("could not read $HOME env var"));
+    assert!(home_dir.is_dir(), "home directory does not exist");
+    home_dir.join(rel)
+}
+
+/// Ask PowerShell for the current-user profile path. This is the portable way to
+/// find it - on Unix it resolves under `~/.config/powershell`, on Windows under
+/// the user's `Documents` directory - and avoids relying on `$HOME` (which
+/// Windows does not set).
+fn powershell_profile_path() -> PathBuf {
+    let run = |cmd: &str| {
+        Command::new(cmd)
+            .args(["-NoProfile", "-Command", "$PROFILE.CurrentUserCurrentHost"])
+            .output()
+    };
+
+    let output = run("pwsh").or_else(|_| run("powershell")).expect(
+        "could not run pwsh/powershell to locate the profile - is PowerShell installed and on PATH?",
+    );
+
+    let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    assert!(
+        !path.is_empty(),
+        "PowerShell returned an empty profile path"
+    );
+    PathBuf::from(path)
+}
+
 fn append_conf(conf_path: PathBuf, conf_contents: &str) {
+    // The PowerShell profile (and occasionally a fresh shell rc) may not exist
+    // yet, so create the parent directory and file if needed before appending.
+    if let Some(parent) = conf_path.parent() {
+        create_dir_all(parent).unwrap_or_else(|e| {
+            panic!(
+                "could not create config directory {}: {e}",
+                parent.display()
+            )
+        });
+    }
+
     let mut conf = OpenOptions::new()
+        .create(true)
         .append(true)
         .open(&conf_path)
         .unwrap_or_else(|_| {
@@ -236,6 +333,7 @@ fn print_shell_conf(shell: ShellSubcommand) {
         ShellSubcommand::Bash => println!("{}", BASH_CONF),
         ShellSubcommand::Zsh => println!("{}", ZSH_CONF),
         ShellSubcommand::Fish => println!("{}", FISH_CONF),
+        ShellSubcommand::Pwsh => println!("{}", PWSH_CONF),
     }
 }
 
@@ -246,6 +344,9 @@ fn show(args: ShowArgs, right_only: bool) {
                 ShellArg::Bash => SHELL.set(Shell::Bash),
                 ShellArg::Zsh => SHELL.set(Shell::Zsh),
                 ShellArg::Fish => SHELL.set(Shell::Bare),
+                // PowerShell's PSReadLine handles raw ANSI escapes itself, so it
+                // uses the same bare escapes as fish (no non-printing markers).
+                ShellArg::Pwsh => SHELL.set(Shell::Bare),
             }
             .expect("failed to set shell");
 
