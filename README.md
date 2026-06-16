@@ -51,6 +51,24 @@ behind `src/platform.rs`) but isn't yet runtime-tested there — see
 
 Cargo's bin directory must be in your `$PATH` for the `superline` command to be available.
 
+### Git backends
+
+The `git` segment can be powered by one of three interchangeable backends, selected at compile time via cargo
+features. They all produce identical output, so this is purely a build-time trade-off:
+
+- **`libgit`** (default) — uses the `git2` bindings to `libgit2`. Fast and dependency-light.
+- **`gitoxide`** — uses the pure-Rust [`gix`](https://crates.io/crates/gix) crate, with no C dependencies.
+- **the `git` CLI** — the fallback when no backend feature is enabled; shells out to the `git` binary on `$PATH`.
+
+When more than one backend feature is enabled the precedence is `gitoxide` > `libgit` > the CLI fallback. To build
+against a specific backend:
+
+```bash
+cargo install superline                                          # libgit (default)
+cargo install superline --no-default-features --features gitoxide # pure-Rust gitoxide
+cargo install superline --no-default-features                     # git CLI fallback
+```
+
 ## Customization
 
 Superline will create a default config file at `$HOME/.config/superline/config.json`. You can edit it to make

@@ -4,9 +4,14 @@ use std::fmt::Write;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
-#[cfg(feature = "libgit")]
+// Backend selection. At most one of these modules is compiled in; when more
+// than one feature is enabled the precedence is `gitoxide` > `libgit` > the
+// `git` CLI fallback. Each backend exposes a `run_git(&Path) -> GitStats`.
+#[cfg(feature = "gitoxide")]
+use gitoxide as internal;
+#[cfg(all(feature = "libgit", not(feature = "gitoxide")))]
 use libgit as internal;
-#[cfg(not(feature = "libgit"))]
+#[cfg(not(any(feature = "libgit", feature = "gitoxide")))]
 use process as internal;
 
 use crate::colors::Color;
@@ -15,11 +20,14 @@ use crate::{Powerline, Style};
 
 use super::Module;
 
-#[cfg(not(feature = "libgit"))]
+#[cfg(not(any(feature = "libgit", feature = "gitoxide")))]
 mod process;
 
-#[cfg(feature = "libgit")]
+#[cfg(all(feature = "libgit", not(feature = "gitoxide")))]
 mod libgit;
+
+#[cfg(feature = "gitoxide")]
+mod gitoxide;
 
 pub struct Git<S> {
     scheme: PhantomData<S>,
