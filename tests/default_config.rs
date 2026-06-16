@@ -28,7 +28,10 @@ fn default_config_parses_with_compiled_binary() {
 
     let output = Command::new(BIN)
         .args(["show", "fish", "-s", "0", "-c", "80"])
+        // Point the binary's home lookup at the scratch dir on both Unix ($HOME)
+        // and Windows (%USERPROFILE%).
         .env("HOME", &home)
+        .env("USERPROFILE", &home)
         .output()
         .expect("failed to run the powerline binary");
 

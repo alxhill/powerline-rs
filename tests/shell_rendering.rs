@@ -32,7 +32,9 @@ fn scratch_home(label: &str) -> PathBuf {
 fn render_in(home: &PathBuf, shell: &str) -> String {
     let output = Command::new(BIN)
         .args(["show", shell, "-s", "0", "-c", "80"])
+        // Home lookup keys off $HOME on Unix and %USERPROFILE% on Windows.
         .env("HOME", home)
+        .env("USERPROFILE", home)
         .output()
         .expect("failed to run the superline binary");
     assert!(
@@ -139,26 +141,36 @@ fn powershell_prompt_function_renders_end_to_end() {
     let warm = Command::new(BIN)
         .args(["show", "pwsh", "-s", "0", "-c", "80"])
         .env("HOME", &home)
+        .env("USERPROFILE", &home)
         .output()
         .expect("warm up config");
     assert!(warm.status.success());
 
-    // Load the init snippet, then invoke the prompt function it defines. A
-    // failing native command first proves the exit status is threaded through.
+    // A native command that exits non-zero, to prove the status is threaded
+    // through. `sh` may be absent on Windows, so use `cmd` there.
+    let fail_cmd = if cfg!(windows) {
+        "cmd /c exit 7"
+    } else {
+        "& sh -c 'exit 7'"
+    };
+
+    // Load the init snippet, then invoke the prompt function it defines.
     let script = r#"
         $env:PATH = $env:SLBIN + [IO.Path]::PathSeparator + $env:PATH
         (& superline init pwsh) -join "`n" | Invoke-Expression
-        & sh -c 'exit 7'
+        __FAILCMD__
         $out = prompt
         if ($out -notmatch [char]27) { Write-Error 'no ANSI escapes in prompt'; exit 1 }
         if ($out -notmatch '48;5;160m') { Write-Error 'failing command did not render a red status segment'; exit 1 }
         if ($LASTEXITCODE -ne 7) { Write-Error "LASTEXITCODE not preserved: $LASTEXITCODE"; exit 1 }
         Write-Host 'OK'
-    "#;
+    "#
+    .replace("__FAILCMD__", fail_cmd);
 
     let output = Command::new("pwsh")
-        .args(["-NoProfile", "-Command", script])
+        .args(["-NoProfile", "-Command", &script])
         .env("HOME", &home)
+        .env("USERPROFILE", &home)
         .env("SLBIN", &bin_dir)
         .output()
         .expect("failed to run pwsh");
