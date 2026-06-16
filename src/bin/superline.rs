@@ -86,10 +86,6 @@ const BASH_INSTALL: &str = r#"
 source <(superline init bash)
 "#;
 
-// PowerShell renders the prompt from whatever the `prompt` function returns.
-// PSReadLine understands raw ANSI/VT escapes (the same ones fish uses), so no
-// special non-printing markers are needed. There is no native right-prompt, so
-// like bash the final row only shows its left side.
 const PWSH_CONF: &str = r#"
 $env:SUPERLINE_PWSH = 1
 
@@ -179,9 +175,8 @@ impl ShellArg {
         }
     }
 
-    /// Name of the per-shell marker env var set by that shell's init snippet
-    /// (e.g. `SUPERLINE_BASH`). Each shell uses its own variable so a nested
-    /// shell of a different kind isn't mistaken for an already-configured one.
+    /// Per-shell marker env var exported by that shell's init snippet (e.g.
+    /// `SUPERLINE_BASH`).
     fn marker_env_var(&self) -> String {
         format!("SUPERLINE_{}", self.name().to_uppercase())
     }
@@ -253,9 +248,8 @@ fn main() {
 fn install(args: InstallArgs) {
     let shell = args.shell;
 
-    // Detect prior installation via the shell-specific marker rather than a
-    // single shared one, so superline can still be installed from a nested
-    // shell of a different kind (whose parent only exports its own marker).
+    // A nested shell only inherits its parent's marker, so keying detection off
+    // the target shell's own marker lets install still run in nested shells.
     if env::var(shell.marker_env_var()).is_ok() && !args.force {
         println!(
             "superline already installed in current {} shell",
@@ -270,8 +264,6 @@ fn install(args: InstallArgs) {
         ShellArg::Fish => append_conf(home_config(".config/fish/config.fish"), FISH_INSTALL),
         ShellArg::Zsh => append_conf(home_config(".zshrc"), ZSH_INSTALL),
         ShellArg::Bash => append_conf(home_config(".bashrc"), BASH_INSTALL),
-        // PowerShell stores its profile in different places per platform, so ask
-        // PowerShell itself where it lives rather than guessing from $HOME.
         ShellArg::Pwsh => append_conf(powershell_profile_path(), PWSH_INSTALL),
     }
 
@@ -286,10 +278,8 @@ fn home_config(rel: &str) -> PathBuf {
     home_dir.join(rel)
 }
 
-/// Ask PowerShell for the current-user profile path. This is the portable way to
-/// find it - on Unix it resolves under `~/.config/powershell`, on Windows under
-/// the user's `Documents` directory - and avoids relying on `$HOME` (which
-/// Windows does not set).
+/// Ask PowerShell itself for the current-user profile path: it varies per
+/// platform and avoids relying on `$HOME`, which Windows does not set.
 fn powershell_profile_path() -> PathBuf {
     let run = |cmd: &str| {
         Command::new(cmd)
