@@ -7,9 +7,15 @@ development machine.
 ## How the integration works
 
 `superline install pwsh` appends a loader to the current-user PowerShell profile
-(resolved by asking PowerShell itself for `$PROFILE.CurrentUserCurrentHost`, so
-it is correct on every platform). The loader runs `superline init pwsh`, which
-emits a `prompt` function. On each prompt PowerShell calls that function, which:
+(resolved by asking PowerShell itself for `$PROFILE.CurrentUserCurrentHost`).
+PowerShell 7+ (`pwsh`) and Windows PowerShell 5.1 (`powershell`) keep their
+profiles in different folders (`Documents\PowerShell` vs
+`Documents\WindowsPowerShell`), so the installer queries whichever edition it was
+launched from first — inferred from the inherited `$PSModulePath` — and only
+falls back to the other when that one isn't on `PATH`. Querying the wrong edition
+would write the loader to a profile the user's shell never reads, leaving the
+prompt silently unchanged. The loader runs `superline init pwsh`, which emits a
+`prompt` function. On each prompt PowerShell calls that function, which:
 
 - captures `$?` **then** `$LASTEXITCODE` (order matters — any statement, even an
   assignment, resets `$?`) and maps them to a status string (`0` on success,
@@ -130,8 +136,14 @@ Checks:
       may need `[console]::OutputEncoding` / VT enabling). If escapes show as
       literal text, that's the host, not superline.
 - [ ] `$PROFILE.CurrentUserCurrentHost` resolves under
-      `Documents\WindowsPowerShell\` (5.1) vs `Documents\PowerShell\` (7+); the
-      installer should write to the correct one because it asks PowerShell.
+      `Documents\WindowsPowerShell\` (5.1) vs `Documents\PowerShell\` (7+).
+      Running `superline install pwsh` from a 5.1 session must write to the
+      `WindowsPowerShell` profile and from a 7+ session to the `PowerShell`
+      profile — it keys the choice off the invoking edition's `$PSModulePath`,
+      so the line lands in the profile that shell actually loads.
+- [ ] Re-running `superline install pwsh` is idempotent: it detects the existing
+      loader in the resolved profile and reports "already installed" instead of
+      appending a duplicate block (use `--force` to append anyway).
 - [ ] Output encoding is UTF-8 so Nerd Font glyphs aren't mangled
       (`$OutputEncoding` / `chcp 65001` for legacy conhost).
 
