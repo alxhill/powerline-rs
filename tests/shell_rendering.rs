@@ -125,8 +125,7 @@ fn powershell_init_forces_utf8_output_encoding() {
     assert!(output.status.success(), "`init pwsh` exited with failure");
     let init = String::from_utf8_lossy(&output.stdout);
     assert!(
-        init.contains("[Console]::OutputEncoding")
-            && init.contains("[System.Text.Encoding]::UTF8"),
+        init.contains("[Console]::OutputEncoding") && init.contains("[System.Text.Encoding]::UTF8"),
         "pwsh init must set [Console]::OutputEncoding to UTF-8 so Nerd Font \
          glyphs aren't mangled; got:\n{init}",
     );
