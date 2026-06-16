@@ -1,7 +1,9 @@
 use std::marker::PhantomData;
+use std::path::{MAIN_SEPARATOR, MAIN_SEPARATOR_STR};
 use std::{env, path};
 
 use crate::colors::Color;
+use crate::platform;
 use crate::themes::DefaultColors;
 use crate::{Powerline, Style};
 
@@ -46,34 +48,41 @@ impl<S: CwdScheme> Module for Cwd<S> {
         let current_dir = if self.resolve_symlinks {
             env::current_dir().unwrap()
         } else {
-            path::PathBuf::from(env::var("PWD").unwrap())
+            // $PWD is the shell's logical (symlink-preserving) cwd, but it isn't
+            // set on Windows or by every shell, so fall back to the real cwd.
+            env::var_os("PWD")
+                .map(path::PathBuf::from)
+                .unwrap_or_else(|| env::current_dir().unwrap())
         };
 
-        let mut cwd = current_dir.to_str().unwrap();
+        let current_dir = current_dir.to_string_lossy();
+        let mut cwd: &str = &current_dir;
 
         let mut current_bg = 0usize;
 
+        // Sitting at the filesystem root ("/" on Unix) - just show the glyph.
         #[allow(unused_assignments)]
-        if cwd == "/" {
+        if cwd == MAIN_SEPARATOR_STR {
             rainbow_segment!(powerline, current_bg, "~");
             return;
         }
 
-        if let Ok(home_str) = env::var("HOME") {
-            if cwd.starts_with(&home_str) {
+        if let Some(home) = platform::home_dir() {
+            let home = home.to_string_lossy();
+            if cwd.starts_with(home.as_ref()) {
                 rainbow_segment!(powerline, current_bg, "~");
-                cwd = &cwd[home_str.len()..]
+                cwd = &cwd[home.len()..]
             }
         }
 
-        let depth = cwd.matches('/').count();
+        let depth = cwd.matches(MAIN_SEPARATOR).count();
 
         if (cwd.len() > self.max_length) && (depth > self.wanted_seg_num) {
             let left = self.wanted_seg_num / 2;
             let right = self.wanted_seg_num - left;
 
-            let start = cwd.split('/').skip(1).take(left);
-            let end = cwd.split('/').skip(depth - right + 1);
+            let start = cwd.split(MAIN_SEPARATOR).skip(1).take(left);
+            let end = cwd.split(MAIN_SEPARATOR).skip(depth - right + 1);
 
             for val in start {
                 rainbow_segment!(powerline, current_bg, val);
@@ -85,7 +94,7 @@ impl<S: CwdScheme> Module for Cwd<S> {
                 rainbow_segment!(powerline, current_bg, val);
             }
         } else {
-            for val in cwd.split('/').skip(1) {
+            for val in cwd.split(MAIN_SEPARATOR).skip(1) {
                 rainbow_segment!(powerline, current_bg, val);
             }
         };

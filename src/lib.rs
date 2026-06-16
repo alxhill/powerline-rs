@@ -1,6 +1,7 @@
 pub mod colors;
 pub mod config;
 pub mod modules;
+pub mod platform;
 pub mod powerline;
 pub mod terminal;
 pub mod themes;

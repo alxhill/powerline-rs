@@ -66,11 +66,18 @@ Run the **functional checklist** below in each configuration.
 | 5 | Windows 10/11 | Windows PowerShell 5.1 | legacy `conhost.exe` | Verify VT processing + glyph fallback. |
 | 6 | macOS | `pwsh` 7+ | iTerm2 / Terminal.app | Sanity re-check on a second terminal. |
 
-> ⚠️ **Windows requires a binary port first.** The crate currently depends on the
-> Unix-only `users` crate and reads `$HOME` directly (see "Known limitations").
-> Until that work lands, configurations 2–5 cannot be built/run on Windows even
-> though the PowerShell integration itself is correct. On macOS/Linux the
-> integration is complete today.
+> ℹ️ **Windows now compiles.** The crate's Unix-only assumptions (the `users`
+> crate, `libc::access`, and direct `$HOME` reads) have been ported behind the
+> cross-platform helpers in `src/platform.rs`, and both `x86_64-pc-windows-gnu`
+> and `x86_64-pc-windows-msvc` pass `cargo check`. The remaining unknown is the
+> runtime behaviour on a real Windows box (configs 2–5), which still needs
+> hands-on verification — that's what this checklist is for.
+>
+> **Building on Windows:** the default `libgit` feature builds `libgit2` from C
+> source, so it needs a C toolchain (the standard MSVC `rustup` setup on Windows
+> provides one). To skip the C build entirely, install with
+> `cargo install superline --no-default-features`, which uses the `git` CLI
+> backend instead (requires `git` on `PATH`).
 
 ## Functional checklist (per configuration)
 
@@ -128,23 +135,40 @@ Checks:
 - [ ] Output encoding is UTF-8 so Nerd Font glyphs aren't mangled
       (`$OutputEncoding` / `chcp 65001` for legacy conhost).
 
+## Windows port — what changed
+
+The Unix-only assumptions are now isolated in `src/platform.rs`, which exposes
+cross-platform helpers used by both the library and the binary:
+
+- `home_dir()` — `$HOME` on Unix, `%USERPROFILE%` (then `%HOMEDRIVE%%HOMEPATH%`)
+  on Windows. Used for the config path (`get_or_create_conf_file`), `~`
+  substitution (`cwd.rs`), and the bash/zsh/fish install paths.
+- `cache_dir()` — `$XDG_CACHE_HOME`/`$HOME/.cache` on Unix, `%LOCALAPPDATA%` on
+  Windows. Used by the PR cache.
+- `is_root()` / `current_username()` — the Unix `users`-crate calls, gated to
+  `#[cfg(unix)]`; on Windows `is_root()` returns `false` and the username comes
+  from `%USERNAME%`.
+- `cwd_is_readonly()` — `libc::access(W_OK)` on Unix; the directory's read-only
+  attribute on Windows.
+
+`users` and `libc` are now `[target.'cfg(unix)'.dependencies]`, so they're never
+built for Windows. `cwd.rs` uses `std::path::MAIN_SEPARATOR` and falls back from
+`$PWD` to `current_dir()`. The directory-resolution rules have unit tests that
+exercise **both** the Unix and Windows branches regardless of host.
+
 ## Known limitations & follow-ups
 
-- **Windows binary port (blocker for configs 2–5).** To build and run on
-  Windows the crate needs:
-  - `users` crate usage replaced with a cross-platform alternative. It's used
-    for root detection in `src/modules/cmd.rs` (`get_current_uid() == 0`) and
-    for the current user name in `src/modules/user.rs`. On Windows, gate these
-    behind `#[cfg(unix)]` and provide a Windows path (e.g. default to
-    non-root / use `USERNAME`, or detect elevation via the Win32 API).
-  - `$HOME` reads replaced with a portable home lookup (`USERPROFILE` on
-    Windows, or the `dirs` crate). Affected: config path in
-    `src/bin/superline.rs` (`get_or_create_conf_file`), `~` substitution in
-    `src/modules/cwd.rs`, and the PR cache dir in `src/modules/pr.rs`
-    (`XDG_CACHE_HOME`/`HOME` → `LOCALAPPDATA` on Windows).
-  These are pre-existing Unix assumptions shared by all shells, not introduced
-  by the PowerShell work; the `pwsh` profile-path detection already avoids
-  `$HOME`.
+- **Elevation detection on Windows.** `is_root()` always reports non-elevated on
+  Windows, so the prompt never shows the root symbol / root-user colour there.
+  Detecting an elevated ("Run as administrator") session needs Win32 token APIs
+  and is left as a future enhancement.
+- **Read-only detection on Windows is best-effort** — it reports the directory's
+  read-only *attribute*, which Windows largely ignores for directories, so the
+  lock icon will rarely appear. True write access is governed by ACLs.
+- **`libgit` feature needs a C toolchain on Windows** (it builds `libgit2` from
+  source). Use `--no-default-features` for the pure-`git`-CLI backend if that's
+  not available. The C cross-build can't be verified from the macOS dev box; a
+  real Windows/MSVC build or CI run should confirm it.
 - **No native right prompt**, matching bash. Right-aligned segments only render
   on non-final rows of a multi-row prompt.
 - **OSC 8 hyperlinks** (PR segment) require a terminal that supports them;

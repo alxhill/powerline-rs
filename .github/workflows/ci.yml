@@ -34,3 +34,38 @@ jobs:
 
       - name: Test
         run: cargo test --verbose
+
+      # Guard the pure-Rust `git` CLI backend (no libgit2 C build) - the path
+      # recommended for Windows installs without a C toolchain.
+      - name: Test (no default features, git-CLI backend)
+        run: cargo test --no-default-features --verbose
+
+  windows:
+    name: Build & test (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      # Default features build libgit2 from C source; windows-latest ships the
+      # MSVC toolchain + cmake that `cc`/`libgit2-sys` need.
+      - name: Build
+        run: cargo build --verbose
+
+      # Runs the unit tests plus the real-`pwsh` end-to-end prompt test
+      # (PowerShell 7 is preinstalled on windows-latest).
+      - name: Test
+        run: cargo test --verbose
+
+      - name: Build (no default features, git-CLI backend)
+        run: cargo build --no-default-features --verbose
