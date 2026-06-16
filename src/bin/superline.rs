@@ -258,13 +258,13 @@ fn install(args: InstallArgs) {
     // shell of a different kind (whose parent only exports its own marker).
     if env::var(shell.marker_env_var()).is_ok() && !args.force {
         println!(
-            "powerline already installed in current {} shell",
+            "superline already installed in current {} shell",
             shell.name()
         );
         return;
     }
 
-    println!("Installing powerline for {} shell", shell.name());
+    println!("Installing superline for {} shell", shell.name());
 
     match shell {
         ShellArg::Fish => append_conf(home_config(".config/fish/config.fish"), FISH_INSTALL),
@@ -376,7 +376,7 @@ fn show(args: ShowArgs, right_only: bool) {
             }
         }
         Err(e) => {
-            eprintln!("powerline error: {}", e);
+            eprintln!("superline error: {}", e);
             if let Some(source) = e.source() {
                 eprintln!("source:\n\t{}", source);
             }
