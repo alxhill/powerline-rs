@@ -300,8 +300,6 @@ fn powershell_profile_path() -> PathBuf {
 }
 
 fn append_conf(conf_path: PathBuf, conf_contents: &str) {
-    // The PowerShell profile (and occasionally a fresh shell rc) may not exist
-    // yet, so create the parent directory and file if needed before appending.
     if let Some(parent) = conf_path.parent() {
         create_dir_all(parent).unwrap_or_else(|e| {
             panic!(
