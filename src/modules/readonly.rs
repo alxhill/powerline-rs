@@ -1,9 +1,8 @@
-use std::ffi::CString;
 use std::marker::PhantomData;
 
 use crate::colors::Color;
 use crate::themes::DefaultColors;
-use crate::{Powerline, Style};
+use crate::{platform, Powerline, Style};
 
 use super::Module;
 
@@ -36,12 +35,7 @@ impl<S: ReadOnlyScheme> ReadOnly<S> {
 
 impl<S: ReadOnlyScheme> Module for ReadOnly<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        let readonly = unsafe {
-            let path = CString::new("./").unwrap();
-            libc::access(path.as_ptr(), libc::W_OK) != 0
-        };
-
-        if readonly {
+        if platform::cwd_is_readonly() {
             powerline.add_segment(
                 S::readonly_symbol(),
                 Style::simple(S::readonly_fg(), S::readonly_bg()),

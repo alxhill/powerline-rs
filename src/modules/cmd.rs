@@ -49,7 +49,7 @@ impl<S: CmdScheme> Cmd<S> {
 
 impl<S: CmdScheme> Module for Cmd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        let user_symbol = if users::get_current_uid() == 0 {
+        let user_symbol = if crate::platform::is_root() {
             S::cmd_root_symbol()
         } else {
             S::cmd_user_symbol()

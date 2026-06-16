@@ -5,7 +5,7 @@ use super::GitStats;
 
 pub fn get_first_number(s: &str) -> u32 {
     s.chars()
-        .take_while(|x| x.is_digit(10))
+        .take_while(|x| x.is_ascii_digit())
         .flat_map(|x| x.to_digit(10))
         .fold(0, |acc, x| 10 * acc + x)
 }
@@ -51,7 +51,7 @@ pub fn get_branch_name(s: &str) -> Option<&str> {
 
 pub fn get_detached_branch_name() -> String {
     let child = Command::new("git")
-        .args(&["describe", "--tags", "--always"])
+        .args(["describe", "--tags", "--always"])
         .output()
         .unwrap();
 
@@ -69,13 +69,17 @@ pub fn get_detached_branch_name() -> String {
 
 pub fn run_git(_: &Path) -> GitStats {
     let output = Command::new("git")
-        .args(&["status", "--porcelain", "-b"])
+        .args(["status", "--porcelain", "-b"])
         .output()
         .unwrap()
         .stdout;
 
     let mut lines = output.split(|x| *x == (b'\n'));
     let branch_line = std::str::from_utf8(lines.next().unwrap()).unwrap();
+
+    // `git status -b --porcelain` renders an upstream as `## local...remote`, so
+    // the `...` separator tells us whether the branch is tracking a remote.
+    let remote = branch_line.contains("...");
 
     let mut ahead = 0;
     let mut behind = 0;
@@ -85,7 +89,7 @@ pub fn run_git(_: &Path) -> GitStats {
     let mut untracked = 0;
 
     let branch_name = {
-        if let Some(branch_name) = get_branch_name(&branch_line) {
+        if let Some(branch_name) = get_branch_name(branch_line) {
             if let Some(info) = branch_line
                 .find('[')
                 .map(|pos| branch_line.get(pos..).unwrap())
@@ -127,6 +131,7 @@ pub fn run_git(_: &Path) -> GitStats {
         non_staged,
         staged,
         conflicted,
+        remote,
         branch_name,
     }
 }

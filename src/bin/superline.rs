@@ -1,6 +1,5 @@
 extern crate superline;
 
-use std::env::VarError;
 use std::error::Error;
 use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::Write;
@@ -270,10 +269,10 @@ fn install(args: InstallArgs) {
     println!("Done, please restart your shell for changes to take effect");
 }
 
-/// Resolve a path inside the Unix `$HOME` directory used by the bash/zsh/fish
+/// Resolve a path inside the user's home directory used by the bash/zsh/fish
 /// config files.
 fn home_config(rel: &str) -> PathBuf {
-    let home_dir = PathBuf::from(env::var("HOME").expect("could not read $HOME env var"));
+    let home_dir = superline::platform::home_dir().expect("could not determine home directory");
     assert!(home_dir.is_dir(), "home directory does not exist");
     home_dir.join(rel)
 }
@@ -441,8 +440,8 @@ fn show_normal(args: &ShowArgs, conf: Config, conf_root: PathBuf) {
 
 #[derive(Error, Debug)]
 enum PowerlineError {
-    #[error("could not read value of $HOME env var")]
-    HomeEnvNotFound(#[from] VarError),
+    #[error("could not determine home directory")]
+    HomeDirNotFound,
     #[error("could not read config file")]
     IoError(#[from] io::Error),
     #[error("config file could not be parsed")]
@@ -457,7 +456,7 @@ fn load_config(conf_file: Option<PathBuf>) -> Result<(Config, PathBuf), Powerlin
 }
 
 fn get_or_create_conf_file() -> Result<PathBuf, PowerlineError> {
-    let home_dir = PathBuf::from(env::var("HOME")?);
+    let home_dir = superline::platform::home_dir().ok_or(PowerlineError::HomeDirNotFound)?;
     let config_dir = home_dir.join(".config/superline");
     if !config_dir.exists() {
         create_dir_all(&config_dir)?;

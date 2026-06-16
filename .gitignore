@@ -1,4 +1,5 @@
 /.idea
+/.claude/
 /target/
 **/*.rs.bk
 .DS_Store

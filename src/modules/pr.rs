@@ -229,9 +229,7 @@ fn current_branch_and_root() -> Option<(String, PathBuf)> {
 }
 
 fn cache_path_for(repo_root: &Path, branch: &str) -> Option<PathBuf> {
-    let base = env::var_os("XDG_CACHE_HOME")
-        .map(PathBuf::from)
-        .or_else(|| env::var_os("HOME").map(|home| PathBuf::from(home).join(".cache")))?;
+    let base = crate::platform::cache_dir()?;
 
     let mut hasher = DefaultHasher::new();
     repo_root.hash(&mut hasher);
