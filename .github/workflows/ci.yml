@@ -69,3 +69,20 @@ jobs:
 
       - name: Build (no default features, git-CLI backend)
         run: cargo build --no-default-features --verbose
+
+      # The steps above build the committed Cargo.lock. `cargo install` instead
+      # resolves dependencies fresh, so a published release can pull newer
+      # transitive crates than the locked build ever sees. That is exactly how
+      # the advapi32 link failure shipped: libgit2-sys never links advapi32, and
+      # the locked build only succeeds because the pinned windows-sys 0.52 (via
+      # chrono) drags its umbrella Win32 import library onto the link line and
+      # incidentally resolves those symbols. Newer windows-sys uses per-function
+      # raw-dylib imports and drops that coverage. Resolve to the latest
+      # compatible versions and rebuild so this job also mirrors the
+      # `cargo install` view and fails loudly if a transitive bump removes a
+      # system library we depend on. Kept last because it rewrites Cargo.lock.
+      - name: Update to latest compatible dependencies
+        run: cargo update
+
+      - name: Build (latest deps)
+        run: cargo build --verbose
