@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3](https://github.com/alxhill/superline/compare/v0.5.2...v0.5.3) - 2026-06-16
+
+### Added
+
+- *(platform)* add Windows compatibility ([#18](https://github.com/alxhill/superline/pull/18))
+- *(shell)* add PowerShell (pwsh) support ([#17](https://github.com/alxhill/superline/pull/17))
+
+### Other
+
+- document custom theme JSON format ([#15](https://github.com/alxhill/superline/pull/15))
+
 ## [0.5.2](https://github.com/alxhill/superline/compare/v0.5.1...v0.5.2) - 2026-06-15
 
 ### Other
