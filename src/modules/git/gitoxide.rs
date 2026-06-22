@@ -38,7 +38,9 @@ pub fn run_git(path: &Path) -> GitStats {
             }
             Item::IndexWorktree(IndexWorktreeItem::Rewrite { .. }) => non_staged += 1,
             Item::IndexWorktree(IndexWorktreeItem::DirectoryContents { entry, .. }) => {
-                if entry.status == gix::dir::entry::Status::Untracked {
+                if entry.status == gix::dir::entry::Status::Untracked
+                    && !is_hollow_untracked_dir(&repo, &entry)
+                {
                     untracked += 1;
                 }
             }
@@ -87,11 +89,138 @@ pub fn run_git(path: &Path) -> GitStats {
     }
 }
 
+/// Whether an untracked directory entry is "hollow": a directory whose tree
+/// contains no files at any depth (only empty subdirectories).
+///
+/// gitoxide's collapsing directory walk emits such a directory as a single
+/// untracked entry, but `git status` (and the libgit2 / CLI backends) never
+/// report a directory that holds no files. Without this filter the gitoxide
+/// backend over-counts — e.g. a `screenshots/` containing only empty `new/` and
+/// `reference/` subdirectories shows up as "1 new file" on an otherwise clean
+/// worktree.
+///
+/// A plain filesystem check is sufficient here: gitoxide only classifies a
+/// directory as untracked when it has untracked file content, so a directory
+/// that holds solely ignored files is already reported as clean and never
+/// reaches this code. Thus "has any file on disk" exactly distinguishes a real
+/// untracked directory from a hollow tree of empty directories.
+fn is_hollow_untracked_dir(repo: &gix::Repository, entry: &gix::dir::Entry) -> bool {
+    if entry.disk_kind != Some(gix::dir::entry::Kind::Directory) {
+        return false;
+    }
+    match repo.workdir_path(entry.rela_path.clone()) {
+        Some(path) => !dir_contains_file(&path),
+        None => false,
+    }
+}
+
+/// Returns `true` as soon as a non-directory entry (a file, symlink, etc.) is
+/// found anywhere beneath `dir`, short-circuiting on the first hit. Recursion
+/// only descends through subdirectories, so the cost is bounded by the number of
+/// empty directories — a directory with files returns almost immediately. An
+/// unreadable directory is treated as containing no files.
+fn dir_contains_file(dir: &Path) -> bool {
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return false;
+    };
+    for entry in entries.flatten() {
+        match entry.file_type() {
+            // `file_type()` does not follow symlinks, so a symlinked directory
+            // is treated as a (non-directory) entry and cannot cause a cycle.
+            Ok(kind) if kind.is_dir() => {
+                if dir_contains_file(&entry.path()) {
+                    return true;
+                }
+            }
+            Ok(_) => return true,
+            Err(_) => continue,
+        }
+    }
+    false
+}
+
 /// Count commits reachable from `tip` but not from `excluded`, i.e. the
 /// `excluded..tip` range — equivalent to `git rev-list --count excluded..tip`.
 fn count_commits(repo: &gix::Repository, tip: gix::ObjectId, excluded: gix::ObjectId) -> u32 {
     match repo.rev_walk(Some(tip)).with_hidden(Some(excluded)).all() {
         Ok(walk) => walk.filter(Result::is_ok).count() as u32,
         Err(_) => 0,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::{Path, PathBuf};
+    use std::process::Command;
+    use std::sync::atomic::{AtomicU32, Ordering};
+
+    use super::{dir_contains_file, run_git};
+
+    fn unique_temp_dir() -> PathBuf {
+        static COUNTER: AtomicU32 = AtomicU32::new(0);
+        let n = COUNTER.fetch_add(1, Ordering::Relaxed);
+        let dir = std::env::temp_dir().join(format!("superline-gix-{}-{n}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    fn git(repo: &Path, args: &[&str]) {
+        let status = Command::new("git")
+            .current_dir(repo)
+            .args(args)
+            .status()
+            .unwrap();
+        assert!(status.success(), "`git {}` failed", args.join(" "));
+    }
+
+    fn init_repo() -> PathBuf {
+        let dir = unique_temp_dir();
+        git(&dir, &["init", "-q", "-b", "main"]);
+        git(&dir, &["config", "user.email", "test@example.com"]);
+        git(&dir, &["config", "user.name", "test"]);
+        git(&dir, &["commit", "-q", "--allow-empty", "-m", "init"]);
+        dir
+    }
+
+    /// Regression test: gitoxide's collapsing walk emits an untracked directory
+    /// even when it contains nothing but empty subdirectories, where `git
+    /// status` reports a clean tree. Such a directory must not be counted.
+    #[test]
+    fn untracked_dir_of_only_empty_subdirs_is_not_counted() {
+        let repo = init_repo();
+        std::fs::create_dir_all(repo.join("screenshots/new")).unwrap();
+        std::fs::create_dir_all(repo.join("screenshots/reference")).unwrap();
+
+        assert_eq!(
+            run_git(&repo).untracked,
+            0,
+            "a directory holding only empty subdirectories must not count as untracked"
+        );
+
+        // A real file anywhere in the tree makes it a genuine untracked
+        // directory, which git collapses into a single entry.
+        std::fs::write(repo.join("screenshots/new/shot.png"), b"x").unwrap();
+        assert_eq!(
+            run_git(&repo).untracked,
+            1,
+            "an untracked directory containing a file counts once"
+        );
+
+        std::fs::remove_dir_all(&repo).ok();
+    }
+
+    #[test]
+    fn dir_contains_file_finds_nested_files_only() {
+        let dir = unique_temp_dir();
+        std::fs::create_dir_all(dir.join("a/b/c")).unwrap();
+        assert!(
+            !dir_contains_file(&dir),
+            "a tree of empty dirs has no files"
+        );
+
+        std::fs::write(dir.join("a/b/c/leaf"), b"x").unwrap();
+        assert!(dir_contains_file(&dir), "a nested file must be found");
+
+        std::fs::remove_dir_all(&dir).ok();
     }
 }
