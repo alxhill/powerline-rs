@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4](https://github.com/alxhill/superline/compare/v0.5.3...v0.5.4) - 2026-06-23
+
+### Added
+
+- *(shell)* fix powershell utf8 rendering ([#23](https://github.com/alxhill/superline/pull/23))
+- *(git)* add gitoxide backend ([#21](https://github.com/alxhill/superline/pull/21))
+
+### Fixed
+
+- filter out empty dirs from gitoxide status ([#24](https://github.com/alxhill/superline/pull/24))
+- *(install)* target the PowerShell edition install was run from ([#22](https://github.com/alxhill/superline/pull/22))
+- *(platform)* link advapi32 on Windows for the libgit2 backend ([#19](https://github.com/alxhill/superline/pull/19))
+
 ### Fixed
 
 - *(shell)* set `[Console]::OutputEncoding` to UTF-8 in the PowerShell init so
