@@ -3,7 +3,7 @@ extern crate superline;
 use std::error::Error;
 use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
 use std::{env, io};
@@ -173,12 +173,6 @@ impl ShellArg {
             ShellArg::Pwsh => "pwsh",
         }
     }
-
-    /// Per-shell marker env var exported by that shell's init snippet (e.g.
-    /// `SUPERLINE_BASH`).
-    fn marker_env_var(&self) -> String {
-        format!("SUPERLINE_{}", self.name().to_uppercase())
-    }
 }
 
 #[derive(Debug, Args)]
@@ -247,26 +241,49 @@ fn main() {
 fn install(args: InstallArgs) {
     let shell = args.shell;
 
-    // A nested shell only inherits its parent's marker, so keying detection off
-    // the target shell's own marker lets install still run in nested shells.
-    if env::var(shell.marker_env_var()).is_ok() && !args.force {
+    let (conf_path, conf_contents) = match shell {
+        ShellArg::Fish => (home_config(".config/fish/config.fish"), FISH_INSTALL),
+        ShellArg::Zsh => (home_config(".zshrc"), ZSH_INSTALL),
+        ShellArg::Bash => (home_config(".bashrc"), BASH_INSTALL),
+        ShellArg::Pwsh => (powershell_profile_path(), PWSH_INSTALL),
+    };
+
+    // Skip re-appending when the snippet is already present. This replaces the
+    // old guard, which checked the `SUPERLINE_<SHELL>` runtime marker - a marker
+    // only set once the snippet has been *sourced*, never in the shell that runs
+    // `install` itself. As a result repeated installs (e.g. when the first one
+    // wrote to a profile the user's shell doesn't load) stacked duplicate blocks
+    // instead of being recognised as already done.
+    if !args.force && already_installed(&conf_path, shell) {
         println!(
-            "superline already installed in current {} shell",
-            shell.name()
+            "superline already installed for {} in {}",
+            shell.name(),
+            conf_path.display()
         );
         return;
     }
 
     println!("Installing superline for {} shell", shell.name());
+    append_conf(&conf_path, conf_contents);
+    println!(
+        "Done - added superline to {}.\nPlease restart your shell for changes to take effect.",
+        conf_path.display()
+    );
+}
 
-    match shell {
-        ShellArg::Fish => append_conf(home_config(".config/fish/config.fish"), FISH_INSTALL),
-        ShellArg::Zsh => append_conf(home_config(".zshrc"), ZSH_INSTALL),
-        ShellArg::Bash => append_conf(home_config(".bashrc"), BASH_INSTALL),
-        ShellArg::Pwsh => append_conf(powershell_profile_path(), PWSH_INSTALL),
-    }
+/// Whether `conf_path` already contains superline's init line for `shell`, used
+/// to keep `install` idempotent. A missing or unreadable file counts as "not
+/// installed" so the install proceeds and surfaces any real error on write.
+fn already_installed(conf_path: &Path, shell: ShellArg) -> bool {
+    std::fs::read_to_string(conf_path)
+        .map(|contents| contents_have_install(&contents, shell))
+        .unwrap_or(false)
+}
 
-    println!("Done, please restart your shell for changes to take effect");
+/// Whether `contents` already includes the `superline init <shell>` invocation
+/// that the install snippet adds.
+fn contents_have_install(contents: &str, shell: ShellArg) -> bool {
+    contents.contains(&format!("superline init {}", shell.name()))
 }
 
 /// Resolve a path inside the user's home directory used by the bash/zsh/fish
@@ -278,7 +295,15 @@ fn home_config(rel: &str) -> PathBuf {
 }
 
 /// Ask PowerShell itself for the current-user profile path: it varies per
-/// platform and avoids relying on `$HOME`, which Windows does not set.
+/// platform/edition and avoids relying on `$HOME`, which Windows does not set.
+///
+/// Windows ships two PowerShells side by side - PowerShell Core (`pwsh`, v6+)
+/// and Windows PowerShell (`powershell`, v5.1) - and each keeps its profile in
+/// a *different* folder (`Documents\PowerShell` vs `Documents\WindowsPowerShell`).
+/// We therefore query whichever edition the user ran `install` from first
+/// (inferred from `$PSModulePath`) and only fall back to the other when the
+/// preferred one isn't on PATH. Querying the wrong edition writes the snippet to
+/// a profile the user's shell never loads, so the prompt silently never updates.
 fn powershell_profile_path() -> PathBuf {
     let run = |cmd: &str| {
         Command::new(cmd)
@@ -286,7 +311,8 @@ fn powershell_profile_path() -> PathBuf {
             .output()
     };
 
-    let output = run("pwsh").or_else(|_| run("powershell")).expect(
+    let [preferred, fallback] = powershell_executables();
+    let output = run(preferred).or_else(|_| run(fallback)).expect(
         "could not run pwsh/powershell to locate the profile - is PowerShell installed and on PATH?",
     );
 
@@ -298,7 +324,36 @@ fn powershell_profile_path() -> PathBuf {
     PathBuf::from(path)
 }
 
-fn append_conf(conf_path: PathBuf, conf_contents: &str) {
+/// The order in which to try the two PowerShell executables when locating the
+/// profile, preferring the edition `superline install pwsh` was launched from.
+fn powershell_executables() -> [&'static str; 2] {
+    if invoked_from_powershell_core(env::var("PSModulePath").ok().as_deref()) {
+        ["pwsh", "powershell"]
+    } else {
+        ["powershell", "pwsh"]
+    }
+}
+
+/// Heuristic for "was `install` launched from PowerShell Core (`pwsh`, v6+)
+/// rather than Windows PowerShell (`powershell`, v5.1)".
+///
+/// The two editions store modules under differently named folders: Core uses a
+/// path component named exactly `PowerShell` (e.g. the install dir
+/// `...\powershell\7\Modules` or the user dir `...\Documents\PowerShell\Modules`),
+/// whereas Windows PowerShell only ever uses `WindowsPowerShell`. Child
+/// processes inherit `$PSModulePath`, so its entries reveal which one launched
+/// us. Matching the bare `PowerShell` component (rather than a version number)
+/// keeps this correct for PowerShell 8 and beyond, and splitting on both path
+/// separators handles the `/`-delimited paths used by `pwsh` on macOS/Linux.
+fn invoked_from_powershell_core(ps_module_path: Option<&str>) -> bool {
+    ps_module_path
+        .unwrap_or("")
+        .split(';')
+        .flat_map(|entry| entry.split(['\\', '/']))
+        .any(|segment| segment.eq_ignore_ascii_case("powershell"))
+}
+
+fn append_conf(conf_path: &Path, conf_contents: &str) {
     if let Some(parent) = conf_path.parent() {
         create_dir_all(parent).unwrap_or_else(|e| {
             panic!(
@@ -311,7 +366,7 @@ fn append_conf(conf_path: PathBuf, conf_contents: &str) {
     let mut conf = OpenOptions::new()
         .create(true)
         .append(true)
-        .open(&conf_path)
+        .open(conf_path)
         .unwrap_or_else(|_| {
             panic!(
                 "could not open shell config file: {}",
@@ -473,4 +528,62 @@ fn get_or_create_conf_file() -> Result<PathBuf, PowerlineError> {
     }
 
     Ok(conf_file)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn detects_powershell_core_from_module_path() {
+        // What a child process inherits from pwsh 7 on Windows: a bare
+        // `PowerShell` component appears (both the user dir and the install dir).
+        let core = r"C:\Users\me\Documents\PowerShell\Modules;C:\Program Files\PowerShell\Modules;c:\program files\powershell\7\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules";
+        assert!(invoked_from_powershell_core(Some(core)));
+    }
+
+    #[test]
+    fn detects_windows_powershell_from_module_path() {
+        // Windows PowerShell 5.1 only ever uses `WindowsPowerShell` components.
+        let desktop = r"C:\Users\me\Documents\WindowsPowerShell\Modules;C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules";
+        assert!(!invoked_from_powershell_core(Some(desktop)));
+    }
+
+    #[test]
+    fn unknown_module_path_is_not_treated_as_core() {
+        // No signal -> fall back to the Windows-PowerShell-first order, which
+        // still resolves correctly via `.or_else` if only `pwsh` exists.
+        assert!(!invoked_from_powershell_core(None));
+        assert!(!invoked_from_powershell_core(Some("")));
+        assert!(!invoked_from_powershell_core(Some(
+            r"C:\Some\Other\Modules"
+        )));
+    }
+
+    #[test]
+    fn detects_core_with_unix_style_paths() {
+        // `pwsh` on macOS/Linux uses `/`-delimited, `:`-joined module paths; the
+        // inner separator split still finds the `powershell` component.
+        let core = "/home/me/.local/share/powershell/Modules:/usr/local/share/powershell/Modules";
+        assert!(invoked_from_powershell_core(Some(core)));
+    }
+
+    #[test]
+    fn install_detection_matches_each_shell_snippet() {
+        // The real install snippets must be recognised by the idempotency check.
+        assert!(contents_have_install(BASH_INSTALL, ShellArg::Bash));
+        assert!(contents_have_install(ZSH_INSTALL, ShellArg::Zsh));
+        assert!(contents_have_install(FISH_INSTALL, ShellArg::Fish));
+        assert!(contents_have_install(PWSH_INSTALL, ShellArg::Pwsh));
+    }
+
+    #[test]
+    fn install_detection_is_shell_specific_and_absent_by_default() {
+        assert!(!contents_have_install(PWSH_INSTALL, ShellArg::Bash));
+        assert!(!contents_have_install(
+            "# an unrelated profile\n",
+            ShellArg::Pwsh
+        ));
+        assert!(!contents_have_install("", ShellArg::Zsh));
+    }
 }
