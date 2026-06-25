@@ -75,14 +75,18 @@ fn powershell_uses_bare_ansi_like_fish() {
         "PowerShell prompt must not use zsh's %{{ }} markers",
     );
 
-    // PowerShell and fish should be byte-for-byte identical: both map to the
-    // bare escape mode internally. Render both against one pre-warmed home so
-    // the comparison isn't thrown off by per-home paths in any notice text.
+    // PowerShell and fish both map to the same bare-escape mode internally, so
+    // their output is identical except for the one place the default config
+    // prints the shell's own name (the `shell` segment). Normalise that token
+    // out of each and the rest must match byte-for-byte. Render both against one
+    // pre-warmed home so the comparison isn't thrown off by per-home paths in
+    // any notice text.
     let home = scratch_home("pwsh-vs-fish");
     let _ = render_in(&home, "pwsh"); // warm the config once
+    let pwsh_render = render_in(&home, "pwsh").replace("pwsh", "<shell>");
+    let fish_render = render_in(&home, "fish").replace("fish", "<shell>");
     assert_eq!(
-        render_in(&home, "pwsh"),
-        render_in(&home, "fish"),
+        pwsh_render, fish_render,
         "PowerShell and fish should render identical bare-escape output",
     );
     let _ = fs::remove_dir_all(&home);
