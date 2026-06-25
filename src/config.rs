@@ -78,29 +78,35 @@ impl Default for Config {
             rows: vec![
                 CommandLine {
                     left: vec![
-                        LineSegment::SmallSpacer,
+                        LineSegment::Padding(2),
+                        LineSegment::Separator(SeparatorStyle::Round),
                         LineSegment::ReadOnly,
                         LineSegment::Cwd {
                             max_length: 60,
                             wanted_seg_num: 5,
                             resolve_symlinks: false,
                         },
-                        LineSegment::SmallSpacer,
+                        LineSegment::Padding(2),
                         LineSegment::Git,
+                        LineSegment::Pr { status: true },
                     ],
-                    right: Some(vec![
-                        LineSegment::Separator(SeparatorStyle::Round),
-                        LineSegment::Cargo,
-                        LineSegment::PythonEnv,
-                        LineSegment::Padding(0),
-                    ]),
+                    right: Some(vec![]),
                 },
                 CommandLine {
                     left: vec![
-                        LineSegment::LastCmdDuration { min_run_time: 5 },
+                        LineSegment::Shell,
+                        LineSegment::LastCmdDuration { min_run_time: 50 },
                         LineSegment::Cmd,
+                        LineSegment::Padding(1),
                     ],
-                    right: None,
+                    right: Some(vec![
+                        LineSegment::Separator(SeparatorStyle::Round),
+                        LineSegment::Nvm,
+                        LineSegment::Sdkman,
+                        LineSegment::PythonEnv,
+                        LineSegment::Cargo,
+                        LineSegment::Padding(0),
+                    ]),
                 },
             ],
         }
