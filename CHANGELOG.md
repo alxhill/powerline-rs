@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   visible columns, corrupting cursor tracking and smearing the powerline glyph
   colours on redraw. For bash, ESC is now spelled `\e` and the ST terminator's
   backslash as `\\` so it doesn't merge with the `\]` close marker. fish and
-  PowerShell were unaffected.
+  PowerShell were unaffected. ([#28](https://github.com/alxhill/superline/pull/28))
 
 ## [0.5.4](https://github.com/alxhill/superline/compare/v0.5.3...v0.5.4) - 2026-06-23
 
