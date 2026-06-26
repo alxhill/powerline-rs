@@ -7,16 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- *(pr)* wrap the PR segment's OSC 8 hyperlink in each shell's non-printing
-  markers (`\[ \]` for bash, `%{ %}` for zsh). The hyperlink escapes were always
-  emitted raw, so bash readline counted them - and the entire PR URL - as
-  visible columns, corrupting cursor tracking and smearing the powerline glyph
-  colours on redraw. For bash, ESC is now spelled `\e` and the ST terminator's
-  backslash as `\\` so it doesn't merge with the `\]` close marker. fish and
-  PowerShell were unaffected. ([#28](https://github.com/alxhill/superline/pull/28))
-
 ## [0.5.4](https://github.com/alxhill/superline/compare/v0.5.3...v0.5.4) - 2026-06-23
 
 ### Added
