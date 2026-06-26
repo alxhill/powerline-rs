@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- *(cwd)* show the current directory under Git Bash on Windows. The native
+  Windows binary was reading the MSYS-style `$PWD` (e.g. `/c/Users/alex`) and
+  splitting it on `\`, so the whole path collapsed into one segment that the
+  leading `skip(1)` discarded, leaving the module empty. On Windows the cwd is
+  now always taken from the real working directory, which yields a proper
+  `C:\...` path.
+
 ## [0.5.4](https://github.com/alxhill/superline/compare/v0.5.3...v0.5.4) - 2026-06-23
 
 ### Added

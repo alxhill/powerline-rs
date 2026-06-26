@@ -1,6 +1,7 @@
+use std::ffi::OsString;
 use std::marker::PhantomData;
-use std::path::{MAIN_SEPARATOR, MAIN_SEPARATOR_STR};
-use std::{env, path};
+use std::path::{PathBuf, MAIN_SEPARATOR, MAIN_SEPARATOR_STR};
+use std::env;
 
 use crate::colors::Color;
 use crate::platform;
@@ -43,17 +44,37 @@ macro_rules! rainbow_segment {
     };
 }
 
+/// Resolve the directory the prompt should display.
+///
+/// When `resolve_symlinks` is set we always use the real (symlink-resolved)
+/// cwd. Otherwise we prefer the shell's logical `$PWD`, which preserves
+/// symlinks - but only off Windows. On Windows `$PWD` is either unset
+/// (cmd / PowerShell) or an MSYS-style POSIX path such as `/c/Users/alex` under
+/// Git Bash. A native Windows binary uses `\` as its path separator, so it
+/// can't split or home-contract a forward-slash `$PWD`: the whole path becomes
+/// a single unsplittable segment that the leading `skip(1)` then discards,
+/// leaving the module empty. So on Windows we always fall back to the real cwd,
+/// which yields a proper `C:\...` path.
+fn resolve_cwd(
+    resolve_symlinks: bool,
+    windows: bool,
+    pwd: Option<OsString>,
+    current_dir: impl FnOnce() -> PathBuf,
+) -> PathBuf {
+    if resolve_symlinks || windows {
+        return current_dir();
+    }
+    pwd.map(PathBuf::from).unwrap_or_else(current_dir)
+}
+
 impl<S: CwdScheme> Module for Cwd<S> {
     fn append_segments(&mut self, powerline: &mut Powerline) {
-        let current_dir = if self.resolve_symlinks {
-            env::current_dir().unwrap()
-        } else {
-            // $PWD is the shell's logical (symlink-preserving) cwd, but it isn't
-            // set on Windows or by every shell, so fall back to the real cwd.
-            env::var_os("PWD")
-                .map(path::PathBuf::from)
-                .unwrap_or_else(|| env::current_dir().unwrap())
-        };
+        let current_dir = resolve_cwd(
+            self.resolve_symlinks,
+            cfg!(windows),
+            env::var_os("PWD"),
+            || env::current_dir().unwrap(),
+        );
 
         let current_dir = current_dir.to_string_lossy();
         let mut cwd: &str = &current_dir;
@@ -98,5 +119,48 @@ impl<S: CwdScheme> Module for Cwd<S> {
                 rainbow_segment!(powerline, current_bg, val);
             }
         };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn never_called() -> PathBuf {
+        panic!("current_dir should not have been called");
+    }
+
+    #[test]
+    fn prefers_pwd_off_windows() {
+        let dir = resolve_cwd(false, false, Some(OsString::from("/home/alex/src")), never_called);
+        assert_eq!(dir, PathBuf::from("/home/alex/src"));
+    }
+
+    #[test]
+    fn falls_back_to_current_dir_when_pwd_unset_off_windows() {
+        let dir = resolve_cwd(false, false, None, || PathBuf::from("/home/alex/src"));
+        assert_eq!(dir, PathBuf::from("/home/alex/src"));
+    }
+
+    #[test]
+    fn ignores_msys_pwd_on_windows() {
+        // Git Bash sets `$PWD` to a forward-slash POSIX path; a native Windows
+        // binary must ignore it and use the real cwd, otherwise the module
+        // renders empty (regression test).
+        let dir = resolve_cwd(
+            false,
+            true,
+            Some(OsString::from("/c/Users/alex/src")),
+            || PathBuf::from(r"C:\Users\alex\src"),
+        );
+        assert_eq!(dir, PathBuf::from(r"C:\Users\alex\src"));
+    }
+
+    #[test]
+    fn resolve_symlinks_always_uses_current_dir() {
+        let dir = resolve_cwd(true, false, Some(OsString::from("/logical/pwd")), || {
+            PathBuf::from("/real/cwd")
+        });
+        assert_eq!(dir, PathBuf::from("/real/cwd"));
     }
 }
