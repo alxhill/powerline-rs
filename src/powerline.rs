@@ -304,7 +304,10 @@ impl Powerline {
         marker: Option<(&str, Color)>,
     ) {
         let mut visible_width = label.chars().count();
-        let link = format!("\x1b]8;;{}\x1b\\{}\x1b]8;;\x1b\\", url, label);
+        // The OSC 8 open/close escapes are invisible, so wrap them in the
+        // shell's non-printing markers; only `label` between them is printing.
+        let (open, close) = hyperlink(url);
+        let link = format!("{open}{label}{close}");
         let seg = match marker {
             Some((glyph, color)) => {
                 // separating space + the glyph itself
