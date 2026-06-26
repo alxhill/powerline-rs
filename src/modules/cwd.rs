@@ -1,7 +1,7 @@
+use std::env;
 use std::ffi::OsString;
 use std::marker::PhantomData;
 use std::path::{PathBuf, MAIN_SEPARATOR, MAIN_SEPARATOR_STR};
-use std::env;
 
 use crate::colors::Color;
 use crate::platform;
@@ -132,7 +132,12 @@ mod tests {
 
     #[test]
     fn prefers_pwd_off_windows() {
-        let dir = resolve_cwd(false, false, Some(OsString::from("/home/alex/src")), never_called);
+        let dir = resolve_cwd(
+            false,
+            false,
+            Some(OsString::from("/home/alex/src")),
+            never_called,
+        );
         assert_eq!(dir, PathBuf::from("/home/alex/src"));
     }
 
